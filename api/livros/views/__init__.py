@@ -1,0 +1,4 @@
+from .categoria import CategoriaListCreateView, CategoriaRetrieveUpdateDestroyView
+from .autor import AutorListCreateView, AutorRetrieveUpdateDestroyView
+from .editora import EditoraListCreateView, EditoraRetrieveUpdateDestroyView
+from .livro import LivroListCreateView, LivroRetrieveUpdateDestroyView

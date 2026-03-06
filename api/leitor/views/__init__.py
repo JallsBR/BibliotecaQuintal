@@ -1,0 +1,4 @@
+from .recompensa import RecompensaListCreateView, RecompensaRetrieveUpdateDestroyView
+from .leitor import LeitorListCreateView, LeitorRetrieveUpdateDestroyView
+from .emprestimo import EmprestimoListCreateView, EmprestimoRetrieveUpdateDestroyView
+from .reserva import ReservaListCreateView, ReservaRetrieveUpdateDestroyView

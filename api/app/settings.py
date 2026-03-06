@@ -35,6 +35,8 @@ INSTALLED_APPS = [
     # JWT
     'rest_framework_simplejwt',
     'users',
+    'livros',
+    'leitor',
 ]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -160,6 +162,14 @@ JAZZMIN_SETTINGS = {
         "auth.permission": "fas fa-key",
         "auth.userprofile": "fas fa-user",
         "users.user": "fas fa-user",
+        "livros.categoria": "fas fa-tags",
+        "livros.autor": "fas fa-pen-nib",
+        "livros.editora": "fas fa-book-open",
+        "livros.livro": "fas fa-book",
+        "leitor.recompensa": "fas fa-award",
+        "leitor.leitor": "fas fa-book-reader",
+        "leitor.emprestimo": "fas fa-hand-holding-heart",
+        "leitor.reserva": "fas fa-calendar-check",
     },
 
 }
