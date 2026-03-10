@@ -7,11 +7,13 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Instala dependências do sistema (necessárias para Pillow e possíveis libs)
+# Instala dependências do sistema (Pillow + mysqlclient)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libjpeg-dev \
     zlib1g-dev \
+    default-libmysqlclient-dev \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 # Copia e instala dependências Python

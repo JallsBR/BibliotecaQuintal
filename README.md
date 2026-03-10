@@ -14,8 +14,9 @@ docker-compose up --build
 
 - **API:** http://localhost:8000  
 - **Admin:** http://localhost:8000/admin/  
+- **MySQL:** porta 3308, banco `bibliotecaquintal` (credenciais em `docker-compose.yml`)  
 - O código em `./api` está montado no container; alterações refletem sem rebuild.  
-- O banco SQLite fica em `api/db.sqlite3` no host (persiste entre subidas).
+- Dados do MySQL persistem no volume `mysql_data`.
 
 Comandos úteis:
 
@@ -32,7 +33,10 @@ docker-compose run --rm api python manage.py shell
 
 ## Desenvolvimento local (sem Docker)
 
+MySQL deve estar rodando na porta 3308 com o banco `bibliotecaquintal` criado. Configure via variáveis de ambiente:
+
 ```bash
+export DB_HOST=localhost DB_PORT=3308 DB_NAME=bibliotecaquintal DB_USER=root DB_PASSWORD=sua_senha
 python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
