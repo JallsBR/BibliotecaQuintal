@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+
+# Python
+venv
+.venv
+env
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info
+.eggs
+dist
+build
+
+# Banco local (opcional: remover se quiser persistir db no host)
+*.sqlite3
+
+# IDE e OS
+.idea
+.vscode
+.DS_Store
+*.sw?
+*.suo
+
+# Logs e docs de desenvolvimento
+logs
+*.log
+notation.txt
+passos.txt
+atalhos.txt
+.dist
+
+# Node (se não usar front no mesmo build)
+node_modules
+npm-debug.log*
+
+# Arquivos de contexto do Cursor
+.cursor

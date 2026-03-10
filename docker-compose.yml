@@ -1,0 +1,16 @@
+services:
+  api:
+    build: .
+    container_name: biblioteca-quintal-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Código montado para desenvolvimento (alterações refletem sem rebuild)
+      - .:/app
+    environment:
+      - ALLOWED_HOSTS=0.0.0.0,localhost,127.0.0.1
+      - PYTHONUNBUFFERED=1
+    working_dir: /app/api
+    command: sh -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
+    stdin_open: true
+    tty: true
