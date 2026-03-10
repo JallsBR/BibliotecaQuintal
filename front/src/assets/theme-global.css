@@ -1,0 +1,34 @@
+/* ===== TEMA CLARO (padrão) ===== */
+:root,
+[data-tema="claro"] {
+  --bg-primario: #c4d0dd;
+  --bg-secundario: #c7acac;
+
+  --texto-primario: #2d3436;
+  --texto-secundario: #636e72;
+
+  --accent: #0984e3;
+  --sucesso: #00b894;
+  --perigo: #d63031;
+  --neutro: #2d3436;
+}
+
+/* ===== TEMA ESCURO (opcional) ===== */
+[data-tema="escuro"] {
+  --bg-primario: #1a1c23;
+  --bg-secundario: #252836;
+
+  --texto-primario: #fdfdfd;
+  --texto-secundario: #a0a7b1;
+
+  --accent: #5db0ff;
+  --sucesso: #4ade80;
+  --perigo: #f87171;
+  --neutro: #f8f9fa;
+}
+
+/* Aplicação Global Básica */
+#app {
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: 'Inter', sans-serif; /* Recomendo usar Inter ou Roboto */
+}

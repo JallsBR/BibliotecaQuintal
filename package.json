@@ -1,26 +1,14 @@
 {
-  "name": "controlefinanceiro",
+  "name": "biblioteca-quintal",
   "version": "1.0.0",
-  "description": "App de Controle Financeiro",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "description": "Biblioteca Quintal - back (Django) + front (Vue)",
+  "private": true,
   "scripts": {
-    "backend": "cd api && .\\venv\\Scripts\\python.exe manage.py runserver",
+    "dev": "concurrently --names \"API,FRONT\" --prefix-colors \"blue,green\" \"docker-compose up\" \"npm run frontend\"",
     "frontend": "cd front && npm run dev",
-    "dev": "concurrently --names \"DJANGO,FRONT\" --prefix-colors \"blue,green\" \"npm run backend\" \"npm run frontend\""
+    "backend": "docker-compose up"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/JallsBR/ControleFinanceiro.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/JallsBR/ControleFinanceiro/issues"
-  },
-  "homepage": "https://github.com/JallsBR/ControleFinanceiro#readme"
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
 }
