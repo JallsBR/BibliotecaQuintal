@@ -15,6 +15,6 @@ export default {
 .logout-page {
   padding: 2rem;
   text-align: center;
-  color: var(--p-text-muted-color);
+  color: var(--texto-secundario);
 }
 </style>

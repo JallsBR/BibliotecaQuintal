@@ -1,22 +1,29 @@
 <template>
   <div class="auth-layout">
-
-    <br />
-    <div class="container mt-4 auth-content">
-      <router-view />
+    <NavBar />
+    <div class="auth-main">
+      <header class="auth-header">
+        <AuthUserCard />
+      </header>
+      <div class="container mt-4 auth-content">
+        <router-view />
+      </div>
+      <FooterApp />
     </div>
-    <FooterApp />
   </div>
 </template>
 
 <script>
-
 import FooterApp from '../components/FooterApp.vue'
+import NavBar from '../components/NavBar.vue'
+import AuthUserCard from '../components/AuthUserCard.vue'
 
 export default {
   name: 'AuthLayout',
   components: {
-    FooterApp
+    FooterApp,
+    NavBar,
+    AuthUserCard
   }
 }
 </script>
@@ -24,10 +31,27 @@ export default {
 <style scoped>
 .auth-layout {
   min-height: 100vh;
-  padding-bottom: 60px; /* espaço para o footer fixo */
+  display: flex;
+}
+
+.auth-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100vh;
+}
+
+.auth-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  flex-shrink: 0;
 }
 
 .auth-content {
   padding-bottom: 1rem;
+  flex: 1;
 }
 </style>

@@ -1,14 +1,14 @@
 <template>
-  <div class="signin-page">
-    <Card class="signin-card">
+  <div class="auth-page">
+    <Card class="auth-card" style="width: 650px;">
       <template #content>
         <form @submit.prevent="handleLogin">
-          <div class="signin-header">
-            <h2 class="brand-title">Biblioteca <span>Quintal</span></h2>
+          <div class="auth-header">
+            <img src="/logoHAzul.png" alt="Logo" class="auth-logo" />
           </div>
 
-          <Message v-if="error" severity="error" :closable="false" class="signin-error">
-            Credenciais inválidas. Tente novamente.
+          <Message v-if="error" severity="error" :closable="false" class="auth-error">
+            Credenciais não encontradas. Tente novamente.
           </Message>
 
           <div class="field mb-3">
@@ -32,6 +32,7 @@
               placeholder="Sua senha"
               :feedback="false"
               toggleMask
+              fluid
               inputClass="w-full"
             />
           </div>
@@ -44,11 +45,9 @@
             :disabled="loading"
           />
 
-          <div class="signin-footer">
-            <p class="signin-footer-text">
-              Não tem cadastro?
-              <RouterLink to="/signup" class="signin-link">Registre-se</RouterLink>
-            </p>
+          <div class="auth-footer">
+            <span class="auth-footer-text">Não tem cadastro? </span>
+            <RouterLink to="/signup" class="auth-link">Registre-se</RouterLink>
           </div>
         </form>
       </template>
@@ -63,9 +62,8 @@ import Password from 'primevue/password'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
 import { RouterLink } from 'vue-router'
-
 export default {
-  name: 'SiginPage',
+  name: 'SignInPage',
   components: {
     Card,
     InputText,
@@ -81,11 +79,13 @@ export default {
       error: null
     }
   },
+
   computed: {
     loading() {
       return this.$store.getters.isLoading
     }
   },
+
   methods: {
     async handleLogin() {
       this.error = null
@@ -93,10 +93,17 @@ export default {
         email: this.email,
         password: this.password
       })
+
       if (success) {
         this.$router.push({ name: 'home' })
       } else {
         this.error = true
+        this.$toast.add({
+          severity: 'error',
+          summary: 'Erro ao entrar',
+          detail: 'Credenciais não encontradas. Tente novamente.',
+          life: 5000
+        })
       }
     }
   }
@@ -104,30 +111,39 @@ export default {
 </script>
 
 <style scoped>
-.signin-page {
+.auth-page {
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 1rem;
-  background: var(--p-surface-ground);
+  background: var(--bg-primario);
 }
 
-.signin-card {
+.auth-card {
   width: 100%;
   max-width: 400px;
 }
 
-.signin-card :deep(.p-card-content) {
+.auth-card :deep(.p-card-content) {
   padding: 0;
 }
 
-.signin-header {
+.auth-header {
   margin-bottom: 1.5rem;
   text-align: center;
 }
 
-.signin-error {
+.auth-logo {
+  width: 100%;
+  max-width: 200px;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+  padding: 1rem 0;
+}
+
+.auth-error {
   margin-bottom: 1rem;
 }
 
@@ -135,7 +151,7 @@ export default {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: var(--p-text-color);
+  color: var(--texto-primario);
 }
 
 .mb-3 {
@@ -146,37 +162,32 @@ export default {
   width: 100%;
 }
 
-.signin-footer {
+.auth-card :deep(.p-password) {
+  width: 100%;
+}
+.auth-card :deep(.p-password .p-password-input),
+.auth-card :deep(.p-password .p-inputtext) {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.auth-footer {
   margin-top: 1.5rem;
   text-align: center;
 }
 
-.signin-footer-text {
-  margin: 0;
-  color: var(--p-text-muted-color);
+.auth-footer-text {
+  color: var(--texto-secundario);
   font-size: 0.9375rem;
 }
 
-.signin-link {
-  color: var(--p-primary-color);
+.auth-link {
+  color: var(--sucesso);
   text-decoration: none;
   font-weight: 500;
 }
 
-.signin-link:hover {
+.auth-link:hover {
   text-decoration: underline;
-}
-
-.brand-title {
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: var(--p-text-color);
-  letter-spacing: 0.5px;
-  margin: 0;
-}
-
-.brand-title span {
-  color: var(--p-primary-color);
-  font-weight: 700;
 }
 </style>

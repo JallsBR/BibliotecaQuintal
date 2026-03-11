@@ -1,34 +1,245 @@
+html,
+body,
+#app {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg-primario);
+  color: var(--texto-primario);
+  font-family: 'Inter', sans-serif;
+}
+
 /* ===== TEMA CLARO (padrão) ===== */
 :root,
 [data-tema="claro"] {
-  --bg-primario: #c4d0dd;
-  --bg-secundario: #c7acac;
+  --bg-primario: #cccfc7;
+  --bg-secundario: #ffffff;
 
-  --texto-primario: #2d3436;
-  --texto-secundario: #636e72;
+  --texto-primario: #212529;
+  --texto-secundario: #6c757d;
 
-  --accent: #0984e3;
-  --sucesso: #00b894;
-  --perigo: #d63031;
-  --neutro: #2d3436;
+  --sucesso: #198754;
+  --perigo: #dc3545;
+  --neutro: #212529;
+
+  --azulquintal: #029BA7;
+  --amareloquintal: #FEE867;
+  --texto-sobre-azul: #ffffff;
 }
 
-/* ===== TEMA ESCURO (opcional) ===== */
+/* ===== TEMA ESCURO ===== */
 [data-tema="escuro"] {
-  --bg-primario: #1a1c23;
-  --bg-secundario: #252836;
+  --bg-primario: #14161c;
+  --bg-secundario: #1f242d;
 
-  --texto-primario: #fdfdfd;
-  --texto-secundario: #a0a7b1;
+  --texto-primario: #f8f9fa;
+  --texto-secundario: #adb5bd;
 
-  --accent: #5db0ff;
-  --sucesso: #4ade80;
-  --perigo: #f87171;
-  --neutro: #f8f9fa;
+  --sucesso: #20c997;
+  --perigo: #ff6b6b;
+  --neutro: #e9ecef;
+  --azulquintal: #074e42;
+  --amareloquintal: #e7630b;
+  --texto-sobre-azul: #ffffff;
 }
 
-/* Aplicação Global Básica */
-#app {
-  transition: background-color 0.3s ease, color 0.3s ease;
-  font-family: 'Inter', sans-serif; /* Recomendo usar Inter ou Roboto */
+/* ===== Botões PrimeVue - cores do tema ===== */
+.p-button.p-button-danger {
+  background: var(--perigo) !important;
+  border-color: var(--perigo) !important;
+}
+.p-button.p-button-danger:hover {
+  background: color-mix(in srgb, var(--perigo) 85%, black) !important;
+  border-color: color-mix(in srgb, var(--perigo) 85%, black) !important;
+}
+.p-button.p-button-success {
+  background: var(--sucesso) !important;
+  border-color: var(--sucesso) !important;
+}
+.p-button.p-button-success:hover {
+  background: color-mix(in srgb, var(--sucesso) 85%, black) !important;
+  border-color: color-mix(in srgb, var(--sucesso) 85%, black) !important;
+}
+
+/* ===== Card (login/cadastro) ===== */
+.p-card {
+  background: var(--bg-secundario) !important;
+  color: var(--texto-primario) !important;
+  border-color: color-mix(in srgb, var(--texto-secundario) 25%, transparent) !important;
+}
+.p-card .p-card-body,
+.p-card .p-card-content {
+  background: var(--bg-secundario) !important;
+  color: var(--texto-primario) !important;
+}
+
+/* Message (erro) nas páginas de auth */
+.p-message {
+  background: color-mix(in srgb, var(--perigo) 12%, var(--bg-secundario)) !important;
+  border-color: var(--perigo) !important;
+  color: var(--texto-primario) !important;
+}
+.p-message .p-message-icon {
+  color: var(--perigo) !important;
+}
+
+/* ===== PRIMEVUE: dialogs, inputs e datatable seguem o tema da app ===== */
+.p-dialog,
+.p-dialog .p-dialog-header,
+.p-dialog .p-dialog-content,
+.p-dialog .p-dialog-footer {
+  background: var(--bg-secundario) !important;
+  color: var(--texto-primario) !important;
+  border-color: color-mix(in srgb, var(--texto-secundario) 25%, transparent) !important;
+}
+
+.p-dialog .p-dialog-header .p-dialog-title,
+.p-dialog .p-dialog-header .p-dialog-header-icon {
+  color: var(--texto-primario) !important;
+}
+
+/* Inputs: InputText, InputNumber, DatePicker, MultiSelect, etc. */
+.p-inputtext,
+.p-inputnumber input,
+.p-datepicker .p-inputtext,
+.p-multiselect .p-multiselect-label,
+.p-dropdown .p-dropdown-label,
+.p-password input {
+  background: var(--bg-secundario) !important;
+  color: var(--texto-primario) !important;
+  border-color: color-mix(in srgb, var(--texto-secundario) 40%, transparent) !important;
+}
+
+.p-inputtext::placeholder,
+.p-inputnumber input::placeholder {
+  color: var(--texto-secundario);
+}
+
+.p-inputgroup-addon {
+  background: var(--bg-primario) !important;
+  color: var(--texto-secundario) !important;
+  border-color: color-mix(in srgb, var(--texto-secundario) 40%, transparent) !important;
+}
+
+/* DatePicker panel e dropdowns */
+.p-datepicker,
+.p-datepicker table td > span,
+.p-multiselect-panel,
+.p-dropdown-panel {
+  background: var(--bg-secundario) !important;
+  color: var(--texto-primario) !important;
+  border-color: color-mix(in srgb, var(--texto-secundario) 25%, transparent) !important;
+}
+
+.p-datepicker .p-datepicker-header,
+.p-multiselect-panel .p-multiselect-header {
+  background: var(--bg-primario) !important;
+  color: var(--texto-primario) !important;
+  border-color: color-mix(in srgb, var(--texto-secundario) 25%, transparent) !important;
+}
+
+/* DataTable */
+.p-datatable-header {
+  background: var(--bg-secundario) !important;
+  color: var(--texto-primario) !important;
+  border-color: color-mix(in srgb, var(--texto-secundario) 25%, transparent) !important;
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  background: var(--bg-primario) !important;
+  color: var(--texto-primario) !important;
+  border-color: color-mix(in srgb, var(--texto-secundario) 25%, transparent) !important;
+}
+
+.p-datatable .p-datatable-tbody > tr > td,
+.p-datatable .p-datatable-tbody > tr {
+  background: var(--bg-secundario) !important;
+  color: var(--texto-primario) !important;
+  border-color: color-mix(in srgb, var(--texto-secundario) 20%, transparent) !important;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover > td {
+  background: var(--bg-primario) !important;
+}
+
+.p-datatable-wrapper {
+  background: var(--bg-secundario) !important;
+}
+
+/* Remove a linha escura entre tabela e paginador (borda vinda do tema PrimeVue) */
+.p-datatable .p-datatable-wrapper {
+  border-bottom: none !important;
+}
+.p-datatable .p-paginator.p-paginator-bottom,
+.p-datatable .p-paginator[data-p-bottom="true"] {
+  border-top: none !important;
+
+}
+
+/* Paginador da DataTable */
+.p-paginator,
+.p-paginator.p-paginator-bottom,
+.p-paginator .p-paginator-pages .p-paginator-page,
+.p-paginator .p-paginator-first,
+.p-paginator .p-paginator-prev,
+.p-paginator .p-paginator-next,
+.p-paginator .p-paginator-last {
+  background: var(--bg-secundario) !important;
+  color: var(--texto-primario) !important;
+  border-bottom: none !important;
+
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page:hover,
+.p-paginator .p-paginator-first:hover,
+.p-paginator .p-paginator-prev:hover,
+.p-paginator .p-paginator-next:hover,
+.p-paginator .p-paginator-last:hover {
+  background: var(--bg-primario) !important;
+  color: var(--texto-primario) !important;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+  background: var(--sucesso) !important;
+  color: var(--texto-primario) !important;
+  border-color: var(--sucesso) !important;
+}
+
+/* ===== TOAST (PrimeVue) - cores da app ===== */
+.p-toast-message-success {
+  background: color-mix(in srgb, var(--sucesso) 15%, var(--bg-secundario)) !important;
+  border-color: var(--sucesso) !important;
+  color: var(--texto-primario) !important;
+}
+.p-toast-message-success .p-toast-message-icon,
+.p-toast-message-success .p-toast-summary {
+  color: var(--sucesso) !important;
+}
+.p-toast-message-success .p-toast-detail {
+  color: var(--texto-secundario) !important;
+}
+
+.p-toast-message-error {
+  background: color-mix(in srgb, var(--perigo) 15%, var(--bg-secundario)) !important;
+  border-color: var(--perigo) !important;
+  color: var(--texto-primario) !important;
+}
+.p-toast-message-error .p-toast-message-icon,
+.p-toast-message-error .p-toast-summary {
+  color: var(--perigo) !important;
+}
+.p-toast-message-error .p-toast-detail {
+  color: var(--texto-secundario) !important;
+}
+
+.p-toast-message-warn {
+  background: color-mix(in srgb, var(--perigo) 12%, var(--bg-secundario)) !important;
+  border-color: var(--perigo) !important;
+  color: var(--texto-primario) !important;
+}
+.p-toast-message-warn .p-toast-message-icon,
+.p-toast-message-warn .p-toast-summary {
+  color: var(--perigo) !important;
+}
+.p-toast-message-warn .p-toast-detail {
+  color: var(--texto-secundario) !important;
 }

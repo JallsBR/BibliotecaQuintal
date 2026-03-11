@@ -20,12 +20,12 @@ import { RouterLink } from 'vue-router'
 .home-title {
   font-size: 1.75rem;
   font-weight: 600;
-  color: var(--p-text-color);
+  color: var(--texto-primario);
   margin: 0 0 0.5rem;
 }
 
 .home-subtitle {
-  color: var(--p-text-muted-color);
+  color: var(--texto-secundario);
   margin: 0 0 1.5rem;
 }
 </style>

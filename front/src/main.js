@@ -19,4 +19,9 @@ app.use(PrimeVue, {
 })
 app.use(router)
 app.use(store)
+
+// Aplica tema salvo antes do mount para evitar flash
+const temaSalvo = localStorage.getItem('tema') || 'claro'
+document.documentElement.setAttribute('data-tema', temaSalvo)
+
 app.mount('#app')
