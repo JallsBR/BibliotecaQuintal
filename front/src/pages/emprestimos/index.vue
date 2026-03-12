@@ -1,28 +1,27 @@
 <template>
-  <div class="home-page">
-    <h1 class="home-title">Biblioteca Quintal</h1>
-    <p class="home-subtitle">Bem-vindo ao sistema.</p>
+  <div class="page">
+    <h1 class="page-title">Empréstimos</h1>
+    <p class="page-subtitle">Gerencie os empréstimos de livros.</p>
   </div>
 </template>
 
 <script setup>
-import { RouterLink } from 'vue-router'
 </script>
 
 <style scoped>
-.home-page {
+.page {
   padding: 1.5rem;
-  padding-top: 0rem;
+  padding-top: 0;
 }
 
-.home-title {
+.page-title {
   font-size: 3rem;
   font-weight: 600;
   color: var(--azulquintal);
   margin: 0 0 0.5rem;
 }
 
-.home-subtitle {
+.page-subtitle {
   color: var(--texto-primario);
   margin: 0 0 1.5rem;
 }

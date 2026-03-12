@@ -1,26 +1,35 @@
 <template>
   <aside class="navbar">
     <div class="navbar-header">
-      <img src="/logoHAmarelo.png" alt="Biblioteca Quintal" class="navbar-logo" />
+      <router-link to="/" class="navbar-logo-link">
+        <img :src="logoNavBar" alt="Biblioteca Quintal" class="navbar-logo" />
+      </router-link>
     </div>
 
     <nav class="navbar-links">
-      <!-- Links de exemplo – você pode trocar por seus próprios depois -->
-      <router-link to="/" class="nav-link" active-class="nav-link--active">
+      <router-link to="/" class="nav-link" exact-active-class="nav-link--active">
         <i class="pi pi-home"></i>
         <span>Início</span>
       </router-link>
-      <router-link to="/" class="nav-link" active-class="nav-link--active">
+      <router-link to="/livros" class="nav-link" active-class="nav-link--active">
         <i class="pi pi-book"></i>
-        <span>Exemplo 1</span>
+        <span>Livros</span>
       </router-link>
-      <router-link to="/" class="nav-link" active-class="nav-link--active">
-        <i class="pi pi-list"></i>
-        <span>Exemplo 2</span>
+      <router-link to="/leitores" class="nav-link" active-class="nav-link--active">
+        <i class="pi pi-user"></i>
+        <span>Leitores</span>
       </router-link>
-      <router-link to="/" class="nav-link" active-class="nav-link--active">
-        <i class="pi pi-cog"></i>
-        <span>Exemplo 3</span>
+      <router-link to="/emprestimos" class="nav-link" active-class="nav-link--active">
+        <i class="pi pi-arrow-right"></i>
+        <span>Empréstimos</span>
+      </router-link>
+      <router-link to="/reservas" class="nav-link" active-class="nav-link--active">
+        <i class="pi pi-clock"></i>
+        <span>Reservas</span>
+      </router-link>
+      <router-link to="/recompensas" class="nav-link" active-class="nav-link--active">
+        <i class="pi pi-gift"></i>
+        <span>Recompensas</span>
       </router-link>
     </nav>
 
@@ -54,6 +63,10 @@ export default {
       temaAtual.value = document.documentElement.getAttribute('data-tema') || 'claro'
     })
 
+    const logoNavBar = computed(() =>
+      temaAtual.value === 'escuro' ? '/logoHAmarelo.png' : '/logoHAzul.png'
+    )
+
     const userName = computed(() => {
       const user = store.state?.user
       if (user?.nome) return user.nome
@@ -73,7 +86,7 @@ export default {
       temaAtual.value = proximo
     }
 
-    return { userName, logout, temaAtual, toggleTema }
+    return { userName, logout, temaAtual, toggleTema, logoNavBar }
   }
 }
 </script>
@@ -94,6 +107,11 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.navbar-logo-link {
+  display: block;
+  line-height: 0;
 }
 
 .navbar-logo {

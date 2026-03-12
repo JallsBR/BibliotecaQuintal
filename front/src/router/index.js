@@ -3,6 +3,11 @@ import AuthLayout from '../layouts/AuthLayout.vue'
 import PublicLayout from '../layouts/PublicLayout.vue'
 import LogoutPage from '../pages/auth/LogoutPage.vue'
 import HomePage from '../pages/home/index.vue'
+import LivrosPage from '../pages/livros/index.vue'
+import LeitoresPage from '../pages/leitores/index.vue'
+import EmprestimosPage from '../pages/emprestimos/index.vue'
+import ReservasPage from '../pages/reservas/index.vue'
+import RecompensasPage from '../pages/recompensas/index.vue'
 import SiginPage from '../pages/auth/SiginPage.vue'
 import SigupPage from '../pages/auth/SigupPage.vue'
 import store from '../store'
@@ -48,6 +53,31 @@ const routes = [
         path: '',
         name: 'home',
         component: HomePage
+      },
+      {
+        path: 'livros',
+        name: 'livros',
+        component: LivrosPage
+      },
+      {
+        path: 'leitores',
+        name: 'leitores',
+        component: LeitoresPage
+      },
+      {
+        path: 'emprestimos',
+        name: 'emprestimos',
+        component: EmprestimosPage
+      },
+      {
+        path: 'reservas',
+        name: 'reservas',
+        component: ReservasPage
+      },
+      {
+        path: 'recompensas',
+        name: 'recompensas',
+        component: RecompensasPage
       }
     ]
   }

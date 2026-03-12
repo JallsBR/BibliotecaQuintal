@@ -12,7 +12,7 @@ body,
 :root,
 [data-tema="claro"] {
   --bg-primario: #cccfc7;
-  --bg-secundario: #ffffff;
+  --bg-secundario: #d1dce0;
 
   --texto-primario: #212529;
   --texto-secundario: #6c757d;
@@ -21,7 +21,7 @@ body,
   --perigo: #dc3545;
   --neutro: #212529;
 
-  --azulquintal: #029BA7;
+  --azulquintal: #173b69;
   --amareloquintal: #FEE867;
   --texto-sobre-azul: #ffffff;
 }
@@ -37,7 +37,7 @@ body,
   --sucesso: #20c997;
   --perigo: #ff6b6b;
   --neutro: #e9ecef;
-  --azulquintal: #074e42;
+  --azulquintal: #029BA7;
   --amareloquintal: #e7630b;
   --texto-sobre-azul: #ffffff;
 }
