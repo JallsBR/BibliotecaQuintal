@@ -114,6 +114,99 @@ body,
   color: var(--texto-secundario);
 }
 
+/* ===== InputText (PrimeVue) - tema da app ===== */
+.p-inputtext {
+  background: var(--bg-secundario) !important;
+  color: var(--texto-primario) !important;
+  border-color: color-mix(in srgb, var(--texto-secundario) 40%, transparent) !important;
+}
+.p-inputtext::placeholder {
+  color: var(--texto-secundario);
+}
+.p-inputtext:enabled:hover {
+  border-color: color-mix(in srgb, var(--texto-secundario) 60%, transparent) !important;
+}
+.p-inputtext:enabled:focus {
+  outline: 0;
+  border-color: var(--azulquintal) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--azulquintal) 25%, transparent);
+}
+
+/* ===== Textarea (PrimeVue) - tema da app ===== */
+.p-textarea {
+  background: var(--bg-secundario) !important;
+  color: var(--texto-primario) !important;
+  border-color: color-mix(in srgb, var(--texto-secundario) 40%, transparent) !important;
+}
+.p-textarea::placeholder {
+  color: var(--texto-secundario);
+}
+.p-textarea:enabled:hover {
+  border-color: color-mix(in srgb, var(--texto-secundario) 60%, transparent) !important;
+}
+.p-textarea:enabled:focus {
+  outline: 0;
+  border-color: var(--azulquintal) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--azulquintal) 25%, transparent);
+}
+
+/* ===== Select (PrimeVue) - tema da app ===== */
+.p-select,
+.p-select.p-inputwrapper {
+  background: var(--bg-secundario) !important;
+  border-color: color-mix(in srgb, var(--texto-secundario) 40%, transparent) !important;
+}
+.p-select .p-select-label {
+  background: var(--bg-secundario) !important;
+  color: var(--texto-primario) !important;
+  border-color: transparent !important;
+}
+.p-select .p-select-label::placeholder {
+  color: var(--texto-secundario);
+}
+.p-select .p-select-label.p-placeholder {
+  color: var(--texto-secundario) !important;
+}
+.p-select .p-select-clear-icon,
+.p-select .p-select-dropdown-icon {
+  color: var(--texto-secundario) !important;
+}
+.p-select.p-inputwrapper-focus,
+.p-select.p-inputwrapper:focus-within {
+  border-color: var(--azulquintal) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--azulquintal) 25%, transparent);
+}
+.p-select-overlay {
+  background: var(--bg-secundario) !important;
+  color: var(--texto-primario) !important;
+  border-color: color-mix(in srgb, var(--texto-secundario) 25%, transparent) !important;
+}
+.p-select-overlay .p-select-list {
+  background: var(--bg-secundario) !important;
+  color: var(--texto-primario) !important;
+}
+.p-select-overlay .p-select-option {
+  color: var(--texto-primario) !important;
+  background: transparent !important;
+}
+.p-select-overlay .p-select-option.p-focus,
+.p-select-overlay .p-select-option:hover {
+  background: var(--bg-primario) !important;
+  color: var(--texto-primario) !important;
+}
+.p-select-overlay .p-select-option-selected {
+  background: color-mix(in srgb, var(--azulquintal) 15%, var(--bg-secundario)) !important;
+  color: var(--texto-primario) !important;
+}
+.p-select-overlay .p-select-filter {
+  background: var(--bg-primario) !important;
+  color: var(--texto-primario) !important;
+  border-color: color-mix(in srgb, var(--texto-secundario) 40%, transparent) !important;
+}
+.p-select-overlay .p-select-empty-message {
+  color: var(--texto-secundario) !important;
+}
+
 .p-inputgroup-addon {
   background: var(--bg-primario) !important;
   color: var(--texto-secundario) !important;

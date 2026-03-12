@@ -4,111 +4,144 @@
     modal
     header="Incluir livro"
     :style="{ width: '65rem' }"
+    :contentStyle="{ overflow: 'visible' }"
     @hide="limparFormulario"
     @show="carregarOpcoes"
   >
     <div class="dialog-body">
-      <div class="dialog-field">
-        <label for="livro-titulo" class="dialog-label">Título</label>
-        <InputText id="livro-titulo" v-model="form.titulo" class="dialog-input" autocomplete="off" />
+      <div class="dialog-row"></div>
+
+        <div class="dialog-field">
+          <FloatLabel variant="on" class="dialog-input-wrap">
+            <InputText id="livro-titulo" v-model="form.titulo" class="dialog-input" autocomplete="off" />
+            <label for="livro-titulo">Título</label>
+          </FloatLabel>
+        </div>
+
+        <div class="dialog-field">
+          <FloatLabel variant="on" class="dialog-input-wrap">
+            <Select
+              id="livro-autor"
+              v-model="form.autor"
+              :options="opcoesAutores"
+              optionLabel="nome"
+              optionValue="id"
+              class="dialog-input"
+              showClear
+              editable
+            />
+            <label for="livro-autor">Autor</label>
+          </FloatLabel>
+        </div>
+        <div class="dialog-field">
+          <FloatLabel variant="on" class="dialog-input-wrap">
+            <Select
+              id="livro-editora"
+              v-model="form.editora"
+              :options="opcoesEditoras"
+              optionLabel="nome"
+              optionValue="id"
+              class="dialog-input"
+              showClear
+              editable
+            />
+            <label for="livro-editora">Editora</label>
+          </FloatLabel>
       </div>
+
 
       <div class="dialog-field dialog-field--vertical">
-        <label for="livro-descricao" class="dialog-label">Descrição</label>
-        <Textarea id="livro-descricao" v-model="form.descricao" class="dialog-input" rows="3" autoResize />
+        <FloatLabel variant="on" class="dialog-input-wrap">
+          <Textarea id="livro-descricao" v-model="form.descricao" class="dialog-input" rows="3" autoResize />
+          <label for="livro-descricao">Descrição</label>
+        </FloatLabel>
       </div>
 
-      <div class="dialog-row">
-        <div class="dialog-field">
-          <label for="livro-autor" class="dialog-label">Autor</label>
+
+      <!-- Categoria -->
+      <div class="dialog-field">
+        <FloatLabel variant="on" class="dialog-input-wrap">
           <Select
-            id="livro-autor"
-            v-model="form.autor"
-            :options="opcoesAutores"
+            id="livro-categoria"
+            v-model="form.categoria"
+            :options="opcoesCategorias"
             optionLabel="nome"
             optionValue="id"
-            placeholder="Selecione"
             class="dialog-input"
             showClear
             editable
           />
+          <label for="livro-categoria">Categoria</label>
+        </FloatLabel>
+      </div>
+
+      <!-- Qtd. páginas | Ano publicação -->
+      <div class="dialog-row">
+        <div class="dialog-field">
+          <FloatLabel variant="on" class="dialog-input-wrap">
+            <InputNumber id="livro-qtd-paginas" v-model="form.qtd_paginas" class="dialog-input" :min="1" showButtons />
+            <label for="livro-qtd-paginas">Qtd. páginas</label>
+          </FloatLabel>
         </div>
         <div class="dialog-field">
-          <label for="livro-editora" class="dialog-label">Editora</label>
-          <Select
-            id="livro-editora"
-            v-model="form.editora"
-            :options="opcoesEditoras"
-            optionLabel="nome"
-            optionValue="id"
-            placeholder="Selecione"
-            class="dialog-input"
-            showClear
-            editable
-          />
+          <FloatLabel variant="on" class="dialog-input-wrap">
+            <InputNumber id="livro-ano" v-model="form.ano_publicacao" class="dialog-input" :min="1900" :max="anoAtual" showButtons />
+            <label for="livro-ano">Ano publicação</label>
+          </FloatLabel>
         </div>
       </div>
 
+      <!-- Qtd. disponível | Qtd. emprestados -->
+      <div class="dialog-row">
+        <div class="dialog-field">
+          <FloatLabel variant="on" class="dialog-input-wrap">
+            <InputNumber id="livro-qtd-disponivel" v-model="form.qtd_disponivel" class="dialog-input" :min="0" showButtons />
+            <label for="livro-qtd-disponivel">Qtd. disponível</label>
+          </FloatLabel>
+        </div>
+        <div class="dialog-field">
+          <FloatLabel variant="on" class="dialog-input-wrap">
+            <InputNumber id="livro-qtd-emprestados" v-model="form.qtd_emprestados" class="dialog-input" :min="0" showButtons />
+            <label for="livro-qtd-emprestados">Qtd. emprestados</label>
+          </FloatLabel>
+        </div>
+      </div>
+
+      <!-- Pontuação | Idioma -->
+      <div class="dialog-row">
+        <div class="dialog-field">
+          <FloatLabel variant="on" class="dialog-input-wrap">
+            <InputNumber id="livro-pontuacao" v-model="form.pontuacao" class="dialog-input" :min="0" showButtons />
+            <label for="livro-pontuacao">Pontuação</label>
+          </FloatLabel>
+        </div>
+        <div class="dialog-field">
+          <FloatLabel variant="on" class="dialog-input-wrap">
+            <InputText id="livro-idioma" v-model="form.idioma" class="dialog-input" autocomplete="off" />
+            <label for="livro-idioma">Idioma</label>
+          </FloatLabel>
+        </div>
+      </div>
+
+      <!-- ISBN -->
       <div class="dialog-field">
-        <label for="livro-categoria" class="dialog-label">Categoria</label>
-        <Select
-          id="livro-categoria"
-          v-model="form.categoria"
-          :options="opcoesCategorias"
-          optionLabel="nome"
-          optionValue="id"
-          placeholder="Selecione"
-          class="dialog-input"
-          showClear
-          editable
-        />
+        <FloatLabel variant="on" class="dialog-input-wrap">
+          <InputText id="livro-isbn" v-model="form.isbn" class="dialog-input" maxlength="13" autocomplete="off" />
+          <label for="livro-isbn">ISBN</label>
+        </FloatLabel>
       </div>
 
-      <div class="dialog-row">
-        <div class="dialog-field">
-          <label for="livro-qtd-paginas" class="dialog-label">Qtd. páginas</label>
-          <InputNumber id="livro-qtd-paginas" v-model="form.qtd_paginas" class="dialog-input" :min="1" showButtons />
-        </div>
-        <div class="dialog-field">
-          <label for="livro-ano" class="dialog-label">Ano publicação</label>
-          <InputNumber id="livro-ano" v-model="form.ano_publicacao" class="dialog-input" :min="1900" :max="anoAtual" showButtons />
-        </div>
-      </div>
-
-      <div class="dialog-row">
-        <div class="dialog-field">
-          <label for="livro-qtd-disponivel" class="dialog-label">Qtd. disponível</label>
-          <InputNumber id="livro-qtd-disponivel" v-model="form.qtd_disponivel" class="dialog-input" :min="0" showButtons />
-        </div>
-        <div class="dialog-field">
-          <label for="livro-qtd-emprestados" class="dialog-label">Qtd. emprestados</label>
-          <InputNumber id="livro-qtd-emprestados" v-model="form.qtd_emprestados" class="dialog-input" :min="0" showButtons />
-        </div>
-      </div>
-
-      <div class="dialog-row">
-        <div class="dialog-field">
-          <label for="livro-pontuacao" class="dialog-label">Pontuação</label>
-          <InputNumber id="livro-pontuacao" v-model="form.pontuacao" class="dialog-input" :min="0" showButtons />
-        </div>
-        <div class="dialog-field">
-          <label for="livro-idioma" class="dialog-label">Idioma</label>
-          <InputText id="livro-idioma" v-model="form.idioma" class="dialog-input" autocomplete="off" />
-        </div>
-      </div>
-
-      <div class="dialog-field">
-        <label for="livro-isbn" class="dialog-label">ISBN</label>
-        <InputText id="livro-isbn" v-model="form.isbn" class="dialog-input" maxlength="13" autocomplete="off" />
-      </div>
-
+      <!-- Ativo -->
       <div class="dialog-field dialog-field--checkbox">
-        <Checkbox id="livro-ativo" v-model="form.ativo" :binary="true" inputId="livro-ativo" />
-        <label for="livro-ativo" class="dialog-label-inline">Ativo</label>
+        <FloatLabel variant="on" class="dialog-input-wrap dialog-input-wrap--inline">
+          <Checkbox id="livro-ativo" v-model="form.ativo" :binary="true" inputId="livro-ativo" />
+          <label for="livro-ativo">Ativo</label>
+        </FloatLabel>
       </div>
 
+      <!-- Imagem -->
       <div class="dialog-field dialog-field--vertical">
-        <label class="dialog-label">Imagem</label>
+        <span class="dialog-label">Imagem</span>
         <FileUpload
           mode="basic"
           accept="image/*"
@@ -132,6 +165,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import Dialog from 'primevue/dialog'
+import FloatLabel from 'primevue/floatlabel'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
 import InputNumber from 'primevue/inputnumber'
@@ -233,8 +267,7 @@ function salvar() {
 
 <style scoped>
 .dialog-body {
-  max-height: 70vh;
-  overflow-y: auto;
+  overflow: visible;
 }
 
 .dialog-field {
@@ -244,13 +277,34 @@ function salvar() {
   margin-bottom: 1rem;
 }
 
+.dialog-label {
+  font-weight: 600;
+  color: var(--texto-primario);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.dialog-input-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.dialog-input-wrap :deep(.p-floatlabel) {
+  width: 100%;
+}
+
+.dialog-input-wrap--inline {
+  flex: none;
+}
+
+.dialog-field--vertical .dialog-input-wrap {
+  width: 100%;
+}
+
 .dialog-field--vertical {
   flex-direction: column;
   align-items: stretch;
-}
-
-.dialog-field--vertical .dialog-label {
-  width: auto;
 }
 
 .dialog-field--checkbox {
@@ -265,19 +319,6 @@ function salvar() {
 .dialog-row .dialog-field {
   flex: 1;
   margin-bottom: 1rem;
-}
-
-.dialog-label {
-  font-weight: 600;
-  width: 7rem;
-  flex-shrink: 0;
-  color: var(--texto-primario);
-}
-
-.dialog-label-inline {
-  font-weight: 600;
-  color: var(--texto-primario);
-  margin-left: 0.5rem;
 }
 
 .dialog-input {
