@@ -336,3 +336,50 @@ body,
 .p-toast-message-warn .p-toast-detail {
   color: var(--texto-secundario) !important;
 }
+
+/* ===== TABS (PrimeVue) - tema da app ===== */
+.p-tabs {
+  background: transparent;
+  color: var(--texto-primario);
+}
+
+.p-tabs-nav {
+  background: var(--bg-secundario);
+  border: none;
+  border-radius: 12px 12px 0 0;
+  padding: 0.25rem 0.75rem 0;
+}
+
+.p-tabs-tablist {
+  gap: 0.5rem;
+}
+
+.p-tabs-tab {
+  color: var(--texto-secundario);
+}
+
+.p-tabs-tab .p-tabs-tab-text {
+  color: inherit;
+}
+
+.p-tabs-tab.p-tabs-tab-active {
+  color: var(--azulquintal);
+}
+
+.p-tabs-tab.p-tabs-tab-active .p-tabs-tab-text {
+  font-weight: 600;
+}
+
+.p-tabs-nav::after {
+  content: '';
+  display: block;
+  height: 1px;
+  background: color-mix(in srgb, var(--texto-secundario) 25%, transparent);
+  margin-top: 0.25rem;
+}
+
+.p-tabs-panels {
+  background: transparent;
+  border-radius: 0 0 12px 12px;
+  padding-top: 0.75rem;
+}

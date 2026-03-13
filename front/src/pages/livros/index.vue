@@ -43,6 +43,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useToast } from 'primevue/usetoast'
 import BaseDataTable from '@/components/BaseDataTable.vue'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
@@ -58,6 +59,8 @@ const totalRecords = ref(0)
 const rows = PAGE_SIZE
 const lazy = ref(false)
 const reorderableColumns = false
+
+const toast = useToast()
 
 async function carregarLivros() {
   loading.value = true
@@ -90,8 +93,34 @@ async function onLivroSalvo(payload) {
       await livroService.livros.create(payload)
     }
     await carregarLivros()
+    toast.add({
+      severity: 'success',
+      summary: 'Livro salvo',
+      detail: 'O livro foi salvo com sucesso.',
+      life: 3000
+    })
   } catch (e) {
     console.error('Erro ao incluir livro:', e)
+    const backendErrors = e?.response?.data
+    let detail = 'Não foi possível salvar o livro.'
+
+    if (backendErrors && typeof backendErrors === 'object') {
+      const parts = []
+      for (const [field, messages] of Object.entries(backendErrors)) {
+        const textoCampo = Array.isArray(messages) ? messages.join(' ') : String(messages)
+        parts.push(`${field}: ${textoCampo}`)
+      }
+      if (parts.length > 0) {
+        detail = parts.join(' | ')
+      }
+    }
+
+    toast.add({
+      severity: 'error',
+      summary: 'Erro ao salvar livro',
+      detail,
+      life: 5000
+    })
   }
 }
 

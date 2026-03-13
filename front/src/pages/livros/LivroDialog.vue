@@ -2,163 +2,236 @@
   <Dialog
     v-model:visible="visibleModel"
     modal
-    header="Incluir livro"
+    header="Incluir Informações do Livro"
     :style="{ width: '65rem' }"
     :contentStyle="{ overflow: 'visible' }"
     @hide="limparFormulario"
     @show="carregarOpcoes"
   >
     <div class="dialog-body">
-      <div class="dialog-row"></div>
+      
+      <Tabs value="livro" class="dialog-tabs">
+        <TabList>
+          <Tab value="livro">Livro</Tab>
+          <Tab value="autor">Autor</Tab>
+          <Tab value="editora">Editora</Tab>
+          <Tab value="categoria">Categoria</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel value="livro">
+            <div class="dialog-body">
+              <div class="dialog-row">
+                <div class="dialog-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
+                    <InputText id="livro-titulo" v-model="form.titulo" class="dialog-input" autocomplete="off" />
+                    <label for="livro-titulo">Título</label>
+                  </FloatLabel>
+                </div>
 
-        <div class="dialog-field">
-          <FloatLabel variant="on" class="dialog-input-wrap">
-            <InputText id="livro-titulo" v-model="form.titulo" class="dialog-input" autocomplete="off" />
-            <label for="livro-titulo">Título</label>
-          </FloatLabel>
-        </div>
+                <div class="dialog-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
+                    <Select
+                      id="livro-autor"
+                      v-model="form.autor"
+                      :options="opcoesAutores"
+                      optionLabel="nome"
+                      optionValue="id"
+                      class="dialog-input"
+                      showClear
+                      editable
+                    />
+                    <label for="livro-autor">Autor</label>
+                  </FloatLabel>
+                </div>
 
-        <div class="dialog-field">
-          <FloatLabel variant="on" class="dialog-input-wrap">
-            <Select
-              id="livro-autor"
-              v-model="form.autor"
-              :options="opcoesAutores"
-              optionLabel="nome"
-              optionValue="id"
-              class="dialog-input"
-              showClear
-              editable
-            />
-            <label for="livro-autor">Autor</label>
-          </FloatLabel>
-        </div>
-        <div class="dialog-field">
-          <FloatLabel variant="on" class="dialog-input-wrap">
-            <Select
-              id="livro-editora"
-              v-model="form.editora"
-              :options="opcoesEditoras"
-              optionLabel="nome"
-              optionValue="id"
-              class="dialog-input"
-              showClear
-              editable
-            />
-            <label for="livro-editora">Editora</label>
-          </FloatLabel>
-      </div>
+                <div class="dialog-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
+                    <Select
+                      id="livro-editora"
+                      v-model="form.editora"
+                      :options="opcoesEditoras"
+                      optionLabel="nome"
+                      optionValue="id"
+                      class="dialog-input"
+                      showClear
+                      editable
+                    />
+                    <label for="livro-editora">Editora</label>
+                  </FloatLabel>
+                </div>
+              </div>
 
+              <div class="dialog-field dialog-field--vertical">
+                <FloatLabel variant="on" class="dialog-input-wrap">
+                  <Textarea id="livro-descricao" v-model="form.descricao" class="dialog-input" rows="3" autoResize />
+                  <label for="livro-descricao">Descrição</label>
+                </FloatLabel>
+              </div>
 
-      <div class="dialog-field dialog-field--vertical">
-        <FloatLabel variant="on" class="dialog-input-wrap">
-          <Textarea id="livro-descricao" v-model="form.descricao" class="dialog-input" rows="3" autoResize />
-          <label for="livro-descricao">Descrição</label>
-        </FloatLabel>
-      </div>
+              <!-- Categoria / Idioma / ISBN -->
+              <div class="dialog-row">
+                <div class="dialog-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
+                    <Select
+                      id="livro-categoria"
+                      v-model="form.categoria"
+                      :options="opcoesCategorias"
+                      optionLabel="nome"
+                      optionValue="id"
+                      class="dialog-input"
+                      showClear
+                      editable
+                    />
+                    <label for="livro-categoria">Categoria</label>
+                  </FloatLabel>
+                </div>
+                <div class="dialog-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
+                    <InputText id="livro-idioma" v-model="form.idioma" class="dialog-input" autocomplete="off" />
+                    <label for="livro-idioma">Idioma</label>
+                  </FloatLabel>
+                </div>
+                <div class="dialog-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
+                    <InputText id="livro-isbn" v-model="form.isbn" class="dialog-input" maxlength="13" autocomplete="off" />
+                    <label for="livro-isbn">ISBN</label>
+                  </FloatLabel>
+                </div>
+              </div>
 
+              <!-- Qtd. páginas | Ano publicação | Pontuação -->
+              <div class="dialog-row">
+                <div class="dialog-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
+                    <InputNumber id="livro-qtd-paginas" v-model="form.qtd_paginas" class="dialog-input" :min="1" showButtons />
+                    <label for="livro-qtd-paginas">Qtd. páginas</label>
+                  </FloatLabel>
+                </div>
+                <div class="dialog-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
+                    <InputNumber id="livro-ano" v-model="form.ano_publicacao" class="dialog-input" :min="1900" :max="anoAtual" showButtons />
+                    <label for="livro-ano">Ano publicação</label>
+                  </FloatLabel>
+                </div>
+                <div class="dialog-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
+                    <InputNumber id="livro-pontuacao" v-model="form.pontuacao" class="dialog-input" :min="0" showButtons />
+                    <label for="livro-pontuacao">Pontuação</label>
+                  </FloatLabel>
+                </div>
+              </div>
 
-      <!-- Categoria -->
-      <div class="dialog-field">
-        <FloatLabel variant="on" class="dialog-input-wrap">
-          <Select
-            id="livro-categoria"
-            v-model="form.categoria"
-            :options="opcoesCategorias"
-            optionLabel="nome"
-            optionValue="id"
-            class="dialog-input"
-            showClear
-            editable
-          />
-          <label for="livro-categoria">Categoria</label>
-        </FloatLabel>
-      </div>
+              <!-- Qtd. disponível | Qtd. emprestados | Ativo -->
+              <div class="dialog-row">
+                <div class="dialog-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
+                    <InputNumber id="livro-qtd-disponivel" v-model="form.qtd_disponivel" class="dialog-input" :min="0" showButtons />
+                    <label for="livro-qtd-disponivel">Qtd. disponível</label>
+                  </FloatLabel>
+                </div>
+                <div class="dialog-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
+                    <InputNumber id="livro-qtd-emprestados" v-model="form.qtd_emprestados" class="dialog-input" :min="0" showButtons />
+                    <label for="livro-qtd-emprestados">Qtd. emprestados</label>
+                  </FloatLabel>
+                </div>
+                <div class="dialog-field dialog-field--checkbox">
+                  <div class="dialog-input-wrap dialog-input-wrap--inline dialog-checkbox-wrap">
+                    <Checkbox id="livro-ativo" v-model="form.ativo" :binary="true" inputId="livro-ativo" />
+                    <label for="livro-ativo" class="dialog-checkbox-label">Ativo</label>
+                  </div>
+                </div>
+              </div>
 
-      <!-- Qtd. páginas | Ano publicação -->
-      <div class="dialog-row">
-        <div class="dialog-field">
-          <FloatLabel variant="on" class="dialog-input-wrap">
-            <InputNumber id="livro-qtd-paginas" v-model="form.qtd_paginas" class="dialog-input" :min="1" showButtons />
-            <label for="livro-qtd-paginas">Qtd. páginas</label>
-          </FloatLabel>
-        </div>
-        <div class="dialog-field">
-          <FloatLabel variant="on" class="dialog-input-wrap">
-            <InputNumber id="livro-ano" v-model="form.ano_publicacao" class="dialog-input" :min="1900" :max="anoAtual" showButtons />
-            <label for="livro-ano">Ano publicação</label>
-          </FloatLabel>
-        </div>
-      </div>
+              <!-- Imagem -->
+              <div class="dialog-field dialog-field--vertical">
+                <span class="dialog-label">Imagem</span>
+                <FileUpload
+                  mode="basic"
+                  accept="image/*"
+                  :maxFileSize="2000000"
+                  chooseLabel="Escolher imagem"
+                  @select="onImagemSelect"
+                />
+                <small v-if="form.imagemFile" class="dialog-file-name">{{ form.imagemFile.name }}</small>
+              </div>
 
-      <!-- Qtd. disponível | Qtd. emprestados -->
-      <div class="dialog-row">
-        <div class="dialog-field">
-          <FloatLabel variant="on" class="dialog-input-wrap">
-            <InputNumber id="livro-qtd-disponivel" v-model="form.qtd_disponivel" class="dialog-input" :min="0" showButtons />
-            <label for="livro-qtd-disponivel">Qtd. disponível</label>
-          </FloatLabel>
-        </div>
-        <div class="dialog-field">
-          <FloatLabel variant="on" class="dialog-input-wrap">
-            <InputNumber id="livro-qtd-emprestados" v-model="form.qtd_emprestados" class="dialog-input" :min="0" showButtons />
-            <label for="livro-qtd-emprestados">Qtd. emprestados</label>
-          </FloatLabel>
-        </div>
-      </div>
+              <div class="dialog-actions dialog-actions--inside-tab">
+                <Button type="button" label="Salvar" @click="salvar" />
+              </div>
+            </div>
+          </TabPanel>
 
-      <!-- Pontuação | Idioma -->
-      <div class="dialog-row">
-        <div class="dialog-field">
-          <FloatLabel variant="on" class="dialog-input-wrap">
-            <InputNumber id="livro-pontuacao" v-model="form.pontuacao" class="dialog-input" :min="0" showButtons />
-            <label for="livro-pontuacao">Pontuação</label>
-          </FloatLabel>
-        </div>
-        <div class="dialog-field">
-          <FloatLabel variant="on" class="dialog-input-wrap">
-            <InputText id="livro-idioma" v-model="form.idioma" class="dialog-input" autocomplete="off" />
-            <label for="livro-idioma">Idioma</label>
-          </FloatLabel>
-        </div>
-      </div>
+          <TabPanel value="autor">
+            <div class="dialog-autor">
+              <div class="dialog-row dialog-autor-row">
+                <div class="dialog-field dialog-autor-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
+                    <InputText id="autor-nome" v-model="autorForm.nome" class="dialog-input" />
+                    <label for="autor-nome">Autor</label>
+                  </FloatLabel>
+                </div>
+                <Button type="button" label="Salvar" size="small" class="dialog-autor-button" @click="salvarAutor" />
+                <Button
+                  type="button"
+                  label="Buscar"
+                  icon="pi pi-search"
+                  size="small"
+                  class="dialog-autor-button"
+                  @click="carregarAutores"
+                />
+              </div>
 
-      <!-- ISBN -->
-      <div class="dialog-field">
-        <FloatLabel variant="on" class="dialog-input-wrap">
-          <InputText id="livro-isbn" v-model="form.isbn" class="dialog-input" maxlength="13" autocomplete="off" />
-          <label for="livro-isbn">ISBN</label>
-        </FloatLabel>
-      </div>
+              <BaseDataTable
+                :items="autores"
+                :loading="loadingAutores"
+                dataKey="id"
+                :totalRecords="autoresTotal"
+                :rows="autoresRows"
+                :lazy="false"
+                :reorderableColumns="false"
+                class="dialog-autor-table"
+              >
+                <template #columns>
+                  <Column field="nome" header="Autor" />
+                  <Column
+                    header="Ações"
+                    :style="{ width: '180px', maxWidth: '180px' }"
+                    bodyClass="dialog-col-acoes"
+                    headerClass="dialog-col-acoes"
+                  >
+                    <template #body="slotProps">
+                      <div class="dialog-col-acoes">
+                        <Button
+                          label="Editar"
+                          severity="success"
+                          size="small"
+                          @click="editarAutor(slotProps.data)"
+                        />
+                        <Button
+                          label="Excluir"
+                          severity="danger"
+                          size="small"
+                          @click="excluirAutor(slotProps.data)"
+                        />
+                      </div>
+                    </template>
+                  </Column>
+                </template>
+              </BaseDataTable>
+            </div>
+          </TabPanel>
 
-      <!-- Ativo -->
-      <div class="dialog-field dialog-field--checkbox">
-        <FloatLabel variant="on" class="dialog-input-wrap dialog-input-wrap--inline">
-          <Checkbox id="livro-ativo" v-model="form.ativo" :binary="true" inputId="livro-ativo" />
-          <label for="livro-ativo">Ativo</label>
-        </FloatLabel>
-      </div>
+          <TabPanel value="editora">
+            <p>Conteúdo de Editora (a definir).</p>
+          </TabPanel>
 
-      <!-- Imagem -->
-      <div class="dialog-field dialog-field--vertical">
-        <span class="dialog-label">Imagem</span>
-        <FileUpload
-          mode="basic"
-          accept="image/*"
-          :maxFileSize="2000000"
-          chooseLabel="Escolher imagem"
-          @select="onImagemSelect"
-        />
-        <small v-if="form.imagemFile" class="dialog-file-name">{{ form.imagemFile.name }}</small>
-      </div>
+          <TabPanel value="categoria">
+            <p>Conteúdo de Categoria (a definir).</p>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </div>
-
-    <template #footer>
-      <div class="dialog-actions">
-        <Button type="button" label="Cancelar" severity="secondary" @click="fechar" />
-        <Button type="button" label="Salvar" @click="salvar" />
-      </div>
-    </template>
   </Dialog>
 </template>
 
@@ -173,6 +246,13 @@ import Select from 'primevue/select'
 import Checkbox from 'primevue/checkbox'
 import FileUpload from 'primevue/fileupload'
 import Button from 'primevue/button'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
+import TabPanel from 'primevue/tabpanel'
+import BaseDataTable from '@/components/BaseDataTable.vue'
+import Column from 'primevue/column'
 import livroService from '@/services/livroService'
 
 const props = defineProps({
@@ -193,6 +273,13 @@ const opcoesEditoras = ref([])
 const opcoesCategorias = ref([])
 
 const form = ref(getFormDefault())
+
+const autores = ref([])
+const loadingAutores = ref(false)
+const autoresTotal = ref(0)
+const autoresRows = 10
+const autorEditandoId = ref(null)
+const autorForm = ref({ nome: '' })
 
 function getFormDefault() {
   return {
@@ -220,11 +307,61 @@ async function carregarOpcoes() {
       livroService.editoras.getAll(),
       livroService.categorias.getAll()
     ])
-    opcoesAutores.value = Array.isArray(autores) ? autores : autores?.results ?? []
+    const listaAutores = Array.isArray(autores) ? autores : autores?.results ?? []
+    opcoesAutores.value = listaAutores
+    autores.value = listaAutores
     opcoesEditoras.value = Array.isArray(editoras) ? editoras : editoras?.results ?? []
     opcoesCategorias.value = Array.isArray(categorias) ? categorias : categorias?.results ?? []
   } catch (e) {
     console.error('Erro ao carregar opções:', e)
+  }
+}
+
+async function carregarAutores() {
+  loadingAutores.value = true
+  try {
+    const data = await livroService.autores.getAll()
+    const list = Array.isArray(data) ? data : data?.results ?? []
+    autores.value = list
+    autoresTotal.value = data?.count ?? list.length
+  } catch (e) {
+    console.error('Erro ao carregar autores:', e)
+    autores.value = []
+  } finally {
+    loadingAutores.value = false
+  }
+}
+
+async function salvarAutor() {
+  if (!autorForm.value.nome) return
+  try {
+    if (autorEditandoId.value) {
+      await livroService.autores.update(autorEditandoId.value, { nome: autorForm.value.nome })
+    } else {
+      await livroService.autores.create({ nome: autorForm.value.nome })
+    }
+    autorForm.value = { nome: '' }
+    autorEditandoId.value = null
+    await carregarAutores()
+    await carregarOpcoes()
+  } catch (e) {
+    console.error('Erro ao salvar autor:', e)
+  }
+}
+
+function editarAutor(autor) {
+  autorEditandoId.value = autor.id
+  autorForm.value = { nome: autor.nome }
+}
+
+async function excluirAutor(autor) {
+  if (!confirm(`Excluir o autor "${autor.nome}"?`)) return
+  try {
+    await livroService.autores.delete(autor.id)
+    await carregarAutores()
+    await carregarOpcoes()
+  } catch (e) {
+    console.error('Erro ao excluir autor:', e)
   }
 }
 
@@ -268,6 +405,22 @@ function salvar() {
 <style scoped>
 .dialog-body {
   overflow: visible;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: -0.25rem;
+}
+
+.dialog-tabs {
+  padding: 0rem 0 0;
+}
+
+.dialog-tabs :deep(.p-tabs-nav) {
+  border-radius: 12px 12px 0 0;
+}
+
+.dialog-tabs :deep(.p-tabs-panels) {
+  padding-top: 0.5rem;
 }
 
 .dialog-field {
@@ -275,6 +428,7 @@ function salvar() {
   align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
+  width: 100%;
 }
 
 .dialog-label {
@@ -288,9 +442,6 @@ function salvar() {
 .dialog-input-wrap {
   flex: 1;
   min-width: 0;
-}
-
-.dialog-input-wrap :deep(.p-floatlabel) {
   width: 100%;
 }
 
@@ -311,9 +462,49 @@ function salvar() {
   align-items: center;
 }
 
+.dialog-checkbox-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dialog-checkbox-label {
+  font-weight: 500;
+}
+
 .dialog-row {
   display: flex;
   gap: 1rem;
+}
+
+
+
+.dialog-autor-left .dialog-field {
+  flex: 0 0 50% !important;
+  max-width: 50%;
+  margin-bottom: 0;
+}
+
+.dialog-autor-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+.dialog-autor-table {
+  margin-top: 1rem;
+}
+
+.dialog-autor-acoes-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+.dialog-col-acoes {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .dialog-row .dialog-field {
@@ -323,6 +514,7 @@ function salvar() {
 
 .dialog-input {
   flex: 1;
+  width: 100%;
 }
 
 .dialog-file-name {
@@ -335,5 +527,22 @@ function salvar() {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
+}
+
+.dialog-actions--inside-tab {
+  margin-top: 0.5rem;
+}
+
+.dialog-autor .dialog-row {
+  align-items: stretch;
+}
+
+.dialog-autor .dialog-field {
+  margin-bottom: 0;
+}
+
+.dialog-autor :deep(.p-inputtext),
+.dialog-autor :deep(.p-button) {
+  height: 2.5rem;
 }
 </style>
