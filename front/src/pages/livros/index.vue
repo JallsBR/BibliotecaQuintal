@@ -28,7 +28,7 @@
               </FloatLabel>
 
               <FloatLabel class="filtro-campo">
-                <Select
+                <BaseSelect
                   id="filtro-autor"
                   v-model="filtroAutor"
                   :options="opcoesAutores"
@@ -48,7 +48,7 @@
                 <label for="filtro-idioma">Idioma</label>
               </FloatLabel>
               <FloatLabel class="filtro-campo">
-                <Select
+                <BaseSelect
                   id="filtro-editora"
                   v-model="filtroEditora"
                   :options="opcoesEditoras"
@@ -60,7 +60,7 @@
                 <label for="filtro-editora">Editora</label>
               </FloatLabel>
               <FloatLabel class="filtro-campo">
-                <Select
+                <BaseSelect
                   id="filtro-categoria"
                   v-model="filtroCategoria"
                   :options="opcoesCategorias"
@@ -162,7 +162,7 @@ import Popover from 'primevue/popover'
 import FloatLabel from 'primevue/floatlabel'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
-import Select from 'primevue/select'
+import BaseSelect from '@/components/BaseSelect.vue'
 import Checkbox from 'primevue/checkbox'
 import LivroDialog from './LivroDialog.vue'
 import livroService from '@/services/livroService'
