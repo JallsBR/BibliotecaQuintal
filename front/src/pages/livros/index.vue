@@ -13,7 +13,7 @@
       :reorderableColumns="reorderableColumns"
     >
       <template #toolbar>
-        <div class="table-toolbar">
+        <div class="table-toolbar" style="margin-top: 1rem;">
           <Button label="Buscar" size="small" icon="pi pi-search" @click="(e) => popoverBuscaRef?.toggle(e)" />
           <Button label="Incluir" size="small" icon="pi pi-plus" @click="incluir" />
         </div>

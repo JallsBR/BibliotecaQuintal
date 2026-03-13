@@ -158,15 +158,15 @@
               </div>
 
               <div class="dialog-actions dialog-actions--inside-tab">
-                <Button type="button" label="Salvar" @click="salvar" />
+                <Button type="button" label="Salvar" size="small" @click="salvar" />
               </div>
             </div>
           </TabPanel>
 
           <TabPanel value="autor">
             <div class="dialog-autor">
-              <div class="dialog-row dialog-autor-row">
-                <div class="dialog-field dialog-autor-field">
+              <div class="dialog-row dialog-autor-row" style="margin-top: 1rem;">
+                <div class="dialog-field dialog-autor-field" >
                   <FloatLabel variant="on" class="dialog-input-wrap">
                     <InputText id="autor-nome" v-model="autorForm.nome" class="dialog-input" />
                     <label for="autor-nome">Inserir Autor</label>
@@ -255,7 +255,7 @@
 
           <TabPanel value="editora">
             <div class="dialog-autor">
-              <div class="dialog-row dialog-autor-row">
+              <div class="dialog-row dialog-autor-row" style="margin-top: 1rem;">
                 <div class="dialog-field dialog-autor-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
                     <InputText id="editora-nome" v-model="editoraForm.nome" class="dialog-input" />
@@ -350,7 +350,7 @@
 
           <TabPanel value="categoria">
             <div class="dialog-autor">
-              <div class="dialog-row dialog-autor-row">
+              <div class="dialog-row dialog-autor-row" style="margin-top: 1rem;">
                 <div class="dialog-field dialog-autor-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
                     <InputText id="categoria-nome" v-model="categoriaForm.nome" class="dialog-input" />
