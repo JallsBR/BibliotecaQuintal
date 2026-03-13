@@ -28,9 +28,10 @@
                   </FloatLabel>
                 </div>
 
-                <div class="dialog-field">
+                <div class="dialog-field" @click="onAutorSelectAreaClick">
                   <FloatLabel variant="on" class="dialog-input-wrap">
-                    <BaseSelect
+                    <Select
+                      ref="selectAutorRef"
                       id="livro-autor"
                       v-model="form.autor"
                       :options="autores"
@@ -44,9 +45,9 @@
                   </FloatLabel>
                 </div>
 
-                <div class="dialog-field">
+                <div class="dialog-field" @click="onAutorSelectAreaClick">
                   <FloatLabel variant="on" class="dialog-input-wrap">
-                    <BaseSelect
+                    <Select
                       id="livro-editora"
                       v-model="form.editora"
                       :options="opcoesEditoras"
@@ -72,7 +73,7 @@
               <div class="dialog-row">
                 <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
-                    <BaseSelect
+                    <Select
                       id="livro-categoria"
                       v-model="form.categoria"
                       :options="opcoesCategorias"
@@ -221,8 +222,7 @@
                     <template #body="slotProps">
                       <div class="dialog-col-acoes">
                         <Button
-                          label="Editar"
-                          severity="success"
+                          label="Editar"                         
                           size="small"
                           @click="editarAutor(slotProps.data)"
                         />
@@ -318,7 +318,6 @@
                       <div class="dialog-col-acoes">
                         <Button
                           label="Editar"
-                          severity="success"
                           size="small"
                           @click="editarEditora(slotProps.data)"
                         />
@@ -414,7 +413,6 @@
                       <div class="dialog-col-acoes">
                         <Button
                           label="Editar"
-                          severity="success"
                           size="small"
                           @click="editarCategoria(slotProps.data)"
                         />
@@ -457,7 +455,7 @@ import FloatLabel from 'primevue/floatlabel'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
 import InputNumber from 'primevue/inputnumber'
-import BaseSelect from '@/components/BaseSelect.vue'
+import Select from 'primevue/select'
 import Checkbox from 'primevue/checkbox'
 import FileUpload from 'primevue/fileupload'
 import Button from 'primevue/button'
@@ -502,6 +500,7 @@ const autorForm = ref({ nome: '' })
 const tabAtiva = ref('livro')
 const popoverPesquisaAutorRef = ref(null)
 const filtroPesquisaAutor = ref('')
+const selectAutorRef = ref(null)
 
 const confirmDeleteAutorVisible = ref(false)
 const confirmDeleteAutorLoading = ref(false)
@@ -547,6 +546,13 @@ const confirmDeleteCategoriaMessage = computed(() => {
 })
 
 const toast = useToast()
+
+function onAutorSelectAreaClick(e) {
+  const t = e.target
+  const isInput = t.tagName === 'INPUT'
+  const isComboboxSpan = t.tagName === 'SPAN' && t.getAttribute('role') === 'combobox'
+  if (isInput || isComboboxSpan) selectAutorRef.value?.show(true)
+}
 
 const autoresFiltrados = computed(() => {
   const lista = autores.value ?? []

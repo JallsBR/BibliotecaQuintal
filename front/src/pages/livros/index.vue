@@ -14,9 +14,8 @@
     >
       <template #toolbar>
         <div class="table-toolbar">
-          <Button label="Buscar" icon="pi pi-search" @click="(e) => popoverBuscaRef?.toggle(e)" />
-          <Button label="Incluir" icon="pi pi-plus" @click="incluir" />
-          <Button icon="pi pi-spin pi-cog" severity="info" @click="() => {}" />
+          <Button label="Buscar" size="small" icon="pi pi-search" @click="(e) => popoverBuscaRef?.toggle(e)" />
+          <Button label="Incluir" size="small" icon="pi pi-plus" @click="incluir" />
         </div>
 
         <Popover ref="popoverBuscaRef" :style="{ width: '35%' }">
@@ -122,11 +121,16 @@
         </Column>
         <Column field="qtd_paginas" header="Qtd Páginas" :style="{ width: '115px', maxWidth: '115px' }" />
         <Column field="qtd_disponivel" header="Qtd Disponível" :style="{ width: '115px', maxWidth: '115px' }" />
-
+        <Column field="is_disponivel" header="Disponível" :style="{ width: '115px', maxWidth: '115px' }">
+          <template #body="slotProps">
+            <span v-if="slotProps.data.is_disponivel" class="p-tag p-tag-success">Sim</span>
+            <span v-else class="p-tag p-tag-danger">Não</span>
+          </template>
+        </Column>
         <Column header="Ações" :style="{ width: '180px', maxWidth: '180px' }">
           <template #body="slotProps">
             <div class="col-acoes">
-              <Button label="Editar" severity="success" size="small" @click="editarLivro(slotProps.data)" />
+              <Button label="Editar"size="small" @click="editarLivro(slotProps.data)" />
               <Button label="Excluir" severity="danger" size="small" @click="excluirLivro(slotProps.data)" />
             </div>
           </template>

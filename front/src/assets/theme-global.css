@@ -42,7 +42,7 @@ body,
   --texto-sobre-azul: #ffffff;
 }
 
-/* ===== Botões PrimeVue - cores do tema ===== */
+/* ===== Botões PrimeVue - cores da app (usa --sucesso e --perigo) ===== */
 .p-button.p-button-danger {
   background: var(--perigo) !important;
   border-color: var(--perigo) !important;
@@ -58,6 +58,16 @@ body,
 .p-button.p-button-success:hover {
   background: color-mix(in srgb, var(--sucesso) 85%, black) !important;
   border-color: color-mix(in srgb, var(--sucesso) 85%, black) !important;
+}
+
+/* Ações em DataTable (botões de editar/excluir em colunas) */
+.p-datatable .p-button.p-button-success {
+  background: var(--sucesso) !important;
+  border-color: var(--sucesso) !important;
+}
+.p-datatable .p-button.p-button-danger {
+  background: var(--perigo) !important;
+  border-color: var(--perigo) !important;
 }
 
 /* ===== Card (login/cadastro) ===== */
