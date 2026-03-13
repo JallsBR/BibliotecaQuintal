@@ -11,8 +11,8 @@ body,
 /* ===== TEMA CLARO (padrão) ===== */
 :root,
 [data-tema="claro"] {
-  --bg-primario: #cccfc7;
-  --bg-secundario: #d1dce0;
+  --bg-primario: #f5f8f2;
+  --bg-secundario: #f3f6f8;
 
   --texto-primario: #212529;
   --texto-secundario: #6c757d;
@@ -28,7 +28,7 @@ body,
 
 /* ===== TEMA ESCURO ===== */
 [data-tema="escuro"] {
-  --bg-primario: #14161c;
+  --bg-primario: #181a1f;
   --bg-secundario: #1f242d;
 
   --texto-primario: #f8f9fa;
@@ -335,6 +335,12 @@ body,
 }
 .p-toast-message-warn .p-toast-detail {
   color: var(--texto-secundario) !important;
+}
+
+/* Utilitário simples de largura total (equivalente ao w-full do Tailwind) */
+.w-full {
+  width: 100% !important;
+  box-sizing: border-box;
 }
 
 /* ===== TABS (PrimeVue) - tema da app ===== */

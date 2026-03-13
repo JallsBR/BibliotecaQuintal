@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from decimal import Decimal
 
 class Categoria(models.Model):
-    nome = models.CharField(max_length=100)
+    nome = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -19,7 +19,7 @@ class Categoria(models.Model):
         ordering = ['nome']
 
 class Autor(models.Model):
-    nome = models.CharField(max_length=100)
+    nome = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -32,7 +32,7 @@ class Autor(models.Model):
         ordering = ['nome']
 
 class Editora(models.Model):
-    nome = models.CharField(max_length=100)
+    nome = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -45,7 +45,7 @@ class Editora(models.Model):
         ordering = ['nome']
 
 class Livro(models.Model):
-    titulo = models.CharField(max_length=200)
+    titulo = models.CharField(max_length=200, unique=True)
     descricao = models.TextField(blank=True)
     pontuacao = models.IntegerField(validators=[MinValueValidator(0)], verbose_name='Pontuação', blank=True, null=True)
     qtd_paginas = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='Quantidade de Páginas', blank=True, null=True)

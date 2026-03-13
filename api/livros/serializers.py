@@ -20,6 +20,10 @@ class EditoraSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at']
 
 class LivroSerializer(serializers.ModelSerializer):
+    autor_nome = serializers.CharField(source='autor.nome', read_only=True)
+    editora_nome = serializers.CharField(source='editora.nome', read_only=True)
+    categoria_nome = serializers.CharField(source='categoria.nome', read_only=True)
+
     class Meta:
         model = Livro
         fields = '__all__'
