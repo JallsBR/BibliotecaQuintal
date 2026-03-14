@@ -32,9 +32,15 @@
             </div>
             <div class="filtro-linha">
               <FloatLabel class="filtro-campo">
-                <InputText id="filtro-cidade" v-model="filtroCidade" class="w-full" />
-                <label for="filtro-cidade">Cidade</label>
+                <InputText id="filtro-cpf" v-model="filtroCpf" class="w-full" />
+                <label for="filtro-cpf">CPF</label>
               </FloatLabel>
+              <FloatLabel class="filtro-campo">
+                <InputText id="filtro-telefone" v-model="filtroTelefone" class="w-full" />
+                <label for="filtro-telefone">Telefone</label>
+              </FloatLabel>
+            </div>
+            <div class="filtro-linha">
               <div class="filtro-switches">
                 <div class="filtro-switch">
                   <Checkbox v-model="filtroAtivo" :binary="true" inputId="filtro-ativo" />
@@ -53,8 +59,12 @@
         <Column field="id" header="ID" :style="{ width: '75px', maxWidth: '75px' }" />
         <Column field="nome" header="Nome" :style="{ width: '200px', maxWidth: '200px' }" />
         <Column field="email" header="E-mail" />
-        <Column field="cidade" header="Cidade" :style="{ width: '120px', maxWidth: '120px' }" />
-        <Column field="pontuacao_atual" header="Pontuação" :style="{ width: '100px', maxWidth: '100px' }" />
+        <Column header="Telefone">
+          <template #body="slotProps">
+            {{ formatarTelefone(slotProps.data.telefone) }}
+          </template>
+        </Column>
+            <Column field="pontuacao_atual" header="Pontuação" :style="{ width: '100px', maxWidth: '100px' }" />
         <Column header="Ativo" :style="{ width: '90px', maxWidth: '90px' }">
           <template #body="slotProps">
             <span v-if="slotProps.data.ativo" class="p-tag p-tag-success">Sim</span>
@@ -117,7 +127,8 @@ const reorderableColumns = false
 const popoverBuscaRef = ref(null)
 const filtroNome = ref('')
 const filtroEmail = ref('')
-const filtroCidade = ref('')
+const filtroCpf = ref('')
+const filtroTelefone = ref('')
 const filtroAtivo = ref(false)
 
 const confirmDeleteVisible = ref(false)
@@ -130,6 +141,14 @@ const confirmDeleteMessage = computed(() => {
 })
 
 const toast = useToast()
+
+function formatarTelefone(val) {
+  if (!val) return ''
+  const digits = String(val).replace(/\D/g, '')
+  if (digits.length === 11) return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
+  if (digits.length === 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`
+  return val
+}
 
 async function carregarLeitores(params = {}) {
   loading.value = true
@@ -150,7 +169,8 @@ function montarParametrosBusca() {
   const params = {}
   if (filtroNome.value?.trim()) params['nome__icontains'] = filtroNome.value.trim()
   if (filtroEmail.value?.trim()) params['email__icontains'] = filtroEmail.value.trim()
-  if (filtroCidade.value?.trim()) params['cidade__icontains'] = filtroCidade.value.trim()
+  if (filtroCpf.value?.trim()) params['cpf__icontains'] = filtroCpf.value.trim()
+  if (filtroTelefone.value?.trim()) params['telefone__icontains'] = filtroTelefone.value.trim()
   if (filtroAtivo.value) params['ativo'] = true
   return params
 }
@@ -164,7 +184,8 @@ async function aplicarFiltros() {
 async function limparFiltros() {
   filtroNome.value = ''
   filtroEmail.value = ''
-  filtroCidade.value = ''
+  filtroCpf.value = ''
+  filtroTelefone.value = ''
   filtroAtivo.value = false
   await carregarLeitores()
   popoverBuscaRef.value?.hide()

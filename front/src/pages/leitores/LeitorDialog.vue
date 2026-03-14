@@ -33,6 +33,7 @@
                     <label for="leitor-email">E-mail</label>
                   </FloatLabel>
                 </div>
+                
               </div>
               <div class="dialog-row">
                 <div class="dialog-field">
@@ -84,8 +85,21 @@
                 </div>
                 <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
-                    <InputText id="leitor-cep" v-model="form.cep" class="dialog-input" maxlength="10" autocomplete="off" />
+                    <InputText
+                      id="leitor-cep"
+                      v-model="form.cep"
+                      class="dialog-input"
+                      maxlength="10"
+                      autocomplete="off"
+                      @blur="buscarCep"
+                    />
                     <label for="leitor-cep">CEP</label>
+                  </FloatLabel>
+                </div>
+                <div class="dialog-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
+                    <InputText id="leitor-numero" v-model="form.numero" class="dialog-input" autocomplete="off" />
+                    <label for="leitor-numero">Número</label>
                   </FloatLabel>
                 </div>
               </div>
@@ -95,25 +109,17 @@
                     <InputText id="leitor-endereco" v-model="form.endereco" class="dialog-input" autocomplete="off" />
                     <label for="leitor-endereco">Endereço</label>
                   </FloatLabel>
-                </div>                
-              </div>
-
-              <div class="dialog-row">
+                </div>                      
                 <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
                     <InputText id="leitor-complemento" v-model="form.complemento" class="dialog-input" autocomplete="off" />
                     <label for="leitor-complemento">Complemento</label>
                   </FloatLabel>
-                </div>
+                </div>         
               </div>
 
               <div class="dialog-row">
-                <div class="dialog-field">
-                  <FloatLabel variant="on" class="dialog-input-wrap">
-                    <InputText id="leitor-numero" v-model="form.numero" class="dialog-input" autocomplete="off" />
-                    <label for="leitor-numero">Número</label>
-                  </FloatLabel>
-                </div>
+
                 <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
                     <InputText id="leitor-bairro" v-model="form.bairro" class="dialog-input" autocomplete="off" />
@@ -134,6 +140,7 @@
                 </div>
               </div>
               <div class="dialog-row">
+
                 <div class="dialog-field dialog-field--checkbox">
                   <div class="dialog-input-wrap dialog-input-wrap--inline dialog-checkbox-wrap">
                     <Checkbox id="leitor-ativo" v-model="form.ativo" :binary="true" inputId="leitor-ativo" />
@@ -170,20 +177,35 @@
                   </div>
                   <div class="dialog-field dialog-autor-field">
                     <FloatLabel variant="on" class="dialog-input-wrap">
-                      <InputText id="emp-data-emp" v-model="emprestimoForm.data_emprestimo" class="dialog-input" type="datetime-local" />
+                      <DatePicker
+                        v-model="emprestimoForm.data_emprestimo"
+                        inputId="emp-data-emp"
+                        dateFormat="dd/mm/yy"
+                        showIcon
+                        iconDisplay="input"
+                        class="dialog-input"
+                      />
                       <label for="emp-data-emp">Data empréstimo</label>
                     </FloatLabel>
                   </div>
                   <div class="dialog-field dialog-autor-field">
                     <FloatLabel variant="on" class="dialog-input-wrap">
-                      <InputText id="emp-data-dev" v-model="emprestimoForm.data_devolucao" class="dialog-input" type="datetime-local" />
+                      <DatePicker
+                        v-model="emprestimoForm.data_devolucao"
+                        inputId="emp-data-dev"
+                        dateFormat="dd/mm/yy"
+                        showIcon
+                        iconDisplay="input"
+                        class="dialog-input"
+                      />
                       <label for="emp-data-dev">Data devolução</label>
                     </FloatLabel>
                   </div>
-                </div>
-                <div class="dialog-row dialog-autor-row">
+                  <div class="dialog-row dialog-autor-row">
                   <Button type="button" label="Salvar" size="small" class="dialog-autor-button" @click="salvarEmprestimo" />
                 </div>
+                </div>
+               
                 <BaseDataTable
                   :items="emprestimosLista"
                   :loading="loadingEmprestimos"
@@ -202,18 +224,18 @@
                     </Column>
                     <Column header="Data empréstimo">
                       <template #body="slotProps">
-                        {{ formatarData(slotProps.data.data_emprestimo) }}
+                        {{ formatarApenasData(slotProps.data.data_emprestimo) }}
                       </template>
                     </Column>
                     <Column header="Data devolução">
                       <template #body="slotProps">
-                        {{ formatarData(slotProps.data.data_devolucao) }}
+                        {{ formatarApenasData(slotProps.data.data_devolucao) }}
                       </template>
                     </Column>
                     <Column header="Ações" :style="{ width: '180px', maxWidth: '180px' }" bodyClass="dialog-col-acoes" headerClass="dialog-col-acoes">
                       <template #body="slotProps">
                         <div class="dialog-col-acoes">
-                          <Button label="Editar" severity="success" size="small" @click="editarEmprestimo(slotProps.data)" />
+                          <Button label="Editar" size="small" @click="editarEmprestimo(slotProps.data)" />
                           <Button label="Excluir" severity="danger" size="small" @click="abrirConfirmacaoExcluirEmprestimo(slotProps.data)" />
                         </div>
                       </template>
@@ -259,20 +281,35 @@
                   </div>
                   <div class="dialog-field dialog-autor-field">
                     <FloatLabel variant="on" class="dialog-input-wrap">
-                      <InputText id="res-data-reserva" v-model="reservaForm.data_reserva" class="dialog-input" type="datetime-local" />
+                      <DatePicker
+                        v-model="reservaForm.data_reserva"
+                        inputId="res-data-reserva"
+                        dateFormat="dd/mm/yy"
+                        showIcon
+                        iconDisplay="input"
+                        class="dialog-input"
+                      />
                       <label for="res-data-reserva">Data reserva</label>
                     </FloatLabel>
                   </div>
                   <div class="dialog-field dialog-autor-field">
                     <FloatLabel variant="on" class="dialog-input-wrap">
-                      <InputText id="res-data-exp" v-model="reservaForm.data_expiracao" class="dialog-input" type="datetime-local" />
+                      <DatePicker
+                        v-model="reservaForm.data_expiracao"
+                        inputId="res-data-exp"
+                        dateFormat="dd/mm/yy"
+                        showIcon
+                        iconDisplay="input"
+                        class="dialog-input"
+                      />
                       <label for="res-data-exp">Data expiração</label>
                     </FloatLabel>
+                  </div>                
+                  <div class="dialog-row dialog-autor-row">
+                    <Button type="button" label="Salvar" size="small" class="dialog-autor-button" @click="salvarReserva" />
                   </div>
                 </div>
-                <div class="dialog-row dialog-autor-row">
-                  <Button type="button" label="Salvar" size="small" class="dialog-autor-button" @click="salvarReserva" />
-                </div>
+
                 <BaseDataTable
                   :items="reservasLista"
                   :loading="loadingReservas"
@@ -291,18 +328,18 @@
                     </Column>
                     <Column header="Data reserva">
                       <template #body="slotProps">
-                        {{ formatarData(slotProps.data.data_reserva) }}
+                        {{ formatarApenasData(slotProps.data.data_reserva) }}
                       </template>
                     </Column>
                     <Column header="Data expiração">
                       <template #body="slotProps">
-                        {{ formatarData(slotProps.data.data_expiracao) }}
+                        {{ formatarApenasData(slotProps.data.data_expiracao) }}
                       </template>
                     </Column>
                     <Column header="Ações" :style="{ width: '180px', maxWidth: '180px' }" bodyClass="dialog-col-acoes" headerClass="dialog-col-acoes">
                       <template #body="slotProps">
                         <div class="dialog-col-acoes">
-                          <Button label="Editar" severity="success" size="small" @click="editarReserva(slotProps.data)" />
+                          <Button label="Editar" size="small" @click="editarReserva(slotProps.data)" />
                           <Button label="Excluir" severity="danger" size="small" @click="abrirConfirmacaoExcluirReserva(slotProps.data)" />
                         </div>
                       </template>
@@ -505,6 +542,37 @@ const recompensasFiltradas = computed(() => {
 })
 
 const toast = useToast()
+const loadingCep = ref(false)
+
+function normalizarCep(cep) {
+  if (!cep || typeof cep !== 'string') return ''
+  return cep.replace(/\D/g, '').slice(0, 8)
+}
+
+async function buscarCep() {
+  const cepLimpo = normalizarCep(form.value.cep)
+  if (cepLimpo.length !== 8) return
+  loadingCep.value = true
+  try {
+    const data = await leitorService.cep.consultar(cepLimpo)
+    if (data) {
+      form.value.endereco = data.endereco ?? form.value.endereco
+      form.value.complemento = data.complemento ?? form.value.complemento
+      form.value.bairro = data.bairro ?? form.value.bairro
+      form.value.cidade = data.cidade ?? form.value.cidade
+      form.value.estado = data.estado ?? form.value.estado
+      if (data.cep_formatado) form.value.cep = data.cep_formatado
+      toast.add({ severity: 'success', summary: 'Endereço preenchido', detail: 'CEP encontrado.', life: 2000 })
+    } else {
+      toast.add({ severity: 'warn', summary: 'CEP não encontrado', detail: 'Verifique o CEP e tente novamente.', life: 4000 })
+    }
+  } catch (e) {
+    const msg = e?.response?.data?.detail || e?.message || 'Erro ao consultar CEP.'
+    toast.add({ severity: 'error', summary: 'Erro ao buscar CEP', detail: msg, life: 5000 })
+  } finally {
+    loadingCep.value = false
+  }
+}
 
 function getFormDefault() {
   return {
@@ -529,11 +597,11 @@ function getFormDefault() {
 }
 
 function getEmprestimoFormDefault() {
-  return { livro: null, data_emprestimo: '', data_devolucao: '' }
+  return { livro: null, data_emprestimo: null, data_devolucao: null }
 }
 
 function getReservaFormDefault() {
-  return { livro: null, data_reserva: '', data_expiracao: '' }
+  return { livro: null, data_reserva: null, data_expiracao: null }
 }
 
 function preencherFormComLeitor(leitor) {
@@ -569,6 +637,13 @@ function formatarData(val) {
   const d = new Date(val)
   if (isNaN(d.getTime())) return String(val)
   return d.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+}
+
+function formatarApenasData(val) {
+  if (!val) return ''
+  const d = new Date(val)
+  if (isNaN(d.getTime())) return String(val)
+  return d.toLocaleDateString('pt-BR', { dateStyle: 'short' })
 }
 
 function nomeLivro(livroId) {
@@ -710,8 +785,8 @@ function editarEmprestimo(emp) {
   emprestimoEditandoId.value = emp.id
   emprestimoForm.value = {
     livro: emp.livro,
-    data_emprestimo: toDateTimeLocal(emp.data_emprestimo),
-    data_devolucao: toDateTimeLocal(emp.data_devolucao)
+    data_emprestimo: emp.data_emprestimo ? new Date(emp.data_emprestimo) : null,
+    data_devolucao: emp.data_devolucao ? new Date(emp.data_devolucao) : null
   }
 }
 
@@ -773,8 +848,8 @@ function editarReserva(res) {
   reservaEditandoId.value = res.id
   reservaForm.value = {
     livro: res.livro,
-    data_reserva: toDateTimeLocal(res.data_reserva),
-    data_expiracao: toDateTimeLocal(res.data_expiracao)
+    data_reserva: res.data_reserva ? new Date(res.data_reserva) : null,
+    data_expiracao: res.data_expiracao ? new Date(res.data_expiracao) : null
   }
 }
 

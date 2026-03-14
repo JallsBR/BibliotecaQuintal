@@ -4,6 +4,16 @@ const BASE = '/leitor'
 
 const leitorService = {
   // =========================
+  // --- CEP (ViaCEP) ---
+  // =========================
+  cep: {
+    consultar: async (cep) => {
+      const response = await api.get(`${BASE}/cep/`, { params: { cep } })
+      return response.data
+    }
+  },
+
+  // =========================
   // --- RECOMPENSAS ---
   // =========================
   recompensas: {

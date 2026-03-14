@@ -3,6 +3,9 @@ from . import views
 
 
 urlpatterns = [
+    # CEP (ViaCEP)
+    path("cep/", views.CepConsultaView.as_view(), name="cep-consulta"),
+
     # Recompensas
     path("recompensas/", views.RecompensaListCreateView.as_view(), name="recompensa-list-create"),
     path("recompensas/<int:pk>/", views.RecompensaRetrieveUpdateDestroyView.as_view(), name="recompensa-retrieve-update-destroy"),

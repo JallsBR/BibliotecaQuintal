@@ -2,3 +2,4 @@ from .recompensa import RecompensaListCreateView, RecompensaRetrieveUpdateDestro
 from .leitor import LeitorListCreateView, LeitorRetrieveUpdateDestroyView
 from .emprestimo import EmprestimoListCreateView, EmprestimoRetrieveUpdateDestroyView
 from .reserva import ReservaListCreateView, ReservaRetrieveUpdateDestroyView
+from .cep import CepConsultaView

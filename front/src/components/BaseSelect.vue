@@ -15,7 +15,12 @@ const attrs = useAttrs()
 
 const selectRef = ref(null)
 
-const selectProps = computed(() => attrs)
+const selectProps = computed(() => ({
+  filter: true,
+  filterPlaceholder: 'Buscar...',
+  filterMatchMode: 'contains',
+  ...attrs
+}))
 
 const selectListeners = {}
 

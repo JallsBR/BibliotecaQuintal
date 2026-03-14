@@ -18,6 +18,8 @@ class LeitorListCreateView(generics.ListCreateAPIView):
     filterset_fields = {
         "nome": ["exact", "icontains"],
         "email": ["exact", "icontains"],
+        "cpf": ["exact", "icontains"],
+        "telefone": ["exact", "icontains"],
         "ativo": ["exact"],
         "cidade": ["exact", "icontains"],
     }
