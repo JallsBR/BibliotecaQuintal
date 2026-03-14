@@ -30,10 +30,8 @@ def atualizar_livro_ao_emprestar_ou_devolver(sender, instance, created, **kwargs
         )
         return
 
-    # Atualização: se ainda não creditou pontuação, é a "devolução" (creditar + devolver livro)
-    if instance.pontuacao_creditada:
-        return
-    if not instance.data_devolucao:
+    # Devolução efetiva: só quando devolvido=True (e ainda não creditou pontuação)
+    if not instance.devolvido or instance.pontuacao_creditada:
         return
 
     # Devolver o livro: diminuir qtd_emprestados

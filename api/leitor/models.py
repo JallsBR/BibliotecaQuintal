@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.db import models
 from django.db.models import Sum
 from django.core.exceptions import ValidationError
@@ -84,7 +86,12 @@ class Emprestimo(models.Model):
     leitor = models.ForeignKey(Leitor, on_delete=models.CASCADE)
     livro = models.ForeignKey(Livro, on_delete=models.CASCADE)
     data_emprestimo = models.DateTimeField(default=timezone.now)
-    data_devolucao = models.DateTimeField(default=timezone.now)
+    data_devolucao = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text='Previsão de devolução; a devolução efetiva ocorre quando devolvido=True.'
+    )
+    devolvido = models.BooleanField(default=False)
     pontuacao_creditada = models.BooleanField(
         default=False,
         verbose_name='Pontuação já creditada ao leitor',
@@ -100,6 +107,12 @@ class Emprestimo(models.Model):
         verbose_name_plural = 'Emprestimos'
         ordering = ['data_emprestimo']
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            if not self.data_devolucao:
+                self.data_devolucao = self.data_emprestimo + timedelta(days=15)
+        super().save(*args, **kwargs)
+
     def clean(self):
         if self.livro and not self.livro.is_disponivel:
             raise ValidationError(
@@ -109,12 +122,12 @@ class Emprestimo(models.Model):
             raise ValidationError(
                 {"livro": "Não há exemplares disponíveis para empréstimo."}
             )
-        if self.data_devolucao < timezone.now():
-            raise ValidationError("A data de devolução não pode ser menor que a data atual.")
+        if self.data_devolucao and self.data_devolucao < self.data_emprestimo:
+            raise ValidationError("A data de devolução (previsão) não pode ser anterior à data de empréstimo.")
         if self.data_emprestimo < timezone.now():
             raise ValidationError("A data de empréstimo não pode ser menor que a data atual.")
-        if self.data_emprestimo > self.data_devolucao:
-            raise ValidationError("A data de empréstimo não pode ser maior que a data de devolução.")
+        if self.data_devolucao and self.data_emprestimo > self.data_devolucao:
+            raise ValidationError("A data de empréstimo não pode ser maior que a data de devolução (previsão).")
 
 
     def __str__(self):
@@ -125,7 +138,7 @@ class Reserva(models.Model):
     leitor = models.ForeignKey(Leitor, on_delete=models.CASCADE)
     livro = models.ForeignKey(Livro, on_delete=models.CASCADE)
     data_reserva = models.DateTimeField(default=timezone.now)
-    data_expiracao = models.DateTimeField(default=timezone.now)
+    data_expiracao = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
@@ -136,8 +149,13 @@ class Reserva(models.Model):
         verbose_name_plural = 'Reservas'
         ordering = ['data_reserva']
 
+    def save(self, *args, **kwargs):
+        if not self.pk and not self.data_expiracao:
+            self.data_expiracao = self.data_reserva + timedelta(days=15)
+        super().save(*args, **kwargs)
+
     def clean(self):
-        if self.data_expiracao < timezone.now():
+        if self.data_expiracao and self.data_expiracao < timezone.now():
             raise ValidationError("A data de expiração não pode ser menor que a data atual.")
         if self.data_reserva < timezone.now():
             raise ValidationError("A data de reserva não pode ser menor que a data atual.")

@@ -201,6 +201,10 @@
                       <label for="emp-data-dev">Data devolução</label>
                     </FloatLabel>
                   </div>
+                  <div class="dialog-field dialog-autor-field" style="max-width: 100px;">
+                      <Checkbox id="emp-devolvido" v-model="emprestimoForm.devolvido" :binary="true" inputId="emp-devolvido" />
+                      <label for="emp-devolvido">Devolvido</label>
+                  </div>
                   <div class="dialog-row dialog-autor-row">
                   <Button type="button" label="Salvar" size="small" class="dialog-autor-button" @click="salvarEmprestimo" />
                 </div>
@@ -230,6 +234,11 @@
                     <Column header="Data devolução">
                       <template #body="slotProps">
                         {{ formatarApenasData(slotProps.data.data_devolucao) }}
+                      </template>
+                    </Column>
+                    <Column header="Devolvido">
+                      <template #body="slotProps">
+                        {{ slotProps.data.devolvido ? 'Sim' : 'Não' }}
                       </template>
                     </Column>
                     <Column header="Ações" :style="{ width: '180px', maxWidth: '180px' }" bodyClass="dialog-col-acoes" headerClass="dialog-col-acoes">
@@ -604,7 +613,7 @@ function getFormDefault() {
 }
 
 function getEmprestimoFormDefault() {
-  return { livro: null, data_emprestimo: null, data_devolucao: null }
+  return { livro: null, data_emprestimo: null, data_devolucao: null, devolvido: false }
 }
 
 function getReservaFormDefault() {
@@ -774,11 +783,25 @@ async function salvarEmprestimo() {
     return
   }
   try {
+    const dataEmp = emprestimoForm.value.data_emprestimo
+      ? new Date(emprestimoForm.value.data_emprestimo)
+      : new Date()
+
+    let dataDev = emprestimoForm.value.data_devolucao
+      ? new Date(emprestimoForm.value.data_devolucao)
+      : null
+
+    // Se marcar como devolvido e não informar data_devolucao, usar agora
+    if (emprestimoForm.value.devolvido && !dataDev) {
+      dataDev = new Date()
+    }
+
     const payload = {
       leitor: leitorId.value,
       livro: emprestimoForm.value.livro,
-      data_emprestimo: emprestimoForm.value.data_emprestimo ? new Date(emprestimoForm.value.data_emprestimo).toISOString() : new Date().toISOString(),
-      data_devolucao: emprestimoForm.value.data_devolucao ? new Date(emprestimoForm.value.data_devolucao).toISOString() : new Date().toISOString()
+      data_emprestimo: dataEmp.toISOString(),
+      data_devolucao: dataDev ? dataDev.toISOString() : null,
+      devolvido: !!emprestimoForm.value.devolvido
     }
     if (emprestimoEditandoId.value) {
       await leitorService.emprestimos.update(emprestimoEditandoId.value, payload)
@@ -801,7 +824,8 @@ function editarEmprestimo(emp) {
   emprestimoForm.value = {
     livro: emp.livro,
     data_emprestimo: emp.data_emprestimo ? new Date(emp.data_emprestimo) : null,
-    data_devolucao: emp.data_devolucao ? new Date(emp.data_devolucao) : null
+    data_devolucao: emp.data_devolucao ? new Date(emp.data_devolucao) : null,
+    devolvido: !!emp.devolvido
   }
 }
 
