@@ -24,7 +24,7 @@
                 <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
                     <InputText id="leitor-nome" v-model="form.nome" class="dialog-input" autocomplete="off" />
-                    <label for="leitor-nome">Nome</label>
+                    <label for="leitor-nome">Nome <span class="dialog-required">*</span></label>
                   </FloatLabel>
                 </div>
                 <div class="dialog-field">
@@ -58,7 +58,7 @@
                 <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
                     <InputText id="leitor-telefone" v-model="form.telefone" class="dialog-input" autocomplete="off" />
-                    <label for="leitor-telefone">Telefone</label>
+                    <label for="leitor-telefone">Telefone <span class="dialog-required">*</span></label>
                   </FloatLabel>
                 </div>
               </div>
@@ -625,13 +625,12 @@ function preencherFormComLeitor(leitor) {
     form.value = getFormDefault()
     return
   }
-  const dataNasc = leitor.data_nascimento
-  const dataNascDate = !dataNasc ? null : dataNasc instanceof Date ? dataNasc : new Date(typeof dataNasc === 'string' ? dataNasc.slice(0, 10) : dataNasc)
+  const dataNasc = parseDateLocal(leitor.data_nascimento)
   form.value = {
     id: leitor.id,
     nome: leitor.nome ?? '',
     email: leitor.email ?? '',
-    data_nascimento: dataNascDate,
+    data_nascimento: dataNasc,
     cpf: leitor.cpf ?? '',
     telefone: leitor.telefone ?? '',
     sexo: normalizarSexo(leitor.sexo) ?? '',
@@ -648,6 +647,26 @@ function preencherFormComLeitor(leitor) {
   }
 }
 
+/** Converte Date ou string para YYYY-MM-DD (apenas data para a API). */
+function toDateOnly(val) {
+  if (!val) return null
+  const d = val instanceof Date ? val : new Date(val)
+  if (isNaN(d.getTime())) return null
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+/** Parse da API (YYYY-MM-DD ou ISO) para Date em horário local (evita deslocamento no DatePicker). */
+function parseDateLocal(val) {
+  if (!val) return null
+  if (val instanceof Date) return val
+  const s = typeof val === 'string' ? val.slice(0, 10) : val
+  const [y, m, d] = String(s).split('-').map(Number)
+  if (!y || !m || !d) return null
+  const date = new Date(y, m - 1, d)
+  return isNaN(date.getTime()) ? null : date
+}
+
 function formatarData(val) {
   if (!val) return ''
   const d = new Date(val)
@@ -657,7 +676,7 @@ function formatarData(val) {
 
 function formatarApenasData(val) {
   if (!val) return ''
-  const d = new Date(val)
+  const d = parseDateLocal(val) || new Date(val)
   if (isNaN(d.getTime())) return String(val)
   return d.toLocaleDateString('pt-BR', { dateStyle: 'short' })
 }
@@ -745,14 +764,24 @@ function limparFormulario() {
 }
 
 function salvar() {
-  const dataNasc = form.value.data_nascimento
-  const dataNascStr = dataNasc instanceof Date ? dataNasc.toISOString().slice(0, 10) : (dataNasc || null)
+  const nome = (form.value.nome || '').trim()
+  const telefone = (form.value.telefone || '').trim()
+  if (!nome || !telefone) {
+    toast.add({
+      severity: 'warn',
+      summary: 'Campos obrigatórios',
+      detail: 'Informe pelo menos o nome e o telefone do leitor.',
+      life: 3000
+    })
+    return
+  }
+  const dataNascStr = toDateOnly(form.value.data_nascimento)
   const payload = {
-    nome: form.value.nome || null,
+    nome: nome || null,
     email: form.value.email || null,
     data_nascimento: dataNascStr,
     cpf: form.value.cpf || null,
-    telefone: form.value.telefone || null,
+    telefone: telefone || null,
     sexo: normalizarSexo(form.value.sexo) || null,
     profissao: form.value.profissao || null,
     endereco: form.value.endereco || null,
@@ -783,24 +812,15 @@ async function salvarEmprestimo() {
     return
   }
   try {
-    const dataEmp = emprestimoForm.value.data_emprestimo
-      ? new Date(emprestimoForm.value.data_emprestimo)
-      : new Date()
-
-    let dataDev = emprestimoForm.value.data_devolucao
-      ? new Date(emprestimoForm.value.data_devolucao)
-      : null
-
-    // Se marcar como devolvido e não informar data_devolucao, usar agora
-    if (emprestimoForm.value.devolvido && !dataDev) {
-      dataDev = new Date()
-    }
+    const dataEmp = emprestimoForm.value.data_emprestimo || new Date()
+    let dataDev = emprestimoForm.value.data_devolucao || null
+    if (emprestimoForm.value.devolvido && !dataDev) dataDev = new Date()
 
     const payload = {
       leitor: leitorId.value,
       livro: emprestimoForm.value.livro,
-      data_emprestimo: dataEmp.toISOString(),
-      data_devolucao: dataDev ? dataDev.toISOString() : null,
+      data_emprestimo: toDateOnly(dataEmp),
+      data_devolucao: dataDev ? toDateOnly(dataDev) : null,
       devolvido: !!emprestimoForm.value.devolvido
     }
     if (emprestimoEditandoId.value) {
@@ -815,7 +835,21 @@ async function salvarEmprestimo() {
     await carregarEmprestimos()
   } catch (e) {
     console.error('Erro ao salvar empréstimo:', e)
-    toast.add({ severity: 'error', summary: 'Erro ao salvar empréstimo', detail: e?.response?.data?.detail || 'Não foi possível salvar.', life: 5000 })
+    const data = e?.response?.data
+    let detail = 'Não foi possível salvar.'
+    if (data) {
+      if (Array.isArray(data.non_field_errors) && data.non_field_errors.length) {
+        detail = data.non_field_errors[0]
+      } else if (data.detail) {
+        detail = Array.isArray(data.detail) ? data.detail[0] : data.detail
+      } else {
+        const firstKey = Object.keys(data)[0]
+        const val = firstKey && data[firstKey]
+        if (Array.isArray(val) && val.length) detail = val[0]
+        else if (typeof val === 'string') detail = val
+      }
+    }
+    toast.add({ severity: 'error', summary: 'Erro ao salvar empréstimo', detail, life: 5000 })
   }
 }
 
@@ -823,8 +857,8 @@ function editarEmprestimo(emp) {
   emprestimoEditandoId.value = emp.id
   emprestimoForm.value = {
     livro: emp.livro,
-    data_emprestimo: emp.data_emprestimo ? new Date(emp.data_emprestimo) : null,
-    data_devolucao: emp.data_devolucao ? new Date(emp.data_devolucao) : null,
+    data_emprestimo: parseDateLocal(emp.data_emprestimo),
+    data_devolucao: parseDateLocal(emp.data_devolucao),
     devolvido: !!emp.devolvido
   }
 }
@@ -861,11 +895,12 @@ async function salvarReserva() {
     return
   }
   try {
+    const hoje = new Date()
     const payload = {
       leitor: leitorId.value,
       livro: reservaForm.value.livro,
-      data_reserva: reservaForm.value.data_reserva ? new Date(reservaForm.value.data_reserva).toISOString() : new Date().toISOString(),
-      data_expiracao: reservaForm.value.data_expiracao ? new Date(reservaForm.value.data_expiracao).toISOString() : new Date().toISOString()
+      data_reserva: toDateOnly(reservaForm.value.data_reserva) || toDateOnly(hoje),
+      data_expiracao: reservaForm.value.data_expiracao ? toDateOnly(reservaForm.value.data_expiracao) : null
     }
     if (reservaEditandoId.value) {
       await leitorService.reservas.update(reservaEditandoId.value, payload)
@@ -887,8 +922,8 @@ function editarReserva(res) {
   reservaEditandoId.value = res.id
   reservaForm.value = {
     livro: res.livro,
-    data_reserva: res.data_reserva ? new Date(res.data_reserva) : null,
-    data_expiracao: res.data_expiracao ? new Date(res.data_expiracao) : null
+    data_reserva: parseDateLocal(res.data_reserva),
+    data_expiracao: parseDateLocal(res.data_expiracao)
   }
 }
 
@@ -1055,6 +1090,9 @@ watch(tabAtiva, (valor) => {
   gap: 0.5rem;
 }
 
+.dialog-required {
+  color: var(--p-danger);
+}
 .dialog-checkbox-label {
   font-weight: 500;
 }

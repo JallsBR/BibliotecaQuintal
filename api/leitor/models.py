@@ -39,8 +39,8 @@ class Leitor(models.Model):
         validators=[MinValueValidator(0)],
         verbose_name='Pontuação total acumulada',
     )
-    email = models.EmailField(unique=True)
-    data_nascimento = models.DateField()
+    email = models.EmailField(unique=True, blank=True, null=True)
+    data_nascimento = models.DateField(blank=True, null=True) 
     sexo = models.CharField(max_length=10, blank=True, null=True, choices=[('M', 'Masculino'), ('F', 'Feminino'), ('O', 'Outro')])
     profissao = models.CharField(max_length=100, blank=True, null=True)
     telefone = models.CharField(max_length=20, blank=True, null=True, validators=[validate_telefone])
@@ -85,8 +85,8 @@ class Leitor(models.Model):
 class Emprestimo(models.Model):
     leitor = models.ForeignKey(Leitor, on_delete=models.CASCADE)
     livro = models.ForeignKey(Livro, on_delete=models.CASCADE)
-    data_emprestimo = models.DateTimeField(default=timezone.now)
-    data_devolucao = models.DateTimeField(
+    data_emprestimo = models.DateField(default=timezone.localdate)
+    data_devolucao = models.DateField(
         null=True,
         blank=True,
         help_text='Previsão de devolução; a devolução efetiva ocorre quando devolvido=True.'
@@ -114,17 +114,30 @@ class Emprestimo(models.Model):
         super().save(*args, **kwargs)
 
     def clean(self):
-        if self.livro and not self.livro.is_disponivel:
-            raise ValidationError(
-                {"livro": "Cadastre primeiro a devolução anterior."}
-            )
-        if self.livro and (self.livro.qtd_disponivel or 0) < 1:
-            raise ValidationError(
-                {"livro": "Não há exemplares disponíveis para empréstimo."}
-            )
+        # Validações de livro só ao EMPRESTAR (novo registro). Devolução (devolvido=True) sempre permitida.
+        if not self.pk and self.livro_id:
+            if not self.livro.ativo:
+                raise ValidationError(
+                    {"livro": "Livro inativo. Não pode ser emprestado."}
+                )
+            qtd_disponivel = self.livro.qtd_disponivel or 0
+            if qtd_disponivel < 1:
+                raise ValidationError(
+                    {"livro": "Não há exemplares disponíveis para empréstimo."}
+                )
+            reservas_ativas = Reserva.objects.filter(
+                livro_id=self.livro_id,
+                ativo=True,
+                data_expiracao__gte=timezone.localdate(),
+            ).count()
+            # Bloqueia se há reservas que já "ocupam" os exemplares disponíveis (prioridade para quem reservou)
+            if reservas_ativas >= qtd_disponivel:
+                raise ValidationError(
+                    {"livro": "Livro em reserva. Priorize a entrega para quem reservou."}
+                )
         if self.data_devolucao and self.data_devolucao < self.data_emprestimo:
             raise ValidationError("A data de devolução (previsão) não pode ser anterior à data de empréstimo.")
-        if self.data_emprestimo < timezone.now():
+        if self.data_emprestimo and self.data_emprestimo < timezone.localdate():
             raise ValidationError("A data de empréstimo não pode ser menor que a data atual.")
         if self.data_devolucao and self.data_emprestimo > self.data_devolucao:
             raise ValidationError("A data de empréstimo não pode ser maior que a data de devolução (previsão).")
@@ -137,8 +150,12 @@ class Emprestimo(models.Model):
 class Reserva(models.Model):
     leitor = models.ForeignKey(Leitor, on_delete=models.CASCADE)
     livro = models.ForeignKey(Livro, on_delete=models.CASCADE)
-    data_reserva = models.DateTimeField(default=timezone.now)
-    data_expiracao = models.DateTimeField(null=True, blank=True)
+    data_reserva = models.DateField(default=timezone.localdate)
+    data_expiracao = models.DateField(
+        null=True,
+        blank=True,
+        help_text='Se não informada, será preenchida automaticamente com data_reserva + 15 dias.'
+    )
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
@@ -150,16 +167,16 @@ class Reserva(models.Model):
         ordering = ['data_reserva']
 
     def save(self, *args, **kwargs):
-        if not self.pk and not self.data_expiracao:
+        if not self.pk and self.data_reserva and not self.data_expiracao:
             self.data_expiracao = self.data_reserva + timedelta(days=15)
         super().save(*args, **kwargs)
 
     def clean(self):
-        if self.data_expiracao and self.data_expiracao < timezone.now():
+        if self.data_expiracao and self.data_expiracao < timezone.localdate():
             raise ValidationError("A data de expiração não pode ser menor que a data atual.")
-        if self.data_reserva < timezone.now():
+        if self.data_reserva and self.data_reserva < timezone.localdate():
             raise ValidationError("A data de reserva não pode ser menor que a data atual.")
-        if self.data_reserva > self.data_expiracao:
+        if self.data_reserva and self.data_expiracao and self.data_reserva > self.data_expiracao:
             raise ValidationError("A data de reserva não pode ser maior que a data de expiração.")
 
     def __str__(self):

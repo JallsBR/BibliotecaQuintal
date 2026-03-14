@@ -46,7 +46,7 @@ class Editora(models.Model):
 
 class Livro(models.Model):
     titulo = models.CharField(max_length=200, unique=True)
-    descricao = models.TextField(blank=True)
+    descricao = models.TextField(blank=True, null=True)
     pontuacao = models.IntegerField(validators=[MinValueValidator(0)], verbose_name='Pontuação', blank=True, null=True)
     qtd_paginas = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='Quantidade de Páginas', blank=True, null=True)
     ano_publicacao = models.IntegerField(validators=[MinValueValidator(1900)], verbose_name='Ano de Publicação', blank=True, null=True  )
@@ -69,7 +69,7 @@ class Livro(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Atualizado em')
 
     def __str__(self):
-        return self.titulo  -{self.autor} -{self.editora} -{self.categoria}
+        return f"{self.titulo} - {self.autor} - {self.editora} - {self.categoria}"
 
     @property
     def qtd_disponivel(self):

@@ -24,6 +24,13 @@ class EmprestimoSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'updated_at']
 
+    def validate(self, attrs):
+        instance = self.instance if self.instance else Emprestimo()
+        for key, value in attrs.items():
+            setattr(instance, key, value)
+        instance.clean()
+        return attrs
+
 class ReservaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reserva
