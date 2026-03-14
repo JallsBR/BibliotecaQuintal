@@ -6,7 +6,7 @@
     :style="{ width: '65rem' }"
     :contentStyle="{ overflow: 'visible' }"
     @hide="limparFormulario"
-    @show="carregarOpcoes"
+    @show="aoAbrirDialog"
   >
     <div class="dialog-body">
       <Tabs v-model:value="tabAtiva" class="dialog-tabs">
@@ -487,6 +487,13 @@ const opcoesSexo = [
   { value: 'O', label: 'Outro' }
 ]
 
+/** Normaliza sexo para o valor esperado pela API (M, F, O). Aceita label vindo do backend. */
+function normalizarSexo(val) {
+  if (val == null || val === '') return null
+  const labelToValue = { Masculino: 'M', Feminino: 'F', Outro: 'O' }
+  return labelToValue[val] ?? val
+}
+
 const leitorId = computed(() => props.leitor?.id ?? form.value.id ?? null)
 
 // Empréstimos
@@ -618,7 +625,7 @@ function preencherFormComLeitor(leitor) {
     data_nascimento: dataNascDate,
     cpf: leitor.cpf ?? '',
     telefone: leitor.telefone ?? '',
-    sexo: leitor.sexo ?? '',
+    sexo: normalizarSexo(leitor.sexo) ?? '',
     profissao: leitor.profissao ?? '',
     endereco: leitor.endereco ?? '',
     numero: leitor.numero ?? '',
@@ -650,6 +657,14 @@ function nomeLivro(livroId) {
   if (!livroId) return ''
   const livro = opcoesLivros.value.find((l) => l.id === livroId)
   return livro?.titulo ?? livroId
+}
+
+async function aoAbrirDialog() {
+  if (props.leitor) {
+    tabAtiva.value = 'leitor'
+    preencherFormComLeitor(props.leitor)
+  }
+  await carregarOpcoes()
 }
 
 async function carregarOpcoes() {
@@ -729,7 +744,7 @@ function salvar() {
     data_nascimento: dataNascStr,
     cpf: form.value.cpf || null,
     telefone: form.value.telefone || null,
-    sexo: form.value.sexo || null,
+    sexo: normalizarSexo(form.value.sexo) || null,
     profissao: form.value.profissao || null,
     endereco: form.value.endereco || null,
     numero: form.value.numero || null,

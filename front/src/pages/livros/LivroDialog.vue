@@ -110,8 +110,16 @@
                 </div>
                 <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
-                    <InputNumber id="livro-ano" v-model="form.ano_publicacao" class="dialog-input" :min="1900" :max="anoAtual" showButtons />
-                    <label for="livro-ano">Ano publicação</label>
+                    <InputNumber
+                    id="livro-ano"
+                    v-model="form.ano_publicacao"
+                    class="dialog-input"
+                    :min="1900"
+                    :max="anoAtual"
+                    :useGrouping="false"
+                    showButtons
+                  />
+                  <label for="livro-ano">Ano publicação</label>
                   </FloatLabel>
                 </div>
                 <div class="dialog-field">
@@ -122,17 +130,44 @@
                 </div>
               </div>
 
-              <!-- Qtd. disponível | Qtd. emprestados | Ativo -->
+              <!-- Qtd. total (editável) | Qtd. disponível (calculado) | Qtd. emprestados (calculado) | Ativo -->
               <div class="dialog-row">
                 <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
-                    <InputNumber id="livro-qtd-disponivel" v-model="form.qtd_disponivel" class="dialog-input" :min="0" showButtons />
+                    <InputNumber
+                      id="livro-qtd-total"
+                      v-model="form.qtd_total"
+                      class="dialog-input"
+                      :min="0"
+                      showButtons
+                      :useGrouping="false"
+                    />
+                    <label for="livro-qtd-total">Qtd. total</label>
+                  </FloatLabel>
+                </div>
+                <div class="dialog-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
+                    <InputNumber
+                      id="livro-qtd-disponivel"
+                      v-model="form.qtd_disponivel"
+                      class="dialog-input"
+                      :min="0"
+                      :useGrouping="false"
+                      disabled
+                    />
                     <label for="livro-qtd-disponivel">Qtd. disponível</label>
                   </FloatLabel>
                 </div>
                 <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
-                    <InputNumber id="livro-qtd-emprestados" v-model="form.qtd_emprestados" class="dialog-input" :min="0" showButtons />
+                    <InputNumber
+                      id="livro-qtd-emprestados"
+                      v-model="form.qtd_emprestados"
+                      class="dialog-input"
+                      :min="0"
+                      :useGrouping="false"
+                      disabled
+                    />
                     <label for="livro-qtd-emprestados">Qtd. emprestados</label>
                   </FloatLabel>
                 </div>
@@ -582,6 +617,7 @@ function getFormDefault() {
     pontuacao: null,
     qtd_paginas: null,
     ano_publicacao: null,
+    qtd_total: 1,
     qtd_disponivel: null,
     qtd_emprestados: null,
     idioma: '',
@@ -606,6 +642,7 @@ function preencherFormComLivro(livro) {
     pontuacao: livro.pontuacao ?? null,
     qtd_paginas: livro.qtd_paginas ?? null,
     ano_publicacao: livro.ano_publicacao ?? null,
+    qtd_total: livro.qtd_total ?? 1,
     qtd_disponivel: livro.qtd_disponivel ?? null,
     qtd_emprestados: livro.qtd_emprestados ?? null,
     idioma: livro.idioma ?? '',
@@ -981,8 +1018,7 @@ function salvar() {
     pontuacao: form.value.pontuacao ?? null,
     qtd_paginas: form.value.qtd_paginas ?? null,
     ano_publicacao: form.value.ano_publicacao ?? null,
-    qtd_disponivel: form.value.qtd_disponivel ?? null,
-    qtd_emprestados: form.value.qtd_emprestados ?? null,
+    qtd_total: form.value.qtd_total ?? 1,
     idioma: form.value.idioma || null,
     isbn: form.value.isbn || null,
     ativo: form.value.ativo ?? true,

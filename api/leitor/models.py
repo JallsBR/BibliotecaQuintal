@@ -1,6 +1,9 @@
 from django.db import models
+from django.db.models import Sum
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from users.models import User
+from users.validators import validate_cpf, validate_telefone
 from django.utils import timezone
 from livros.models import Livro
 
@@ -29,13 +32,16 @@ class Leitor(models.Model):
     nome = models.CharField(max_length=250)
     livros_lidos = models.ManyToManyField(Livro, blank=True)
     recompensas = models.ManyToManyField(Recompensa, blank=True)
-    pontuacao_atual = models.IntegerField(default=0)
-    pontuacao_total = models.IntegerField(default=0)
+    pontuacao_total = models.IntegerField(
+        default=0,
+        validators=[MinValueValidator(0)],
+        verbose_name='Pontuação total acumulada',
+    )
     email = models.EmailField(unique=True)
     data_nascimento = models.DateField()
     sexo = models.CharField(max_length=10, blank=True, null=True, choices=[('M', 'Masculino'), ('F', 'Feminino'), ('O', 'Outro')])
     profissao = models.CharField(max_length=100, blank=True, null=True)
-    telefone = models.CharField(max_length=20, blank=True, null=True)
+    telefone = models.CharField(max_length=20, blank=True, null=True, validators=[validate_telefone])
     endereco = models.CharField(max_length=250, blank=True, null=True)
     cidade = models.CharField(max_length=100, blank=True, null=True)
     estado = models.CharField(max_length=100, blank=True, null=True)
@@ -44,7 +50,7 @@ class Leitor(models.Model):
     numero = models.CharField(max_length=10, blank=True, null=True)
     complemento = models.CharField(max_length=100, blank=True, null=True)
     bairro = models.CharField(max_length=100, blank=True, null=True)
-    cpf = models.CharField(max_length=11, unique=True, blank=True, null=True)
+    cpf = models.CharField(max_length=11, unique=True, blank=True, null=True, validators=[validate_cpf])
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     ativo = models.BooleanField(default=True)
@@ -53,7 +59,23 @@ class Leitor(models.Model):
     class Meta:
         verbose_name = 'Leitor'
         verbose_name_plural = 'Leitores'
-        ordering = ['nome']    
+        ordering = ['nome']
+
+    @property
+    def pontuacao_atual(self):
+        """
+        Pontuação disponível = pontuacao_total - soma das pontuações das recompensas
+        que o leitor já recebeu. Nunca menor que zero.
+        """
+        total = self.pontuacao_total or 0
+        if not self.pk:
+            return max(0, total)
+        gasto = self.recompensas.aggregate(s=Sum('pontuacao'))['s'] or 0
+        return max(0, total - gasto)
+
+    def clean(self):
+        if self.pontuacao_total is not None and self.pontuacao_total < 0:
+            raise ValidationError({'pontuacao_total': 'A pontuação total não pode ser negativa.'})
 
     def __str__(self):
         return self.nome
@@ -63,6 +85,11 @@ class Emprestimo(models.Model):
     livro = models.ForeignKey(Livro, on_delete=models.CASCADE)
     data_emprestimo = models.DateTimeField(default=timezone.now)
     data_devolucao = models.DateTimeField(default=timezone.now)
+    pontuacao_creditada = models.BooleanField(
+        default=False,
+        verbose_name='Pontuação já creditada ao leitor',
+        help_text='Marcado quando a pontuação do livro foi somada ao pontuacao_total do leitor.'
+    )
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
@@ -77,6 +104,10 @@ class Emprestimo(models.Model):
         if self.livro and not self.livro.is_disponivel:
             raise ValidationError(
                 {"livro": "Cadastre primeiro a devolução anterior."}
+            )
+        if self.livro and (self.livro.qtd_disponivel or 0) < 1:
+            raise ValidationError(
+                {"livro": "Não há exemplares disponíveis para empréstimo."}
             )
         if self.data_devolucao < timezone.now():
             raise ValidationError("A data de devolução não pode ser menor que a data atual.")

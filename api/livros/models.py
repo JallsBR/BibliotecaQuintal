@@ -50,8 +50,13 @@ class Livro(models.Model):
     pontuacao = models.IntegerField(validators=[MinValueValidator(0)], verbose_name='Pontuação', blank=True, null=True)
     qtd_paginas = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='Quantidade de Páginas', blank=True, null=True)
     ano_publicacao = models.IntegerField(validators=[MinValueValidator(1900)], verbose_name='Ano de Publicação', blank=True, null=True  )
-    qtd_disponivel = models.IntegerField(validators=[MinValueValidator(0)], verbose_name='Quantidade Disponível', blank=True, null=True)
-    qtd_emprestados = models.IntegerField(validators=[MinValueValidator(0)], verbose_name='Quantidade Emprestados', blank=True, null=True)
+    qtd_total = models.IntegerField(
+        validators=[MinValueValidator(0)],
+        verbose_name='Quantidade total',
+        default=1,
+        help_text='Total de exemplares do livro na biblioteca.',
+    )
+    qtd_emprestados = models.IntegerField(validators=[MinValueValidator(0)], verbose_name='Quantidade Emprestados', default=0)
     is_disponivel = models.BooleanField(default=True, verbose_name='Disponível', blank=True, null=True)
     idioma = models.CharField(max_length=50, verbose_name='Idioma', blank=True, null=True)
     isbn = models.CharField(max_length=13, verbose_name='ISBN', blank=True, null=True)
@@ -66,22 +71,34 @@ class Livro(models.Model):
     def __str__(self):
         return self.titulo  -{self.autor} -{self.editora} -{self.categoria}
 
+    @property
+    def qtd_disponivel(self):
+        """Quantidade disponível = quantidade total - quantidade emprestados. Calculado dinamicamente."""
+        total = self.qtd_total if self.qtd_total is not None else 0
+        emp = self.qtd_emprestados if self.qtd_emprestados is not None else 0
+        return max(0, total - emp)
+
     def clean(self):
-        if self.qtd_disponivel > self.qtd_paginas:
-            raise ValidationError("A quantidade de livros disponíveis não pode ser maior que a quantidade de páginas.")
-        if self.ano_publicacao > timezone.now().year:
+        qtd_total = self.qtd_total if self.qtd_total is not None else 0
+        qtd_pag = self.qtd_paginas
+        ano = self.ano_publicacao
+        if self.qtd_total is not None and self.qtd_total < 0:
+            raise ValidationError("A quantidade total não pode ser menor que 0.")
+        if (self.qtd_emprestados or 0) < 0:
+            raise ValidationError("A quantidade de livros emprestados não pode ser menor que 0.")
+        disp = self.qtd_disponivel
+        if qtd_total > 0 and disp > qtd_total:
+            raise ValidationError("A quantidade disponível não pode ser maior que a quantidade total.")
+        if ano is not None and ano > timezone.now().year:
             raise ValidationError("O ano de publicação não pode ser maior que o ano atual.")
-        if self.qtd_paginas < 1:
+        if qtd_pag is not None and qtd_pag < 1:
             raise ValidationError("A quantidade de páginas não pode ser menor que 1.")
-        if self.ano_publicacao < 1900:
+        if ano is not None and ano < 1900:
             raise ValidationError("O ano de publicação não pode ser menor que 1900.")
-        if self.qtd_disponivel < 0:
-            raise ValidationError("A quantidade de livros disponíveis não pode ser menor que 0.")
     
     def save(self, *args, **kwargs):
-        # is_disponivel: False se qtd_disponivel == qtd_emprestados, True caso contrário
-        if self.qtd_disponivel is not None and self.qtd_emprestados is not None:
-            self.is_disponivel = (self.qtd_disponivel != self.qtd_emprestados)
+        if self.qtd_total is not None and self.qtd_emprestados is not None:
+            self.is_disponivel = (self.qtd_total - self.qtd_emprestados) > 0
         try:
             super().save(*args, **kwargs)
 

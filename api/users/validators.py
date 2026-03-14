@@ -1,6 +1,8 @@
 from django.core.exceptions import ValidationError
 
 def validate_cpf(value):
+        if value is None or (isinstance(value, str) and not value.strip()):
+            return
         # Remover pontuação
         cpf = ''.join(char for char in value if char.isdigit())        
         # Validar tamanho
@@ -31,6 +33,8 @@ def validate_cpf(value):
 
     
 def validate_telefone(value):
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return
     try:
         # Remover qualquer caractere que não seja dígito
         telefone = ''.join(char for char in value if char.isdigit())

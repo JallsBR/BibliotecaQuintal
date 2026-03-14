@@ -11,9 +11,9 @@ class RecompensaAdmin(admin.ModelAdmin):
 
 @admin.register(Leitor)
 class LeitorAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'pontuacao_atual', 'created_at', 'updated_at')
+    list_display = ('nome', 'pontuacao_atual', 'pontuacao_total', 'created_at', 'updated_at')
     search_fields = ('nome',)
-    ordering = ('pontuacao_atual', 'nome')
+    ordering = ('pontuacao_total', 'nome')
 
 
 @admin.register(Emprestimo)

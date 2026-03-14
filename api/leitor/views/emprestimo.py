@@ -20,6 +20,7 @@ class EmprestimoListCreateView(generics.ListCreateAPIView):
         "livro": ["exact"],
         "ativo": ["exact"],
         "data_emprestimo": ["exact", "gte", "lte"],
+        "data_devolucao": ["exact", "gte", "lte"],
     }
     ordering_fields = ["data_emprestimo", "data_devolucao", "created_at"]
     ordering = ["-data_emprestimo"]

@@ -11,7 +11,12 @@ class LeitorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Leitor
         fields = '__all__'
-        read_only_fields = ['created_at', 'updated_at'] 
+        read_only_fields = ['created_at', 'updated_at']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['pontuacao_atual'] = instance.pontuacao_atual
+        return data 
 
 class EmprestimoSerializer(serializers.ModelSerializer):
     class Meta:

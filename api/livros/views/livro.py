@@ -28,7 +28,7 @@ class LivroListCreateView(generics.ListCreateAPIView):
     ordering_fields = [
         "titulo",
         "ano_publicacao",
-        "qtd_disponivel",
+        "qtd_total",
         "created_at",
     ]
     ordering = ["titulo"]

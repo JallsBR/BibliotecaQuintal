@@ -213,9 +213,19 @@ async function onLeitorSalvo(payload) {
   }
 }
 
-function editarLeitor(leitor) {
-  leitorEditando.value = leitor
-  dialogVisible.value = true
+async function editarLeitor(leitor) {
+  if (!leitor?.id) return
+  loading.value = true
+  try {
+    const completo = await leitorService.leitores.getById(leitor.id)
+    leitorEditando.value = completo
+    dialogVisible.value = true
+  } catch (e) {
+    console.error('Erro ao carregar leitor:', e)
+    toast.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível carregar os dados do leitor.', life: 5000 })
+  } finally {
+    loading.value = false
+  }
 }
 
 function excluirLeitor(leitor) {
