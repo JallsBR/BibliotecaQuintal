@@ -24,6 +24,12 @@ class EmprestimoSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'updated_at']
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['leitor_nome'] = instance.leitor.nome if instance.leitor_id else ''
+        data['livro_titulo'] = instance.livro.titulo if instance.livro_id else ''
+        return data
+
     def validate(self, attrs):
         instance = self.instance if self.instance else Emprestimo()
         for key, value in attrs.items():
@@ -36,4 +42,10 @@ class ReservaSerializer(serializers.ModelSerializer):
         model = Reserva
         fields = '__all__'
         read_only_fields = ['created_at', 'updated_at']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['leitor_nome'] = instance.leitor.nome if instance.leitor_id else ''
+        data['livro_titulo'] = instance.livro.titulo if instance.livro_id else ''
+        return data
             

@@ -613,11 +613,11 @@ function getFormDefault() {
 }
 
 function getEmprestimoFormDefault() {
-  return { livro: null, data_emprestimo: null, data_devolucao: null, devolvido: false }
+  return { livro: null, data_emprestimo: new Date(), data_devolucao: null, devolvido: false }
 }
 
 function getReservaFormDefault() {
-  return { livro: null, data_reserva: null, data_expiracao: null }
+  return { livro: null, data_reserva: new Date(), data_expiracao: null }
 }
 
 function preencherFormComLeitor(leitor) {

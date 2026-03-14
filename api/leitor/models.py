@@ -137,7 +137,8 @@ class Emprestimo(models.Model):
                 )
         if self.data_devolucao and self.data_devolucao < self.data_emprestimo:
             raise ValidationError("A data de devolução (previsão) não pode ser anterior à data de empréstimo.")
-        if self.data_emprestimo and self.data_emprestimo < timezone.localdate():
+        # Só exige data_emprestimo >= hoje na criação; na atualização (ex.: marcar devolvido) permite datas passadas
+        if not self.pk and self.data_emprestimo and self.data_emprestimo < timezone.localdate():
             raise ValidationError("A data de empréstimo não pode ser menor que a data atual.")
         if self.data_devolucao and self.data_emprestimo > self.data_devolucao:
             raise ValidationError("A data de empréstimo não pode ser maior que a data de devolução (previsão).")
@@ -172,10 +173,12 @@ class Reserva(models.Model):
         super().save(*args, **kwargs)
 
     def clean(self):
-        if self.data_expiracao and self.data_expiracao < timezone.localdate():
-            raise ValidationError("A data de expiração não pode ser menor que a data atual.")
-        if self.data_reserva and self.data_reserva < timezone.localdate():
-            raise ValidationError("A data de reserva não pode ser menor que a data atual.")
+        # Só exige datas >= hoje na criação; na atualização (ex.: cancelar) permite datas passadas
+        if not self.pk:
+            if self.data_expiracao and self.data_expiracao < timezone.localdate():
+                raise ValidationError("A data de expiração não pode ser menor que a data atual.")
+            if self.data_reserva and self.data_reserva < timezone.localdate():
+                raise ValidationError("A data de reserva não pode ser menor que a data atual.")
         if self.data_reserva and self.data_expiracao and self.data_reserva > self.data_expiracao:
             raise ValidationError("A data de reserva não pode ser maior que a data de expiração.")
 

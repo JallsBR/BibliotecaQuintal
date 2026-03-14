@@ -19,6 +19,7 @@ class EmprestimoListCreateView(generics.ListCreateAPIView):
         "leitor": ["exact"],
         "livro": ["exact"],
         "ativo": ["exact"],
+        "devolvido": ["exact"],
         "data_emprestimo": ["exact", "gte", "lte"],
         "data_devolucao": ["exact", "gte", "lte"],
     }
