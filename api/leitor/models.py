@@ -33,7 +33,7 @@ class Leitor(models.Model):
     pontuacao_total = models.IntegerField(default=0)
     email = models.EmailField(unique=True)
     data_nascimento = models.DateField()
-    sexo = models.CharField(max_length=10, blank=True, null=True)
+    sexo = models.CharField(max_length=10, blank=True, null=True, choices=[('M', 'Masculino'), ('F', 'Feminino'), ('O', 'Outro')])
     profissao = models.CharField(max_length=100, blank=True, null=True)
     telefone = models.CharField(max_length=20, blank=True, null=True)
     endereco = models.CharField(max_length=250, blank=True, null=True)

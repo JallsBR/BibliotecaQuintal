@@ -64,7 +64,15 @@
               <div class="dialog-row">
                 <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
-                    <InputText id="leitor-sexo" v-model="form.sexo" class="dialog-input" autocomplete="off" />
+                    <BaseSelect
+                      v-model="form.sexo"
+                      inputId="leitor-sexo"
+                      :options="opcoesSexo"
+                      optionLabel="label"
+                      optionValue="value"
+                      showClear
+                      class="dialog-input"
+                    />
                     <label for="leitor-sexo">Sexo</label>
                   </FloatLabel>
                 </div>
@@ -74,6 +82,12 @@
                     <label for="leitor-profissao">Profissão</label>
                   </FloatLabel>
                 </div>
+                <div class="dialog-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
+                    <InputText id="leitor-cep" v-model="form.cep" class="dialog-input" maxlength="10" autocomplete="off" />
+                    <label for="leitor-cep">CEP</label>
+                  </FloatLabel>
+                </div>
               </div>
               <div class="dialog-row">
                 <div class="dialog-field">
@@ -81,19 +95,23 @@
                     <InputText id="leitor-endereco" v-model="form.endereco" class="dialog-input" autocomplete="off" />
                     <label for="leitor-endereco">Endereço</label>
                   </FloatLabel>
-                </div>
-                <div class="dialog-field">
-                  <FloatLabel variant="on" class="dialog-input-wrap">
-                    <InputText id="leitor-numero" v-model="form.numero" class="dialog-input" autocomplete="off" />
-                    <label for="leitor-numero">Número</label>
-                  </FloatLabel>
-                </div>
+                </div>                
               </div>
+
               <div class="dialog-row">
                 <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
                     <InputText id="leitor-complemento" v-model="form.complemento" class="dialog-input" autocomplete="off" />
                     <label for="leitor-complemento">Complemento</label>
+                  </FloatLabel>
+                </div>
+              </div>
+
+              <div class="dialog-row">
+                <div class="dialog-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
+                    <InputText id="leitor-numero" v-model="form.numero" class="dialog-input" autocomplete="off" />
+                    <label for="leitor-numero">Número</label>
                   </FloatLabel>
                 </div>
                 <div class="dialog-field">
@@ -102,8 +120,6 @@
                     <label for="leitor-bairro">Bairro</label>
                   </FloatLabel>
                 </div>
-              </div>
-              <div class="dialog-row">
                 <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
                     <InputText id="leitor-cidade" v-model="form.cidade" class="dialog-input" autocomplete="off" />
@@ -114,12 +130,6 @@
                   <FloatLabel variant="on" class="dialog-input-wrap">
                     <InputText id="leitor-estado" v-model="form.estado" class="dialog-input" autocomplete="off" />
                     <label for="leitor-estado">Estado</label>
-                  </FloatLabel>
-                </div>
-                <div class="dialog-field">
-                  <FloatLabel variant="on" class="dialog-input-wrap">
-                    <InputText id="leitor-cep" v-model="form.cep" class="dialog-input" maxlength="10" autocomplete="off" />
-                    <label for="leitor-cep">CEP</label>
                   </FloatLabel>
                 </div>
               </div>
@@ -433,6 +443,12 @@ const visibleModel = computed({
 const tabAtiva = ref('leitor')
 const form = ref(getFormDefault())
 const opcoesLivros = ref([])
+
+const opcoesSexo = [
+  { value: 'M', label: 'Masculino' },
+  { value: 'F', label: 'Feminino' },
+  { value: 'O', label: 'Outro' }
+]
 
 const leitorId = computed(() => props.leitor?.id ?? form.value.id ?? null)
 
