@@ -23,7 +23,14 @@
               <div class="dialog-row">
                 <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
-                    <InputText id="livro-isbn" v-model="form.isbn" class="dialog-input" maxlength="13" autocomplete="off" />
+                    <InputText
+                      id="livro-isbn"
+                      v-model="form.isbn"
+                      class="dialog-input"
+                      maxlength="13"
+                      autocomplete="off"
+                      @blur="buscarLivroPorIsbn"
+                    />
                     <label for="livro-isbn">ISBN</label>
                   </FloatLabel>
                 </div>
@@ -45,6 +52,7 @@
                       class="dialog-input"
                       display="chip"
                       showClear
+                      filter
                     />
                     <label for="livro-autores">Autores</label>
                   </FloatLabel>
@@ -89,6 +97,7 @@
                       class="dialog-input"
                       display="chip"
                       showClear
+                      filter
                     />
                     <label for="livro-categorias">Categorias</label>
                   </FloatLabel>
@@ -594,6 +603,7 @@ const confirmDeleteCategoriaMessage = computed(() => {
 })
 
 const toast = useToast()
+const loadingIsbn = ref(false)
 
 function onAutorSelectAreaClick(e) {
   const t = e.target
@@ -702,6 +712,127 @@ async function carregarOpcoes() {
       detail: 'Não foi possível carregar autores, editoras e categorias.',
       life: 5000
     })
+  }
+}
+
+function normalizarIsbn(valor) {
+  if (!valor || typeof valor !== 'string') return ''
+  return valor.replace(/\D/g, '').slice(0, 13)
+}
+
+async function buscarLivroPorIsbn() {
+  const isbnLimpo = normalizarIsbn(form.value.isbn)
+  if (!isbnLimpo) return
+
+  loadingIsbn.value = true
+  try {
+    const url = `https://openlibrary.org/api/books?bibkeys=ISBN:${isbnLimpo}&format=json&jscmd=data`
+    const response = await fetch(url)
+    if (!response.ok) {
+      throw new Error('Falha ao consultar dados do livro.')
+    }
+    const data = await response.json()
+    const key = `ISBN:${isbnLimpo}`
+    const livroApi = data[key]
+    if (!livroApi) {
+      toast.add({
+        severity: 'warn',
+        summary: 'Livro não encontrado',
+        detail: 'Nenhum livro encontrado para este ISBN na Open Library.',
+        life: 4000
+      })
+      return
+    }
+
+    // Título
+    if (!form.value.titulo) {
+      form.value.titulo = livroApi.title || form.value.titulo
+    }
+
+    // Número de páginas
+    if (!form.value.qtd_paginas && livroApi.number_of_pages) {
+      form.value.qtd_paginas = livroApi.number_of_pages
+    }
+
+    // Ano de publicação
+    if (!form.value.ano_publicacao && livroApi.publish_date) {
+      const matchAno = String(livroApi.publish_date).match(/(19|20)\d{2}/)
+      if (matchAno) {
+        form.value.ano_publicacao = Number(matchAno[0])
+      }
+    }
+
+    // Editora (primeira)
+    if (!form.value.editora && Array.isArray(livroApi.publishers) && livroApi.publishers.length > 0) {
+      const nomeEditora = livroApi.publishers[0]?.name || livroApi.publishers[0]
+      if (nomeEditora) {
+        let editoraExistente = editoras.value.find((e) => (e.nome || '').toLowerCase() === nomeEditora.toLowerCase())
+        if (!editoraExistente) {
+          try {
+            const criada = await livroService.editoras.create({ nome: nomeEditora })
+            await carregarEditoras()
+            // garante que dropdown de editora conheça a nova opção
+            opcoesEditoras.value = editoras.value
+            editoraExistente =
+              editoras.value.find((e) => e.id === criada.id) ||
+              editoras.value.find((e) => (e.nome || '').toLowerCase() === nomeEditora.toLowerCase()) ||
+              criada
+          } catch (e) {
+            console.error('Erro ao criar editora a partir do ISBN:', e)
+          }
+        }
+        if (editoraExistente?.id) {
+          form.value.editora = editoraExistente.id
+        }
+      }
+    }
+
+    // Autores (todos)
+    if (Array.isArray(livroApi.authors) && livroApi.authors.length > 0) {
+      const autoresIds = [...(form.value.autores || [])]
+      for (const autorObj of livroApi.authors) {
+        const nomeAutor = autorObj?.name || autorObj
+        if (!nomeAutor) continue
+
+        let existente = autores.value.find((a) => (a.nome || '').toLowerCase() === nomeAutor.toLowerCase())
+        if (!existente) {
+          try {
+            const criado = await livroService.autores.create({ nome: nomeAutor })
+            await carregarAutores()
+            // garante que multiselect de autores conheça o novo autor
+            autores.value = autores.value ?? []
+            existente =
+              autores.value.find((a) => a.id === criado.id) ||
+              autores.value.find((a) => (a.nome || '').toLowerCase() === nomeAutor.toLowerCase()) ||
+              criado
+          } catch (e) {
+            console.error('Erro ao criar autor a partir do ISBN:', e)
+          }
+        }
+        if (existente?.id && !autoresIds.includes(existente.id)) {
+          autoresIds.push(existente.id)
+        }
+      }
+      form.value.autores = autoresIds
+    }
+
+    toast.add({
+      severity: 'success',
+      summary: 'Dados carregados pelo ISBN',
+      detail: 'Informações do livro preenchidas a partir da Open Library.',
+      life: 3000
+    })
+  } catch (e) {
+    console.error('Erro ao buscar livro por ISBN:', e)
+    const msg = e?.message || 'Erro ao consultar dados do livro pelo ISBN.'
+    toast.add({
+      severity: 'error',
+      summary: 'Erro ao buscar ISBN',
+      detail: msg,
+      life: 5000
+    })
+  } finally {
+    loadingIsbn.value = false
   }
 }
 
