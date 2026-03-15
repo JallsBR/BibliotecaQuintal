@@ -9,6 +9,9 @@
         :totalRecords="totalRecords"
         :lazy="lazy"
         :reorderableColumns="reorderableColumns"
+        v-model:sortField="sortField"
+        v-model:sortOrder="sortOrder"
+        @sort="onSort"
         stripedRows
         showGridlines
         responsiveLayout="scroll"
@@ -69,11 +72,19 @@
     reorderableColumns: { type: Boolean, default: false }
   })
 
-  const emit = defineEmits(['rowClick', 'rowSelect', 'page', 'filterApply', 'filterClear'])
+  const emit = defineEmits(['rowClick', 'rowSelect', 'page', 'filterApply', 'filterClear', 'sort'])
 
   const selection = ref([])
   const expandedRows = ref({})
   const filters = ref({})
+  const sortField = ref(null)
+  const sortOrder = ref(1)
+
+  function onSort(event) {
+    if (props.lazy) {
+      emit('sort', event)
+    }
+  }
 
   const aplicarBusca = () => {
     emit('filterApply', filters.value)

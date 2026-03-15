@@ -248,7 +248,7 @@
                 class="dialog-autor-table"
               >
                 <template #columns>
-                  <Column field="nome" header="Autor" />
+                  <Column field="nome" header="Autor" sortable />
                   <Column
                     header="Ações"
                     :style="{ width: '180px', maxWidth: '180px' }"
@@ -343,7 +343,7 @@
                 class="dialog-autor-table"
               >
                 <template #columns>
-                  <Column field="nome" header="Editora" />
+                  <Column field="nome" header="Editora" sortable />
                   <Column
                     header="Ações"
                     :style="{ width: '180px', maxWidth: '180px' }"
@@ -438,7 +438,7 @@
                 class="dialog-autor-table"
               >
                 <template #columns>
-                  <Column field="nome" header="Categoria" />
+                  <Column field="nome" header="Categoria" sortable />
                   <Column
                     header="Ações"
                     :style="{ width: '180px', maxWidth: '180px' }"

@@ -56,16 +56,16 @@
         </Popover>
       </template>
       <template #columns>
-        <Column field="id" header="ID" :style="{ width: '75px', maxWidth: '75px' }" />
-        <Column field="nome" header="Nome" :style="{ width: '200px', maxWidth: '200px' }" />
-        <Column field="email" header="E-mail" />
-        <Column header="Telefone">
+        <Column field="id" header="ID" sortable :style="{ width: '75px', maxWidth: '75px' }" />
+        <Column field="nome" header="Nome" sortable :style="{ width: '200px', maxWidth: '200px' }" />
+        <Column field="email" header="E-mail" sortable />
+        <Column field="telefone" header="Telefone" sortable>
           <template #body="slotProps">
             {{ formatarTelefone(slotProps.data.telefone) }}
           </template>
         </Column>
-            <Column field="pontuacao_atual" header="Pontuação" :style="{ width: '100px', maxWidth: '100px' }" />
-        <Column header="Ativo" :style="{ width: '90px', maxWidth: '90px' }">
+        <Column field="pontuacao_atual" header="Pontuação" sortable :style="{ width: '100px', maxWidth: '100px' }" />
+        <Column field="ativo" header="Ativo" sortable :style="{ width: '90px', maxWidth: '90px' }">
           <template #body="slotProps">
             <span v-if="slotProps.data.ativo" class="p-tag p-tag-success">Sim</span>
             <span v-else class="p-tag p-tag-danger">Não</span>

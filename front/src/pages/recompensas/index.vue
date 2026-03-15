@@ -67,14 +67,14 @@
         </Popover>
       </template>
       <template #columns>
-        <Column field="nome" header="Nome" :style="{ width: '180px', maxWidth: '180px' }" />
-        <Column header="Descrição" :style="{ width: '280px', maxWidth: '280px' }">
+        <Column field="nome" header="Nome" sortable :style="{ width: '180px', maxWidth: '180px' }" />
+        <Column field="descricao" header="Descrição" sortable :style="{ width: '280px', maxWidth: '280px' }">
           <template #body="slotProps">
             {{ truncarDescricao(slotProps.data.descricao) }}
           </template>
         </Column>
-        <Column field="pontuacao" header="Pontuação" :style="{ width: '100px', maxWidth: '100px' }" />
-        <Column header="Ativo" :style="{ width: '90px', maxWidth: '90px' }">
+        <Column field="pontuacao" header="Pontuação" sortable :style="{ width: '100px', maxWidth: '100px' }" />
+        <Column field="ativo" header="Ativo" sortable :style="{ width: '90px', maxWidth: '90px' }">
           <template #body="slotProps">
             <span v-if="slotProps.data.ativo" class="p-tag p-tag-success">Sim</span>
             <span v-else class="p-tag p-tag-danger">Não</span>

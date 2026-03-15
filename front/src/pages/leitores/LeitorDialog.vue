@@ -221,22 +221,22 @@
                   class="dialog-autor-table"
                 >
                   <template #columns>
-                    <Column header="Livro">
+                    <Column field="livro" header="Livro" sortable>
                       <template #body="slotProps">
                         {{ nomeLivro(slotProps.data.livro) }}
                       </template>
                     </Column>
-                    <Column header="Data empréstimo">
+                    <Column field="data_emprestimo" header="Data empréstimo" sortable>
                       <template #body="slotProps">
                         {{ formatarApenasData(slotProps.data.data_emprestimo) }}
                       </template>
                     </Column>
-                    <Column header="Data devolução">
+                    <Column field="data_devolucao" header="Data devolução" sortable>
                       <template #body="slotProps">
                         {{ formatarApenasData(slotProps.data.data_devolucao) }}
                       </template>
                     </Column>
-                    <Column header="Devolvido">
+                    <Column field="devolvido" header="Devolvido" sortable>
                       <template #body="slotProps">
                         {{ slotProps.data.devolvido ? 'Sim' : 'Não' }}
                       </template>
@@ -330,17 +330,17 @@
                   class="dialog-autor-table"
                 >
                   <template #columns>
-                    <Column header="Livro">
+                    <Column field="livro" header="Livro" sortable>
                       <template #body="slotProps">
                         {{ nomeLivro(slotProps.data.livro) }}
                       </template>
                     </Column>
-                    <Column header="Data reserva">
+                    <Column field="data_reserva" header="Data reserva" sortable>
                       <template #body="slotProps">
                         {{ formatarApenasData(slotProps.data.data_reserva) }}
                       </template>
                     </Column>
-                    <Column header="Data expiração">
+                    <Column field="data_expiracao" header="Data expiração" sortable>
                       <template #body="slotProps">
                         {{ formatarApenasData(slotProps.data.data_expiracao) }}
                       </template>
@@ -431,10 +431,10 @@
                   class="dialog-autor-table"
                 >
                   <template #columns>
-                    <Column field="recompensa_nome" header="Nome" />
-                    <Column field="recompensa_descricao" header="Descrição" />
-                    <Column field="recompensa_pontuacao" header="Pontuação" :style="{ width: '100px', maxWidth: '100px' }" />
-                    <Column header="Data resgate" :style="{ width: '120px', maxWidth: '120px' }">
+                    <Column field="recompensa_nome" header="Nome" sortable />
+                    <Column field="recompensa_descricao" header="Descrição" sortable />
+                    <Column field="recompensa_pontuacao" header="Pontuação" sortable :style="{ width: '100px', maxWidth: '100px' }" />
+                    <Column field="data_resgate" header="Data resgate" sortable :style="{ width: '120px', maxWidth: '120px' }">
                       <template #body="slotProps">
                         {{ formatarApenasData(slotProps.data.data_resgate) }}
                       </template>

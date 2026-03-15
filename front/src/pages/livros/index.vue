@@ -102,26 +102,26 @@
         </Popover>
       </template>
       <template #columns>
-        <Column field="id" header="ID" :style="{ width: '75px', maxWidth: '75px' }" />
-        <Column field="titulo" header="Título" :style="{ width: '200px', maxWidth: '200px' }" />
-        <Column header="Autor">
+        <Column field="id" header="ID" sortable :style="{ width: '75px', maxWidth: '75px' }" />
+        <Column field="titulo" header="Título" sortable :style="{ width: '200px', maxWidth: '200px' }" />
+        <Column field="autor_nome" header="Autor" sortable>
           <template #body="slotProps">
             {{ slotProps.data.autor_nome ?? slotProps.data.autor?.nome ?? slotProps.data.autor ?? '' }}
           </template>
         </Column>
-        <Column header="Editora">
+        <Column field="editora_nome" header="Editora" sortable>
           <template #body="slotProps">
             {{ slotProps.data.editora_nome ?? slotProps.data.editora?.nome ?? slotProps.data.editora ?? '' }}
           </template>
         </Column>
-        <Column header="Categoria">
+        <Column field="categoria_nome" header="Categoria" sortable>
           <template #body="slotProps">
             {{ slotProps.data.categoria_nome ?? slotProps.data.categoria?.nome ?? slotProps.data.categoria ?? '' }}
           </template>
         </Column>
-        <Column field="qtd_paginas" header="Qtd Páginas" :style="{ width: '115px', maxWidth: '115px' }" />
-        <Column field="qtd_disponivel" header="Qtd Disponível" :style="{ width: '115px', maxWidth: '115px' }" />
-        <Column field="is_disponivel" header="Disponível" :style="{ width: '115px', maxWidth: '115px' }">
+        <Column field="qtd_paginas" header="Qtd Páginas" sortable :style="{ width: '115px', maxWidth: '115px' }" />
+        <Column field="qtd_disponivel" header="Qtd Disponível" sortable :style="{ width: '115px', maxWidth: '115px' }" />
+        <Column field="is_disponivel" header="Disponível" sortable :style="{ width: '115px', maxWidth: '115px' }">
           <template #body="slotProps">
             <span v-if="slotProps.data.is_disponivel" class="p-tag p-tag-success">Sim</span>
             <span v-else class="p-tag p-tag-danger">Não</span>

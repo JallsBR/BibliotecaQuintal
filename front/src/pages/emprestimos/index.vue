@@ -67,14 +67,14 @@
         </Popover>
       </template>
       <template #columns>
-        <Column field="leitor_nome" header="Leitor" />
-        <Column field="livro_titulo" header="Livro" />
-        <Column header="Data empréstimo">
+        <Column field="leitor_nome" header="Leitor" sortable />
+        <Column field="livro_titulo" header="Livro" sortable />
+        <Column field="data_emprestimo" header="Data empréstimo" sortable>
           <template #body="slotProps">
             {{ formatarData(slotProps.data.data_emprestimo) }}
           </template>
         </Column>
-        <Column header="Data devolução">
+        <Column field="data_devolucao" header="Data devolução" sortable>
           <template #body="slotProps">
             {{ formatarData(slotProps.data.data_devolucao) }}
           </template>
