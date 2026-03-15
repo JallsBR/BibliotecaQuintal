@@ -107,7 +107,7 @@ Base: `/api/v1/`
 - **REST_FRAMEWORK:** JWT auth, IsAuthenticated default, DjangoFilterBackend, PageNumberPagination (PAGE_SIZE=10)  
 - **CORS:** CORS_ALLOW_ALL_ORIGINS = True; CORS_ALLOWED_ORIGINS inclui localhost:5173 (Vue).  
 - **SIMPLE_JWT:** ACCESS_TOKEN_LIFETIME 5 min, REFRESH_TOKEN_LIFETIME 1 dia.  
-- **Database:** SQLite (db.sqlite3).  
+- **Database:** MySQL (variáveis de ambiente: DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT). Em Docker ver `docker-compose.yml`; local: porta 3308, banco `bibliotecaquintal`.  
 - **MEDIA:** MEDIA_ROOT, MEDIA_URL em uso para uploads (ex.: imagens de livros).
 
 ---
@@ -134,4 +134,7 @@ Base: `/api/v1/`
 
 ---
 
-*Última atualização: referência ao estado do backend Biblioteca Quintal (Django).*
+## Documentação relacionada
+
+- **README do projeto:** `README.md` (raiz) — como subir API e front.  
+- **Contexto do frontend:** `docs/ai/frontend-context.md` — Vue, rotas, serviços, store.

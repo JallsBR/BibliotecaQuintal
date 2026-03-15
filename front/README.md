@@ -1,5 +1,46 @@
-# Vue 3 + Vite
+# Biblioteca Quintal — Frontend
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Frontend do sistema Biblioteca Quintal: **Vue 3**, **Vite**, **PrimeVue**, **Vuex**, **Vue Router**. Comunica com a API Django em `http://localhost:8000` (dev com proxy).
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+Documentação de contexto para IA: `docs/ai/frontend-context.md` (na raiz do repositório).
+
+## Stack
+
+- Vue 3 (Composition API / `<script setup>`)
+- Vite 7
+- Vue Router 4
+- Vuex 4
+- PrimeVue 4 + PrimeIcons
+- Axios (API com interceptors e refresh JWT)
+
+## Desenvolvimento
+
+```bash
+npm install
+npm run dev
+```
+
+- App: http://localhost:5173  
+- Em `DEV` o front usa proxy para `/api/v1` (API na mesma máquina).
+
+## Scripts
+
+- `npm run dev` — servidor de desenvolvimento (Vite)
+- `npm run build` — build de produção
+- `npm run preview` — preview do build
+
+## Estrutura principal
+
+- `src/router/index.js` — rotas e guard de autenticação
+- `src/store/index.js` — Vuex (auth: user, token, login/logout)
+- `src/services/APIService.js` — cliente Axios, baseURL, interceptors (Bearer + refresh)
+- `src/services/livroService.js`, `leitorService.js` — chamadas à API por domínio
+- `src/pages/` — páginas: home, livros, leitores, empréstimos, reservas, recompensas, auth (signin/signup/logout)
+- `src/layouts/` — AuthLayout (app autenticada), PublicLayout (login/signup)
+- `src/components/` — NavBar, FooterApp, BaseDataTable, BaseSelect, BaseConfirmDialog, AuthUserCard
+
+## Autenticação
+
+- Login em `/signin`; rotas em `/` exigem autenticação (meta `requiresAuth`).
+- Token JWT em `localStorage` (access + refresh); refresh automático no interceptor em 401.
+- Logout limpa store e localStorage e redireciona para `/signin`.

@@ -45,9 +45,10 @@
                   </FloatLabel>
                 </div>
 
-                <div class="dialog-field" @click="onAutorSelectAreaClick">
+                <div class="dialog-field" @click="onEditoraSelectAreaClick">
                   <FloatLabel variant="on" class="dialog-input-wrap">
                     <Select
+                      ref="selectEditoraRef"
                       id="livro-editora"
                       v-model="form.editora"
                       :options="opcoesEditoras"
@@ -536,6 +537,7 @@ const tabAtiva = ref('livro')
 const popoverPesquisaAutorRef = ref(null)
 const filtroPesquisaAutor = ref('')
 const selectAutorRef = ref(null)
+const selectEditoraRef = ref(null)
 
 const confirmDeleteAutorVisible = ref(false)
 const confirmDeleteAutorLoading = ref(false)
@@ -587,6 +589,13 @@ function onAutorSelectAreaClick(e) {
   const isInput = t.tagName === 'INPUT'
   const isComboboxSpan = t.tagName === 'SPAN' && t.getAttribute('role') === 'combobox'
   if (isInput || isComboboxSpan) selectAutorRef.value?.show(true)
+}
+
+function onEditoraSelectAreaClick(e) {
+  const t = e.target
+  const isInput = t.tagName === 'INPUT'
+  const isComboboxSpan = t.tagName === 'SPAN' && t.getAttribute('role') === 'combobox'
+  if (isInput || isComboboxSpan) selectEditoraRef.value?.show(true)
 }
 
 const autoresFiltrados = computed(() => {
