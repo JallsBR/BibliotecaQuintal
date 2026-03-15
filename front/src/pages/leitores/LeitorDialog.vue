@@ -5,7 +5,7 @@
     header="Leitor"
     :style="{ width: '65rem' }"
     :contentStyle="{ overflow: 'visible' }"
-    @hide="limparFormulario"
+    @hide="aoFechar"
     @show="aoAbrirDialog"
   >
     <div class="dialog-body">
@@ -371,78 +371,96 @@
             </div>
           </TabPanel>
 
-          <!-- Tab Recompensas (CRUD de recompensas, como Autor no LivroDialog) -->
+          <!-- Tab Recompensas: resgates do leitor (recompensa + data do resgate) -->
           <TabPanel value="recompensas">
             <div class="dialog-autor">
-              <div class="dialog-row dialog-autor-row" style="margin-top: 1rem;">
-                <div class="dialog-field dialog-autor-field">
-                  <FloatLabel variant="on" class="dialog-input-wrap">
-                    <InputText id="rec-nome" v-model="recompensaForm.nome" class="dialog-input" />
-                    <label for="rec-nome">Nome</label>
-                  </FloatLabel>
-                </div>
-                <div class="dialog-field dialog-autor-field">
-                  <FloatLabel variant="on" class="dialog-input-wrap">
-                    <InputText id="rec-descricao" v-model="recompensaForm.descricao" class="dialog-input" />
-                    <label for="rec-descricao">Descrição</label>
-                  </FloatLabel>
-                </div>
-                <div class="dialog-field dialog-autor-field">
-                  <FloatLabel variant="on" class="dialog-input-wrap">
-                    <InputNumber id="rec-pontuacao" v-model="recompensaForm.pontuacao" class="dialog-input" :min="0" />
-                    <label for="rec-pontuacao">Pontuação</label>
-                  </FloatLabel>
-                </div>
-                <Button type="button" label="Salvar" size="small" class="dialog-autor-button" @click="salvarRecompensa" />
-                <Button type="button" label="Buscar" icon="pi pi-search" size="small" class="dialog-autor-button" @click="(e) => popoverPesquisaRecompensaRef?.toggle(e)" />
-                <Popover ref="popoverPesquisaRecompensaRef">
-                  <div class="dialog-popover-pesquisa">
+              <p v-if="!leitorId" class="texto-aviso">Salve o leitor antes de cadastrar resgates de recompensa.</p>
+              <template v-else>
+                <div class="dialog-row dialog-autor-row" style="margin-top: 1rem;">
+                  <div class="dialog-field dialog-autor-field">
                     <FloatLabel variant="on" class="dialog-input-wrap">
-                      <InputText id="pesquisa-recompensa" v-model="filtroPesquisaRecompensa" class="dialog-input" autocomplete="off" />
-                      <label for="pesquisa-recompensa">Pesquisar recompensa</label>
+                      <BaseSelect
+                        id="resgate-recompensa"
+                        v-model="recompensaResgateForm.recompensa"
+                        :options="recompensasFiltradas"
+                        optionLabel="nome"
+                        optionValue="id"
+                        showClear
+                        placeholder="Selecione a recompensa"
+                        class="dialog-input"
+                      />
+
                     </FloatLabel>
-                    <div class="dialog-popover-actions">
-                      <Button type="button" label="Limpar" severity="secondary" size="small" @click="limparPesquisaRecompensa" />
-                    </div>
                   </div>
-                </Popover>
-              </div>
-              <BaseDataTable
-                :items="recompensasFiltradas"
-                :loading="loadingRecompensas"
-                dataKey="id"
-                :totalRecords="recompensasFiltradas.length"
-                :rows="recompensasRows"
-                :lazy="false"
-                :reorderableColumns="false"
-                class="dialog-autor-table"
-              >
-                <template #columns>
-                  <Column field="nome" header="Nome" />
-                  <Column field="descricao" header="Descrição" />
-                  <Column field="pontuacao" header="Pontuação" :style="{ width: '100px', maxWidth: '100px' }" />
-                  <Column header="Ações" :style="{ width: '180px', maxWidth: '180px' }" bodyClass="dialog-col-acoes" headerClass="dialog-col-acoes">
-                    <template #body="slotProps">
-                      <div class="dialog-col-acoes">
-                        <Button label="Editar" severity="success" size="small" @click="editarRecompensa(slotProps.data)" />
-                        <Button label="Excluir" severity="danger" size="small" @click="abrirConfirmacaoExcluirRecompensa(slotProps.data)" />
+                  <div class="dialog-field dialog-autor-field">
+                    <FloatLabel variant="on" class="dialog-input-wrap">
+                      <DatePicker
+                        id="resgate-data"
+                        v-model="recompensaResgateForm.data_resgate"
+                        dateFormat="dd/mm/yy"
+                        showIcon
+                        iconDisplay="input"
+                        class="dialog-input"
+                      />
+                      <label for="resgate-data">Data do resgate</label>
+                    </FloatLabel>
+                  </div>
+                  <Button type="button" :label="resgateEditandoId ? 'Atualizar' : 'Resgatar'" size="small" class="dialog-autor-button" @click="salvarRecompensaResgate" />
+                  <Button v-if="resgateEditandoId" type="button" label="Cancelar" severity="secondary" size="small" class="dialog-autor-button" @click="cancelarEdicaoResgate" />
+                  <Button type="button" label="Buscar" icon="pi pi-search" size="small" class="dialog-autor-button" @click="(e) => popoverPesquisaRecompensaRef?.toggle(e)" />
+                  <Popover ref="popoverPesquisaRecompensaRef">
+                    <div class="dialog-popover-pesquisa">
+                      <FloatLabel variant="on" class="dialog-input-wrap">
+                        <InputText id="pesquisa-recompensa" v-model="filtroPesquisaRecompensa" class="dialog-input" autocomplete="off" />
+                        <label for="pesquisa-recompensa">Pesquisar recompensa</label>
+                      </FloatLabel>
+                      <div class="dialog-popover-actions">
+                        <Button type="button" label="Limpar" severity="secondary" size="small" @click="limparPesquisaRecompensa" />
                       </div>
-                    </template>
-                  </Column>
-                </template>
-              </BaseDataTable>
-              <BaseConfirmDialog
-                :visible="confirmDeleteRecompensaVisible"
-                title="Excluir recompensa"
-                :message="confirmDeleteRecompensaMessage"
-                confirmLabel="Excluir"
-                cancelLabel="Cancelar"
-                confirmSeverity="danger"
-                :loading="confirmDeleteRecompensaLoading"
-                @update:visible="(v) => (confirmDeleteRecompensaVisible = v)"
-                @confirm="confirmarExclusaoRecompensa"
-                @cancel="cancelarExclusaoRecompensa"
-              />
+                    </div>
+                  </Popover>
+                </div>
+                <BaseDataTable
+                  :items="recompensasResgatadasLista"
+                  :loading="loadingRecompensasResgatadas"
+                  dataKey="id"
+                  :totalRecords="recompensasResgatadasLista.length"
+                  :rows="recompensasRows"
+                  :lazy="false"
+                  :reorderableColumns="false"
+                  class="dialog-autor-table"
+                >
+                  <template #columns>
+                    <Column field="recompensa_nome" header="Nome" />
+                    <Column field="recompensa_descricao" header="Descrição" />
+                    <Column field="recompensa_pontuacao" header="Pontuação" :style="{ width: '100px', maxWidth: '100px' }" />
+                    <Column header="Data resgate" :style="{ width: '120px', maxWidth: '120px' }">
+                      <template #body="slotProps">
+                        {{ formatarApenasData(slotProps.data.data_resgate) }}
+                      </template>
+                    </Column>
+                    <Column header="Ações" :style="{ width: '160px', maxWidth: '160px' }" bodyClass="dialog-col-acoes" headerClass="dialog-col-acoes">
+                      <template #body="slotProps">
+                        <div class="dialog-col-acoes">                          
+                          <Button label="Excluir" severity="danger" size="small" @click="abrirConfirmacaoExcluirResgate(slotProps.data)" />
+                        </div>
+                      </template>
+                    </Column>
+                  </template>
+                </BaseDataTable>
+                <BaseConfirmDialog
+                  :visible="confirmDeleteResgateVisible"
+                  title="Excluir resgate"
+                  :message="confirmDeleteResgateMessage"
+                  confirmLabel="Excluir"
+                  cancelLabel="Cancelar"
+                  confirmSeverity="danger"
+                  :loading="confirmDeleteResgateLoading"
+                  @update:visible="(v) => (confirmDeleteResgateVisible = v)"
+                  @confirm="confirmarExclusaoResgate"
+                  @cancel="cancelarExclusaoResgate"
+                />
+              </template>
             </div>
           </TabPanel>
         </TabPanels>
@@ -479,7 +497,7 @@ const props = defineProps({
   leitor: { type: Object, default: null }
 })
 
-const emit = defineEmits(['update:visible', 'save'])
+const emit = defineEmits(['update:visible', 'save', 'hide'])
 
 const visibleModel = computed({
   get: () => props.visible,
@@ -533,29 +551,35 @@ const confirmDeleteReservaMessage = computed(() => {
   return 'Excluir esta reserva?'
 })
 
-// Recompensas
-const recompensas = ref([])
-const loadingRecompensas = ref(false)
+// Recompensas: catálogo (para seleção) e resgates do leitor
+const opcoesRecompensas = ref([])
+const recompensasResgatadasLista = ref([])
+const loadingRecompensasResgatadas = ref(false)
+const loadingCatalogoRecompensas = ref(false)
 const recompensasRows = 10
-const recompensaEditandoId = ref(null)
-const recompensaForm = ref({ nome: '', descricao: '', pontuacao: 0 })
+const resgateEditandoId = ref(null)
+const recompensaResgateForm = ref(getRecompensaResgateFormDefault())
 const popoverPesquisaRecompensaRef = ref(null)
 const filtroPesquisaRecompensa = ref('')
 
-const confirmDeleteRecompensaVisible = ref(false)
-const confirmDeleteRecompensaLoading = ref(false)
-const recompensaParaExcluir = ref(null)
-const confirmDeleteRecompensaMessage = computed(() => {
-  if (!recompensaParaExcluir.value) return 'Confirma a exclusão desta recompensa?'
-  return `Excluir a recompensa ${recompensaParaExcluir.value.nome}?`
+const confirmDeleteResgateVisible = ref(false)
+const confirmDeleteResgateLoading = ref(false)
+const resgateParaExcluir = ref(null)
+const confirmDeleteResgateMessage = computed(() => {
+  if (!resgateParaExcluir.value) return 'Confirma a exclusão deste resgate?'
+  return `Excluir o resgate de "${resgateParaExcluir.value.recompensa_nome}"?`
 })
 
 const recompensasFiltradas = computed(() => {
-  const lista = recompensas.value ?? []
+  const lista = opcoesRecompensas.value ?? []
   const termo = filtroPesquisaRecompensa.value?.trim().toLowerCase() || ''
   if (!termo) return lista
   return lista.filter((r) => (r.nome || '').toLowerCase().includes(termo) || (r.descricao || '').toLowerCase().includes(termo))
 })
+
+function getRecompensaResgateFormDefault() {
+  return { recompensa: null, data_resgate: new Date() }
+}
 
 const toast = useToast()
 const loadingCep = ref(false)
@@ -697,13 +721,15 @@ async function aoAbrirDialog() {
 
 async function carregarOpcoes() {
   try {
-    const [livros] = await Promise.all([livroService.livros.getAll()])
+    const [livros, recompensasCatalog] = await Promise.all([
+      livroService.livros.getAll(),
+      leitorService.recompensas.getAll({ ativo: true })
+    ])
     const listaLivros = Array.isArray(livros) ? livros : livros?.results ?? []
     opcoesLivros.value = listaLivros
-    await carregarRecompensas()
+    opcoesRecompensas.value = Array.isArray(recompensasCatalog) ? recompensasCatalog : recompensasCatalog?.results ?? []
     if (leitorId.value) {
-      await carregarEmprestimos()
-      await carregarReservas()
+      await Promise.all([carregarEmprestimos(), carregarReservas(), carregarRecompensasResgatadas()])
     }
   } catch (e) {
     console.error('Erro ao carregar opções:', e)
@@ -739,27 +765,33 @@ async function carregarReservas() {
   }
 }
 
-async function carregarRecompensas() {
-  loadingRecompensas.value = true
+async function carregarRecompensasResgatadas() {
+  if (!leitorId.value) return
+  loadingRecompensasResgatadas.value = true
   try {
-    const data = await leitorService.recompensas.getAll()
-    recompensas.value = Array.isArray(data) ? data : data?.results ?? []
+    const data = await leitorService.leitorRecompensas.getAll({ leitor: leitorId.value })
+    recompensasResgatadasLista.value = Array.isArray(data) ? data : data?.results ?? []
   } catch (e) {
-    console.error('Erro ao carregar recompensas:', e)
-    recompensas.value = []
+    console.error('Erro ao carregar resgates:', e)
+    recompensasResgatadasLista.value = []
   } finally {
-    loadingRecompensas.value = false
+    loadingRecompensasResgatadas.value = false
   }
+}
+
+function aoFechar() {
+  limparFormulario()
+  emit('hide')
 }
 
 function limparFormulario() {
   form.value = getFormDefault()
   emprestimoForm.value = getEmprestimoFormDefault()
   reservaForm.value = getReservaFormDefault()
-  recompensaForm.value = { nome: '', descricao: '', pontuacao: 0 }
+  recompensaResgateForm.value = getRecompensaResgateFormDefault()
   emprestimoEditandoId.value = null
   reservaEditandoId.value = null
-  recompensaEditandoId.value = null
+  resgateEditandoId.value = null
   tabAtiva.value = 'leitor'
 }
 
@@ -953,54 +985,77 @@ function cancelarExclusaoReserva() {
   reservaParaExcluir.value = null
 }
 
-async function salvarRecompensa() {
-  if (!recompensaForm.value.nome) return
+async function salvarRecompensaResgate() {
+  if (!leitorId.value || !recompensaResgateForm.value.recompensa) {
+    toast.add({ severity: 'warn', summary: 'Campo obrigatório', detail: 'Selecione a recompensa.', life: 3000 })
+    return
+  }
+  const dataResgate = recompensaResgateForm.value.data_resgate || new Date()
   try {
-    const payload = { nome: recompensaForm.value.nome, descricao: recompensaForm.value.descricao ?? null, pontuacao: recompensaForm.value.pontuacao ?? 0 }
-    if (recompensaEditandoId.value) {
-      await leitorService.recompensas.update(recompensaEditandoId.value, payload)
-      toast.add({ severity: 'success', summary: 'Recompensa atualizada', life: 3000 })
-    } else {
-      await leitorService.recompensas.create(payload)
-      toast.add({ severity: 'success', summary: 'Recompensa cadastrada', life: 3000 })
+    const payload = {
+      leitor: leitorId.value,
+      recompensa: recompensaResgateForm.value.recompensa,
+      data_resgate: typeof dataResgate === 'object' && dataResgate instanceof Date
+        ? `${dataResgate.getFullYear()}-${String(dataResgate.getMonth() + 1).padStart(2, '0')}-${String(dataResgate.getDate()).padStart(2, '0')}`
+        : dataResgate
     }
-    recompensaForm.value = { nome: '', descricao: '', pontuacao: 0 }
-    recompensaEditandoId.value = null
-    await carregarRecompensas()
+    if (resgateEditandoId.value) {
+      await leitorService.leitorRecompensas.update(resgateEditandoId.value, payload)
+      toast.add({ severity: 'success', summary: 'Data do resgate atualizada', life: 3000 })
+    } else {
+      await leitorService.leitorRecompensas.create(payload)
+      toast.add({ severity: 'success', summary: 'Resgate cadastrado', life: 3000 })
+    }
+    recompensaResgateForm.value = getRecompensaResgateFormDefault()
+    resgateEditandoId.value = null
+    await carregarRecompensasResgatadas()
   } catch (e) {
-    toast.add({ severity: 'error', summary: 'Erro ao salvar recompensa', life: 5000 })
+    const detail = e?.response?.data?.recompensa?.[0] ?? e?.response?.data?.detail ?? 'Não foi possível salvar.'
+    toast.add({ severity: 'error', summary: 'Erro ao salvar resgate', detail, life: 5000 })
   }
 }
 
-function editarRecompensa(rec) {
-  recompensaEditandoId.value = rec.id
-  recompensaForm.value = { nome: rec.nome ?? '', descricao: rec.descricao ?? '', pontuacao: rec.pontuacao ?? 0 }
+function editarResgateData(resgate) {
+  resgateEditandoId.value = resgate.id
+  const dataResgate = resgate.data_resgate
+  const dataObj = dataResgate
+    ? (typeof dataResgate === 'string' ? new Date(dataResgate + 'T12:00:00') : dataResgate)
+    : new Date()
+  recompensaResgateForm.value = {
+    recompensa: resgate.recompensa,
+    data_resgate: dataObj
+  }
 }
 
-function abrirConfirmacaoExcluirRecompensa(rec) {
-  recompensaParaExcluir.value = rec
-  confirmDeleteRecompensaVisible.value = true
+function cancelarEdicaoResgate() {
+  resgateEditandoId.value = null
+  recompensaResgateForm.value = getRecompensaResgateFormDefault()
 }
 
-async function confirmarExclusaoRecompensa() {
-  if (!recompensaParaExcluir.value) return
-  confirmDeleteRecompensaLoading.value = true
+function abrirConfirmacaoExcluirResgate(resgate) {
+  resgateParaExcluir.value = resgate
+  confirmDeleteResgateVisible.value = true
+}
+
+async function confirmarExclusaoResgate() {
+  if (!resgateParaExcluir.value) return
+  confirmDeleteResgateLoading.value = true
   try {
-    await leitorService.recompensas.delete(recompensaParaExcluir.value.id)
-    await carregarRecompensas()
-    toast.add({ severity: 'success', summary: 'Recompensa excluída', life: 3000 })
+    await leitorService.leitorRecompensas.delete(resgateParaExcluir.value.id)
+    await carregarRecompensasResgatadas()
+    toast.add({ severity: 'success', summary: 'Resgate excluído', life: 3000 })
   } catch (e) {
-    toast.add({ severity: 'error', summary: 'Erro ao excluir recompensa', life: 5000 })
+    toast.add({ severity: 'error', summary: 'Erro ao excluir resgate', life: 5000 })
   } finally {
-    confirmDeleteRecompensaLoading.value = false
-    confirmDeleteRecompensaVisible.value = false
-    recompensaParaExcluir.value = null
+    confirmDeleteResgateLoading.value = false
+    confirmDeleteResgateVisible.value = false
+    resgateParaExcluir.value = null
   }
 }
 
-function cancelarExclusaoRecompensa() {
-  confirmDeleteRecompensaVisible.value = false
-  recompensaParaExcluir.value = null
+function cancelarExclusaoResgate() {
+  confirmDeleteResgateVisible.value = false
+  resgateParaExcluir.value = null
 }
 
 function limparPesquisaRecompensa() {
@@ -1024,7 +1079,7 @@ watch(
 watch(tabAtiva, (valor) => {
   if (valor === 'emprestimo' && leitorId.value) carregarEmprestimos()
   if (valor === 'reservas' && leitorId.value) carregarReservas()
-  if (valor === 'recompensas') carregarRecompensas()
+  if (valor === 'recompensas' && leitorId.value) carregarRecompensasResgatadas()
 })
 </script>
 
@@ -1092,6 +1147,12 @@ watch(tabAtiva, (valor) => {
 
 .dialog-required {
   color: var(--p-danger);
+}
+
+.texto-aviso {
+  color: var(--texto-secundario);
+  font-size: 0.9375rem;
+  margin: 1rem 0;
 }
 .dialog-checkbox-label {
   font-weight: 500;

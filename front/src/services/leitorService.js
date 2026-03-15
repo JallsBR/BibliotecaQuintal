@@ -14,7 +14,32 @@ const leitorService = {
   },
 
   // =========================
-  // --- RECOMPENSAS ---
+  // --- RESGATES DE RECOMPENSA (leitor + recompensa + data_resgate) ---
+  // =========================
+  leitorRecompensas: {
+    getAll: async (params = {}) => {
+      const response = await api.get(`${BASE}/leitor-recompensas/`, { params })
+      return response.data
+    },
+    getById: async (id) => {
+      const response = await api.get(`${BASE}/leitor-recompensas/${id}/`)
+      return response.data
+    },
+    create: async (data) => {
+      const response = await api.post(`${BASE}/leitor-recompensas/`, data)
+      return response.data
+    },
+    update: async (id, data) => {
+      const response = await api.put(`${BASE}/leitor-recompensas/${id}/`, data)
+      return response.data
+    },
+    delete: async (id) => {
+      await api.delete(`${BASE}/leitor-recompensas/${id}/`)
+    }
+  },
+
+  // =========================
+  // --- RECOMPENSAS (catálogo) ---
   // =========================
   recompensas: {
     getAll: async (params = {}) => {

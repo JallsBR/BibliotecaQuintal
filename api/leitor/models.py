@@ -29,11 +29,16 @@ class Recompensa(models.Model):
         return f"{self.nome} - {self.descricao} - {self.pontuacao}"
 
 
-
 class Leitor(models.Model):
     nome = models.CharField(max_length=250)
     livros_lidos = models.ManyToManyField(Livro, blank=True)
-    recompensas = models.ManyToManyField(Recompensa, blank=True)
+    recompensas = models.ManyToManyField(
+        Recompensa,
+        through='LeitorRecompensa',
+        through_fields=('leitor', 'recompensa'),
+        blank=True,
+        related_name='leitores_resgataram'
+    )
     pontuacao_total = models.IntegerField(
         default=0,
         validators=[MinValueValidator(0)],
@@ -81,6 +86,22 @@ class Leitor(models.Model):
 
     def __str__(self):
         return self.nome
+
+
+class LeitorRecompensa(models.Model):
+    """Tabela through: recompensas resgatadas pelo leitor, com data do resgate."""
+    leitor = models.ForeignKey(Leitor, on_delete=models.CASCADE)
+    recompensa = models.ForeignKey(Recompensa, on_delete=models.CASCADE)
+    data_resgate = models.DateField(default=timezone.localdate, verbose_name='Data do resgate')
+
+    class Meta:
+        verbose_name = 'Resgate de recompensa'
+        verbose_name_plural = 'Resgates de recompensa'
+        ordering = ['-data_resgate', 'recompensa__nome']
+
+    def __str__(self):
+        return f"{self.leitor.nome} - {self.recompensa.nome} - {self.data_resgate}"
+
 
 class Emprestimo(models.Model):
     leitor = models.ForeignKey(Leitor, on_delete=models.CASCADE)

@@ -10,6 +10,10 @@ urlpatterns = [
     path("recompensas/", views.RecompensaListCreateView.as_view(), name="recompensa-list-create"),
     path("recompensas/<int:pk>/", views.RecompensaRetrieveUpdateDestroyView.as_view(), name="recompensa-retrieve-update-destroy"),
 
+    # Resgates de recompensa (leitor + recompensa + data_resgate)
+    path("leitor-recompensas/", views.LeitorRecompensaListCreateView.as_view(), name="leitor-recompensa-list-create"),
+    path("leitor-recompensas/<int:pk>/", views.LeitorRecompensaRetrieveUpdateDestroyView.as_view(), name="leitor-recompensa-retrieve-update-destroy"),
+
     # Leitores
     path("leitores/", views.LeitorListCreateView.as_view(), name="leitor-list-create"),
     path("leitores/<int:pk>/", views.LeitorRetrieveUpdateDestroyView.as_view(), name="leitor-retrieve-update-destroy"),

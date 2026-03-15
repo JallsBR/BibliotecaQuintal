@@ -82,7 +82,7 @@
       </template>
     </BaseDataTable>
 
-    <LeitorDialog v-model:visible="dialogVisible" :leitor="leitorEditando" @save="onLeitorSalvo" />
+    <LeitorDialog v-model:visible="dialogVisible" :leitor="leitorEditando" @save="onLeitorSalvo" @hide="aoFecharDialog" />
 
     <BaseConfirmDialog
       :visible="confirmDeleteVisible"
@@ -194,6 +194,10 @@ async function limparFiltros() {
 function incluir() {
   leitorEditando.value = null
   dialogVisible.value = true
+}
+
+async function aoFecharDialog() {
+  await carregarLeitores(montarParametrosBusca())
 }
 
 async function onLeitorSalvo(payload) {

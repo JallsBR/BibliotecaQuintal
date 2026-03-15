@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Recompensa, Leitor, Emprestimo, Reserva
+from .models import Recompensa, Leitor, Emprestimo, Reserva, LeitorRecompensa
 
 
 @admin.register(Recompensa)
@@ -8,6 +8,14 @@ class RecompensaAdmin(admin.ModelAdmin):
     list_filter = ('ativo',)
     search_fields = ('nome', 'descricao')
     ordering = ('pontuacao', 'nome')
+
+
+@admin.register(LeitorRecompensa)
+class LeitorRecompensaAdmin(admin.ModelAdmin):
+    list_display = ('leitor', 'recompensa', 'data_resgate')
+    list_filter = ('data_resgate',)
+    search_fields = ('leitor__nome', 'recompensa__nome')
+    raw_id_fields = ('leitor', 'recompensa')
 
 
 @admin.register(Leitor)
