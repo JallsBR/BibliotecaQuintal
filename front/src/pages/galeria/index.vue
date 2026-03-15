@@ -95,7 +95,8 @@
       </div>
     </Popover>
 
-    <div class="cards-container">
+    <div v-if="loading" class="galeria-loading">Carregando...</div>
+    <div v-else class="cards-container">
       <div
         v-for="livro in livros"
         :key="livro.id"
@@ -117,6 +118,17 @@
         </div>
       </div>
     </div>
+
+    <Paginator
+      v-if="totalRecords > 0"
+      :rows="rows"
+      :totalRecords="totalRecords"
+      :first="first"
+      template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} livros"
+      @page="onPage"
+      class="galeria-paginator"
+    />
 
     <Dialog v-model:visible="dialogVisible" modal header="Detalhes do livro" :style="{ width: '40rem' }">
       <div v-if="livroSelecionado" class="dialog-detalhes">
@@ -169,13 +181,18 @@ import InputNumber from 'primevue/inputnumber'
 import BaseSelect from '@/components/BaseSelect.vue'
 import Checkbox from 'primevue/checkbox'
 import Dialog from 'primevue/dialog'
+import Paginator from 'primevue/paginator'
 import livroService from '@/services/livroService'
+import { PAGE_SIZE } from '@/constants/pagination'
 
 const store = useStore()
 const hasPermission = (perm) => store.getters.hasPermission(perm)
 
 const livros = ref([])
 const loading = ref(false)
+const totalRecords = ref(0)
+const first = ref(0)
+const rows = PAGE_SIZE
 
 const popoverBuscaRef = ref(null)
 const filtroTitulo = ref('')
@@ -220,12 +237,16 @@ function formatarAutores(autoresNomes) {
 async function carregarLivros(params = {}) {
   loading.value = true
   try {
-    const data = await livroService.livros.getAll(params)
+    const page = params.page ?? currentPage.value
+    const query = { ...params, page, page_size: rows }
+    const data = await livroService.livros.getAll(query)
     const list = Array.isArray(data) ? data : data?.results ?? []
     livros.value = list
+    totalRecords.value = data?.count ?? list.length
   } catch (e) {
     console.error('Erro ao carregar livros:', e)
     livros.value = []
+    totalRecords.value = 0
     toast.add({
       severity: 'error',
       summary: 'Erro ao carregar livros',
@@ -235,6 +256,17 @@ async function carregarLivros(params = {}) {
   } finally {
     loading.value = false
   }
+}
+
+const currentPage = ref(1)
+
+function onPage(event) {
+  first.value = event.first
+  currentPage.value = event.page + 1
+  const params = montarParametrosBusca()
+  params.page = currentPage.value
+  params.page_size = rows
+  carregarLivros(params)
 }
 
 async function carregarFiltros() {
@@ -267,6 +299,8 @@ function montarParametrosBusca() {
 }
 
 async function aplicarFiltros() {
+  first.value = 0
+  currentPage.value = 1
   const params = montarParametrosBusca()
   await carregarLivros(params)
   popoverBuscaRef.value?.hide()
@@ -282,6 +316,8 @@ async function limparFiltros() {
   filtroCategoria.value = null
   filtroAtivo.value = false
   filtroDisponivel.value = false
+  first.value = 0
+  currentPage.value = 1
   await carregarLivros()
   popoverBuscaRef.value?.hide()
 }
@@ -292,7 +328,8 @@ function abrirDetalhes(livro) {
 }
 
 onMounted(async () => {
-  await Promise.all([carregarLivros(), carregarFiltros()])
+  await carregarFiltros()
+  await carregarLivros({ page: 1, page_size: rows })
 })
 </script>
 
@@ -318,6 +355,17 @@ onMounted(async () => {
   display: flex;
   justify-content: flex-start;
   margin-bottom: 1rem;
+}
+
+.galeria-loading {
+  padding: 2rem;
+  text-align: center;
+  color: var(--texto-secundario);
+}
+
+.galeria-paginator {
+  margin-top: 1.5rem;
+  justify-content: center;
 }
 
 .cards-container {

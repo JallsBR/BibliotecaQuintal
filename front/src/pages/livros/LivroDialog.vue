@@ -222,7 +222,6 @@
                       style="margin-left: -12rem;"
                       @select="onImagemSelect"
                     />
-                    <small v-if="form.imagemFile" class="dialog-file-name">{{ form.imagemFile.name }}</small>
                   </div>
                 </div>
               </div>
