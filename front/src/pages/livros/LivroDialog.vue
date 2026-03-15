@@ -23,28 +23,45 @@
               <div class="dialog-row">
                 <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
+                    <InputText id="livro-isbn" v-model="form.isbn" class="dialog-input" maxlength="13" autocomplete="off" />
+                    <label for="livro-isbn">ISBN</label>
+                  </FloatLabel>
+                </div>
+                <div class="dialog-field">
+                  <FloatLabel variant="on" class="dialog-input-wrap">
                     <InputText id="livro-titulo" v-model="form.titulo" class="dialog-input" autocomplete="off" />
                     <label for="livro-titulo">Título</label>
                   </FloatLabel>
                 </div>
 
-                <div class="dialog-field" @click="onAutorSelectAreaClick">
+                <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
-                    <Select
-                      ref="selectAutorRef"
-                      id="livro-autor"
-                      v-model="form.autor"
+                    <MultiSelect
+                      id="livro-autores"
+                      v-model="form.autores"
                       :options="autores"
                       optionLabel="nome"
                       optionValue="id"
                       class="dialog-input"
+                      display="chip"
                       showClear
-                      editable
                     />
-                    <label for="livro-autor">Autor</label>
+                    <label for="livro-autores">Autores</label>
                   </FloatLabel>
                 </div>
 
+                
+              </div>
+
+              <div class="dialog-field dialog-field--vertical">
+                <FloatLabel variant="on" class="dialog-input-wrap">
+                  <Textarea id="livro-descricao" v-model="form.descricao" class="dialog-input" rows="3" autoResize />
+                  <label for="livro-descricao">Descrição</label>
+                </FloatLabel>
+              </div>
+
+              <!-- Categoria / Idioma / ISBN -->
+              <div class="dialog-row">
                 <div class="dialog-field" @click="onEditoraSelectAreaClick">
                   <FloatLabel variant="on" class="dialog-input-wrap">
                     <Select
@@ -60,43 +77,26 @@
                     />
                     <label for="livro-editora">Editora</label>
                   </FloatLabel>
-                </div>
-              </div>
-
-              <div class="dialog-field dialog-field--vertical">
-                <FloatLabel variant="on" class="dialog-input-wrap">
-                  <Textarea id="livro-descricao" v-model="form.descricao" class="dialog-input" rows="3" autoResize />
-                  <label for="livro-descricao">Descrição</label>
-                </FloatLabel>
-              </div>
-
-              <!-- Categoria / Idioma / ISBN -->
-              <div class="dialog-row">
+                </div>                
                 <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
-                    <Select
-                      id="livro-categoria"
-                      v-model="form.categoria"
+                    <MultiSelect
+                      id="livro-categorias"
+                      v-model="form.categorias"
                       :options="opcoesCategorias"
                       optionLabel="nome"
                       optionValue="id"
                       class="dialog-input"
+                      display="chip"
                       showClear
-                      editable
                     />
-                    <label for="livro-categoria">Categoria</label>
+                    <label for="livro-categorias">Categorias</label>
                   </FloatLabel>
                 </div>
                 <div class="dialog-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
                     <InputText id="livro-idioma" v-model="form.idioma" class="dialog-input" autocomplete="off" />
                     <label for="livro-idioma">Idioma</label>
-                  </FloatLabel>
-                </div>
-                <div class="dialog-field">
-                  <FloatLabel variant="on" class="dialog-input-wrap">
-                    <InputText id="livro-isbn" v-model="form.isbn" class="dialog-input" maxlength="13" autocomplete="off" />
-                    <label for="livro-isbn">ISBN</label>
                   </FloatLabel>
                 </div>
               </div>
@@ -502,6 +502,7 @@ import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
+import MultiSelect from 'primevue/multiselect'
 import Checkbox from 'primevue/checkbox'
 import FileUpload from 'primevue/fileupload'
 import Button from 'primevue/button'
@@ -642,9 +643,9 @@ function getFormDefault() {
     idioma: '',
     isbn: '',
     ativo: true,
-    autor: null,
+    autores: [],
     editora: null,
-    categoria: null,
+    categorias: [],
     imagemFile: null
   }
 }
@@ -667,9 +668,9 @@ function preencherFormComLivro(livro) {
     idioma: livro.idioma ?? '',
     isbn: livro.isbn ?? '',
     ativo: livro.ativo ?? true,
-    autor: livro.autor?.id ?? livro.autor ?? null,
+    autores: Array.isArray(livro.autores) ? livro.autores : [],
     editora: livro.editora?.id ?? livro.editora ?? null,
-    categoria: livro.categoria?.id ?? livro.categoria ?? null,
+    categorias: Array.isArray(livro.categorias) ? livro.categorias : [],
     imagemFile: null
   }
 }
@@ -1041,9 +1042,9 @@ function salvar() {
     idioma: form.value.idioma || null,
     isbn: form.value.isbn || null,
     ativo: form.value.ativo ?? true,
-    autor: form.value.autor ?? null,
+    autores: form.value.autores ?? [],
     editora: form.value.editora ?? null,
-    categoria: form.value.categoria ?? null
+    categorias: form.value.categorias ?? [],
   }
   if (form.value.imagemFile) {
     payload.imagemFile = form.value.imagemFile

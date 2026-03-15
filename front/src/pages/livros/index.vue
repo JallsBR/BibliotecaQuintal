@@ -104,9 +104,9 @@
       <template #columns>
         <Column field="id" header="ID" sortable :style="{ width: '75px', maxWidth: '75px' }" />
         <Column field="titulo" header="Título" sortable :style="{ width: '200px', maxWidth: '200px' }" />
-        <Column field="autor_nome" header="Autor" sortable>
+        <Column field="autores_nomes" header="Autores" sortable>
           <template #body="slotProps">
-            {{ slotProps.data.autor_nome ?? slotProps.data.autor?.nome ?? slotProps.data.autor ?? '' }}
+            {{ Array.isArray(slotProps.data.autores_nomes) ? slotProps.data.autores_nomes.join(', ') : '' }}
           </template>
         </Column>
         <Column field="editora_nome" header="Editora" sortable>
@@ -114,9 +114,9 @@
             {{ slotProps.data.editora_nome ?? slotProps.data.editora?.nome ?? slotProps.data.editora ?? '' }}
           </template>
         </Column>
-        <Column field="categoria_nome" header="Categoria" sortable>
+        <Column field="categorias_nomes" header="Categorias" sortable>
           <template #body="slotProps">
-            {{ slotProps.data.categoria_nome ?? slotProps.data.categoria?.nome ?? slotProps.data.categoria ?? '' }}
+            {{ Array.isArray(slotProps.data.categorias_nomes) ? slotProps.data.categorias_nomes.join(', ') : '' }}
           </template>
         </Column>       
         <Column field="qtd_disponivel" header="Qtd Disponível" sortable :style="{ width: '130px', maxWidth: '130px' }" />
@@ -249,9 +249,9 @@ function montarParametrosBusca() {
   if (filtroIdioma.value?.trim()) params['idioma__icontains'] = filtroIdioma.value.trim()
   if (filtroAnoDe.value != null) params['ano_publicacao__gte'] = filtroAnoDe.value
   if (filtroAnoAte.value != null) params['ano_publicacao__lte'] = filtroAnoAte.value
-  if (filtroAutor.value) params['autor'] = filtroAutor.value
+  if (filtroAutor.value) params['autores'] = filtroAutor.value
   if (filtroEditora.value) params['editora'] = filtroEditora.value
-  if (filtroCategoria.value) params['categoria'] = filtroCategoria.value
+  if (filtroCategoria.value) params['categorias'] = filtroCategoria.value
   if (filtroAtivo.value) params['ativo'] = true
   if (filtroDisponivel.value) params['is_disponivel'] = true
   return params

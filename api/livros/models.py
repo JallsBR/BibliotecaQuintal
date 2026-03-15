@@ -49,7 +49,12 @@ class Livro(models.Model):
     descricao = models.TextField(blank=True, null=True)
     pontuacao = models.IntegerField(validators=[MinValueValidator(0)], verbose_name='Pontuação', blank=True, null=True)
     qtd_paginas = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='Quantidade de Páginas', blank=True, null=True)
-    ano_publicacao = models.IntegerField(validators=[MinValueValidator(1900)], verbose_name='Ano de Publicação', blank=True, null=True  )
+    ano_publicacao = models.IntegerField(
+        validators=[MinValueValidator(1900)],
+        verbose_name='Ano de Publicação',
+        blank=True,
+        null=True,
+    )
     qtd_total = models.IntegerField(
         validators=[MinValueValidator(0)],
         verbose_name='Quantidade total',
@@ -62,14 +67,16 @@ class Livro(models.Model):
     isbn = models.CharField(max_length=13, verbose_name='ISBN', blank=True, null=True)
     ativo = models.BooleanField(default=True, verbose_name='Ativo', blank=True, null=True)
     imagem = models.ImageField(upload_to='livros/', blank=True, null=True, verbose_name='Imagem')
-    autor = models.ForeignKey(Autor, on_delete=models.CASCADE, verbose_name='Autor', blank=True, null=True)
+    autores = models.ManyToManyField(Autor, verbose_name='Autores', blank=True)
     editora = models.ForeignKey(Editora, on_delete=models.CASCADE, verbose_name='Editora', blank=True, null=True)
-    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, verbose_name='Categoria', blank=True, null=True)
+    categorias = models.ManyToManyField(Categoria, verbose_name='Categorias', blank=True)
     created_at = models.DateTimeField(default=timezone.now, verbose_name='Criado em')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Atualizado em')
 
     def __str__(self):
-        return f"{self.titulo} - {self.autor} - {self.editora} - {self.categoria}"
+        autores_nomes = ", ".join(self.autores.values_list("nome", flat=True)) if self.pk else ""
+        categorias_nomes = ", ".join(self.categorias.values_list("nome", flat=True)) if self.pk else ""
+        return f"{self.titulo} - {autores_nomes} - {self.editora} - {categorias_nomes}"
 
     @property
     def qtd_disponivel(self):
@@ -134,4 +141,4 @@ class Livro(models.Model):
     class Meta:
         verbose_name = 'Livro'
         verbose_name_plural = 'Livros'
-        ordering = ['titulo','autor','editora','categoria']
+        ordering = ['titulo']

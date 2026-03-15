@@ -21,8 +21,18 @@ class EditoraAdmin(admin.ModelAdmin):
 
 @admin.register(Livro)
 class LivroAdmin(admin.ModelAdmin):
-    list_display = ('titulo', 'autor', 'editora', 'categoria', 'created_at', 'updated_at')
-    search_fields = ('titulo', 'autor', 'editora', 'categoria')
-    ordering = ('titulo',)    
+    list_display = ('titulo', 'get_autores', 'editora', 'get_categorias', 'created_at', 'updated_at')
+    search_fields = ('titulo', 'autores__nome', 'editora__nome', 'categorias__nome')
+    ordering = ('titulo',)
+
+    def get_autores(self, obj):
+        return ", ".join(obj.autores.values_list('nome', flat=True))
+
+    get_autores.short_description = 'Autores'
+
+    def get_categorias(self, obj):
+        return ", ".join(obj.categorias.values_list('nome', flat=True))
+
+    get_categorias.short_description = 'Categorias'
 
 

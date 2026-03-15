@@ -21,9 +21,9 @@ class LivroListCreateView(generics.ListCreateAPIView):
         "is_disponivel": ["exact"],
         "idioma": ["exact", "icontains"],
         "ano_publicacao": ["exact", "gte", "lte"],
-        "autor": ["exact"],
+        "autores": ["exact"],
         "editora": ["exact"],
-        "categoria": ["exact"],
+        "categorias": ["exact"],
     }
     ordering_fields = [
         "titulo",

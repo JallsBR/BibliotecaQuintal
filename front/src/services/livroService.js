@@ -103,8 +103,15 @@ const livroService = {
         delete payload.imagemFile
       }
       Object.entries(payload).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== '') {
-          formData.append(key, value === true || value === false ? value : value)
+        if (value === null || value === undefined || value === '') {
+          return
+        }
+        if (Array.isArray(value)) {
+          value.forEach((v) => {
+            formData.append(key, v)
+          })
+        } else {
+          formData.append(key, value)
         }
       })
       const response = await api.post(`${BASE}/livros/`, formData, {
