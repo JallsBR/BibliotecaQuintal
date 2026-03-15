@@ -14,8 +14,8 @@
     >
       <template #toolbar>
         <div class="table-toolbar" style="margin-top: 1rem;">
-          <Button label="Buscar" size="small" icon="pi pi-search" @click="(e) => popoverBuscaRef?.toggle(e)" />
-          <Button label="Incluir" size="small" icon="pi pi-plus" @click="abrirDialogIncluir" />
+          <Button v-if="hasPermission('leitor.view_reserva')" label="Buscar" size="small" icon="pi pi-search" @click="(e) => popoverBuscaRef?.toggle(e)" />
+          <Button v-if="hasPermission('leitor.add_reserva')" label="Incluir" size="small" icon="pi pi-plus" @click="abrirDialogIncluir" />
         </div>
 
         <Popover ref="popoverBuscaRef" :style="{ width: '35%' }">
@@ -67,7 +67,7 @@
         </Popover>
       </template>
       <template #columns>
-        <Column field="leitor_nome" header="Leitor" sortable />
+        <Column v-if="hasPermission('leitor.view_reserva')" field="leitor_nome" header="Leitor" sortable />
         <Column field="livro_titulo" header="Livro" sortable />
         <Column field="data_reserva" header="Data reserva" sortable>
           <template #body="slotProps">
@@ -85,10 +85,10 @@
             <span v-else class="texto-sem-destaque">—</span>
           </template>
         </Column>
-        <Column header="Ações" :style="{ width: '100px', maxWidth: '100px' }">
+        <Column v-if="hasPermission('leitor.view_reserva')" header="Ações" :style="{ width: '100px', maxWidth: '100px' }">
           <template #body="slotProps">
             <Button
-              v-if="slotProps.data.ativo"
+              v-if="slotProps.data.ativo && hasPermission('leitor.change_reserva')"
               label="Cancelar"
               size="small"
               severity="danger"
@@ -119,6 +119,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useStore } from 'vuex'
 import { useToast } from 'primevue/usetoast'
 import BaseDataTable from '@/components/BaseDataTable.vue'
 import BaseConfirmDialog from '@/components/BaseConfirmDialog.vue'
@@ -132,6 +133,8 @@ import livroService from '@/services/livroService'
 import ReservaDialog from './ReservaDialog.vue'
 import { PAGE_SIZE } from '@/constants/pagination'
 
+const store = useStore()
+const hasPermission = (perm) => store.getters.hasPermission(perm)
 const toast = useToast()
 
 const reservas = ref([])

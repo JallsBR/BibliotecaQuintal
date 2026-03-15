@@ -14,8 +14,8 @@
     >
       <template #toolbar>
         <div class="table-toolbar" style="margin-top: 1rem;">
-          <Button label="Buscar" size="small" icon="pi pi-search" @click="(e) => popoverBuscaRef?.toggle(e)" />
-          <Button label="Incluir" size="small" icon="pi pi-plus" @click="abrirDialogIncluir" />
+          <Button v-if="hasPermission('leitor.view_emprestimo')" label="Buscar" size="small" icon="pi pi-search" @click="(e) => popoverBuscaRef?.toggle(e)" />
+          <Button v-if="hasPermission('leitor.add_emprestimo')" label="Incluir" size="small" icon="pi pi-plus" @click="abrirDialogIncluir" />
         </div>
 
         <Popover ref="popoverBuscaRef" :style="{ width: '35%' }">
@@ -67,7 +67,7 @@
         </Popover>
       </template>
       <template #columns>
-        <Column field="leitor_nome" header="Leitor" sortable />
+        <Column v-if="hasPermission('leitor.view_emprestimo')" field="leitor_nome" header="Leitor" sortable />
         <Column field="livro_titulo" header="Livro" sortable />
         <Column field="data_emprestimo" header="Data empréstimo" sortable>
           <template #body="slotProps">
@@ -87,16 +87,16 @@
             <span v-else class="texto-sem-atraso">—</span>
           </template>
         </Column>
-        <Column header="Ações" :style="{ width: '100px', maxWidth: '100px' }">
+        <Column v-if="hasPermission('leitor.view_emprestimo')" header="Ações" :style="{ width: '100px', maxWidth: '100px' }">
           <template #body="slotProps">
             <Button
-              v-if="!slotProps.data.devolvido"
+              v-if="!slotProps.data.devolvido && hasPermission('leitor.change_emprestimo')"
               label="Devolver"
               size="small"
               :loading="devolvendoId === slotProps.data.id"
               @click="devolver(slotProps.data)"
             />
-            <span v-else class="texto-sem-atraso">—</span>
+            <span v-else-if="slotProps.data.devolvido" class="texto-sem-atraso">—</span>
           </template>
         </Column>
       </template>
@@ -108,7 +108,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useStore } from 'vuex'
 import { useToast } from 'primevue/usetoast'
+
+const store = useStore()
+const hasPermission = (perm) => store.getters.hasPermission(perm)
 import BaseDataTable from '@/components/BaseDataTable.vue'
 import BaseSelect from '@/components/BaseSelect.vue'
 import Column from 'primevue/column'

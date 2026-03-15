@@ -14,8 +14,8 @@
     >
       <template #toolbar>
         <div class="table-toolbar" style="margin-top: 1rem;">
-          <Button label="Buscar" size="small" icon="pi pi-search" @click="(e) => popoverBuscaRef?.toggle(e)" />
-          <Button label="Incluir" size="small" icon="pi pi-plus" @click="incluir" />
+          <Button v-if="hasPermission('leitor.view_leitor')" label="Buscar" size="small" icon="pi pi-search" @click="(e) => popoverBuscaRef?.toggle(e)" />
+          <Button v-if="hasPermission('leitor.add_leitor')" label="Incluir" size="small" icon="pi pi-plus" @click="incluir" />
         </div>
 
         <Popover ref="popoverBuscaRef" :style="{ width: '35%' }">
@@ -58,8 +58,8 @@
       <template #columns>
         <Column field="id" header="ID" sortable :style="{ width: '75px', maxWidth: '75px' }" />
         <Column field="nome" header="Nome" sortable :style="{ width: '200px', maxWidth: '200px' }" />
-        <Column field="email" header="E-mail" sortable />
-        <Column field="telefone" header="Telefone" sortable>
+        <Column v-if="hasPermission('leitor.view_leitor')" field="email" header="E-mail" sortable />
+        <Column v-if="hasPermission('leitor.view_leitor')" field="telefone" header="Telefone" sortable>
           <template #body="slotProps">
             {{ formatarTelefone(slotProps.data.telefone) }}
           </template>
@@ -71,11 +71,11 @@
             <span v-else class="p-tag p-tag-danger">Não</span>
           </template>
         </Column>
-        <Column header="Ações" :style="{ width: '180px', maxWidth: '180px' }">
+        <Column v-if="hasPermission('leitor.view_leitor')" header="Ações" :style="{ width: '180px', maxWidth: '180px' }">
           <template #body="slotProps">
             <div class="col-acoes">
-              <Button label="Editar" size="small" @click="editarLeitor(slotProps.data)" />
-              <Button label="Excluir" severity="danger" size="small" @click="excluirLeitor(slotProps.data)" />
+              <Button v-if="hasPermission('leitor.change_leitor')" label="Editar" size="small" @click="editarLeitor(slotProps.data)" />
+              <Button v-if="hasPermission('leitor.delete_leitor')" label="Excluir" severity="danger" size="small" @click="excluirLeitor(slotProps.data)" />
             </div>
           </template>
         </Column>
@@ -101,7 +101,11 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useStore } from 'vuex'
 import { useToast } from 'primevue/usetoast'
+
+const store = useStore()
+const hasPermission = (perm) => store.getters.hasPermission(perm)
 import BaseDataTable from '@/components/BaseDataTable.vue'
 import BaseConfirmDialog from '@/components/BaseConfirmDialog.vue'
 import Column from 'primevue/column'

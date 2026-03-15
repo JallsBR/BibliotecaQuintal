@@ -12,7 +12,12 @@ export default createStore({
     isAuthenticated: state => !!state.token,
     getUser: state => state.user,
     isLoading: state => state.loading,
-    isSuperuser: state => !!state.user?.is_superuser
+    isSuperuser: state => !!state.user?.is_superuser,
+    hasPermission: state => (perm) => {
+      if (state.user?.is_superuser) return true
+      const perms = state.user?.permissions
+      return Array.isArray(perms) && perms.includes(perm)
+    }
   },
 
   mutations: {

@@ -244,8 +244,8 @@
                     <Column header="Ações" :style="{ width: '180px', maxWidth: '180px' }" bodyClass="dialog-col-acoes" headerClass="dialog-col-acoes">
                       <template #body="slotProps">
                         <div class="dialog-col-acoes">
-                          <Button label="Editar" size="small" @click="editarEmprestimo(slotProps.data)" />
-                          <Button label="Excluir" severity="danger" size="small" @click="abrirConfirmacaoExcluirEmprestimo(slotProps.data)" />
+                          <Button v-if="hasPermission('leitor.change_emprestimo')" label="Editar" size="small" @click="editarEmprestimo(slotProps.data)" />
+                          <Button v-if="hasPermission('leitor.delete_emprestimo')" label="Excluir" severity="danger" size="small" @click="abrirConfirmacaoExcluirEmprestimo(slotProps.data)" />
                         </div>
                       </template>
                     </Column>
@@ -348,8 +348,8 @@
                     <Column header="Ações" :style="{ width: '180px', maxWidth: '180px' }" bodyClass="dialog-col-acoes" headerClass="dialog-col-acoes">
                       <template #body="slotProps">
                         <div class="dialog-col-acoes">
-                          <Button label="Editar" size="small" @click="editarReserva(slotProps.data)" />
-                          <Button label="Excluir" severity="danger" size="small" @click="abrirConfirmacaoExcluirReserva(slotProps.data)" />
+                          <Button v-if="hasPermission('leitor.change_reserva')" label="Editar" size="small" @click="editarReserva(slotProps.data)" />
+                          <Button v-if="hasPermission('leitor.delete_reserva')" label="Excluir" severity="danger" size="small" @click="abrirConfirmacaoExcluirReserva(slotProps.data)" />
                         </div>
                       </template>
                     </Column>
@@ -441,8 +441,8 @@
                     </Column>
                     <Column header="Ações" :style="{ width: '160px', maxWidth: '160px' }" bodyClass="dialog-col-acoes" headerClass="dialog-col-acoes">
                       <template #body="slotProps">
-                        <div class="dialog-col-acoes">                          
-                          <Button label="Excluir" severity="danger" size="small" @click="abrirConfirmacaoExcluirResgate(slotProps.data)" />
+                        <div class="dialog-col-acoes">
+                          <Button v-if="hasPermission('leitor.delete_recompensa')" label="Excluir" severity="danger" size="small" @click="abrirConfirmacaoExcluirResgate(slotProps.data)" />
                         </div>
                       </template>
                     </Column>
@@ -471,7 +471,11 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useStore } from 'vuex'
 import Dialog from 'primevue/dialog'
+
+const store = useStore()
+const hasPermission = (perm) => store.getters.hasPermission(perm)
 import FloatLabel from 'primevue/floatlabel'
 import DatePicker from 'primevue/datepicker'
 import InputText from 'primevue/inputtext'

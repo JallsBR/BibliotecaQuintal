@@ -14,8 +14,8 @@
     >
       <template #toolbar>
         <div class="table-toolbar" style="margin-top: 1rem;">
-          <Button label="Buscar" size="small" icon="pi pi-search" @click="(e) => popoverBuscaRef?.toggle(e)" />
-          <Button label="Incluir" size="small" icon="pi pi-plus" @click="incluir" />
+          <Button v-if="hasPermission('livros.view_livro')" label="Buscar" size="small" icon="pi pi-search" @click="(e) => popoverBuscaRef?.toggle(e)" />
+          <Button v-if="hasPermission('livros.add_livro')" label="Incluir" size="small" icon="pi pi-plus" @click="incluir" />
         </div>
 
         <Popover ref="popoverBuscaRef" :style="{ width: '35%' }">
@@ -126,11 +126,11 @@
             <span v-else class="p-tag p-tag-danger">Não</span>
           </template>
         </Column>
-        <Column header="Ações" :style="{ width: '180px', maxWidth: '180px' }">
+        <Column v-if="hasPermission('livros.view_livro')" header="Ações" :style="{ width: '180px', maxWidth: '180px' }">
           <template #body="slotProps">
             <div class="col-acoes">
-              <Button label="Editar"size="small" @click="editarLivro(slotProps.data)" />
-              <Button label="Excluir" severity="danger" size="small" @click="excluirLivro(slotProps.data)" />
+              <Button v-if="hasPermission('livros.change_livro')" label="Editar" size="small" @click="editarLivro(slotProps.data)" />
+              <Button v-if="hasPermission('livros.delete_livro')" label="Excluir" severity="danger" size="small" @click="excluirLivro(slotProps.data)" />
             </div>
           </template>
         </Column>
@@ -156,7 +156,11 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useStore } from 'vuex'
 import { useToast } from 'primevue/usetoast'
+
+const store = useStore()
+const hasPermission = (perm) => store.getters.hasPermission(perm)
 import BaseDataTable from '@/components/BaseDataTable.vue'
 import BaseConfirmDialog from '@/components/BaseConfirmDialog.vue'
 import Column from 'primevue/column'

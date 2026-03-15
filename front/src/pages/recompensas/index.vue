@@ -14,8 +14,8 @@
     >
       <template #toolbar>
         <div class="table-toolbar" style="margin-top: 1rem;">
-          <Button label="Buscar" size="small" icon="pi pi-search" @click="(e) => popoverBuscaRef?.toggle(e)" />
-          <Button label="Incluir" size="small" icon="pi pi-plus" @click="abrirDialogIncluir" />
+          <Button v-if="hasPermission('leitor.view_recompensa')" label="Buscar" size="small" icon="pi pi-search" @click="(e) => popoverBuscaRef?.toggle(e)" />
+          <Button v-if="hasPermission('leitor.add_recompensa')" label="Incluir" size="small" icon="pi pi-plus" @click="abrirDialogIncluir" />
         </div>
 
         <Popover ref="popoverBuscaRef" :style="{ width: '35%' }">
@@ -80,11 +80,11 @@
             <span v-else class="p-tag p-tag-danger">Não</span>
           </template>
         </Column>
-        <Column header="Ações" :style="{ width: '160px', maxWidth: '160px' }">
+        <Column v-if="hasPermission('leitor.view_recompensa')" header="Ações" :style="{ width: '160px', maxWidth: '160px' }">
           <template #body="slotProps">
             <div class="col-acoes">
-              <Button label="Editar" size="small" @click="editarRecompensa(slotProps.data)" />
-              <Button label="Excluir" severity="danger" size="small" @click="excluirRecompensa(slotProps.data)" />
+              <Button v-if="hasPermission('leitor.change_recompensa')" label="Editar" size="small" @click="editarRecompensa(slotProps.data)" />
+              <Button v-if="hasPermission('leitor.delete_recompensa')" label="Excluir" severity="danger" size="small" @click="excluirRecompensa(slotProps.data)" />
             </div>
           </template>
         </Column>
@@ -113,8 +113,12 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useStore } from 'vuex'
 import { useToast } from 'primevue/usetoast'
 import BaseDataTable from '@/components/BaseDataTable.vue'
+
+const store = useStore()
+const hasPermission = (perm) => store.getters.hasPermission(perm)
 import BaseConfirmDialog from '@/components/BaseConfirmDialog.vue'
 import BaseSelect from '@/components/BaseSelect.vue'
 import Column from 'primevue/column'

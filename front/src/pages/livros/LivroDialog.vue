@@ -258,11 +258,13 @@
                     <template #body="slotProps">
                       <div class="dialog-col-acoes">
                         <Button
-                          label="Editar"                         
+                          v-if="hasPermission('livros.change_autor')"
+                          label="Editar"
                           size="small"
                           @click="editarAutor(slotProps.data)"
                         />
                         <Button
+                          v-if="hasPermission('livros.delete_autor')"
                           label="Excluir"
                           severity="danger"
                           size="small"
@@ -353,11 +355,13 @@
                     <template #body="slotProps">
                       <div class="dialog-col-acoes">
                         <Button
+                          v-if="hasPermission('livros.change_editora')"
                           label="Editar"
                           size="small"
                           @click="editarEditora(slotProps.data)"
                         />
                         <Button
+                          v-if="hasPermission('livros.delete_editora')"
                           label="Excluir"
                           severity="danger"
                           size="small"
@@ -448,11 +452,13 @@
                     <template #body="slotProps">
                       <div class="dialog-col-acoes">
                         <Button
+                          v-if="hasPermission('livros.change_categoria')"
                           label="Editar"
                           size="small"
                           @click="editarCategoria(slotProps.data)"
                         />
                         <Button
+                          v-if="hasPermission('livros.delete_categoria')"
                           label="Excluir"
                           severity="danger"
                           size="small"
@@ -486,7 +492,11 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useStore } from 'vuex'
 import Dialog from 'primevue/dialog'
+
+const store = useStore()
+const hasPermission = (perm) => store.getters.hasPermission(perm)
 import FloatLabel from 'primevue/floatlabel'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'

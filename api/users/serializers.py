@@ -4,6 +4,8 @@ from users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    permissions = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = User
         fields = (
@@ -12,7 +14,13 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'email',
             'is_superuser',
+            'permissions',
         )
+
+    def get_permissions(self, obj):
+        if not obj:
+            return []
+        return list(obj.get_all_permissions())
 
 
 class UserAdminSerializer(serializers.ModelSerializer):

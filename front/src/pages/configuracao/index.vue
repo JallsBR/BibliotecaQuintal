@@ -39,7 +39,7 @@
                 </Column>
                 <Column header="Ações" :style="{ width: '100px' }">
                   <template #body="slotProps">
-                    <Button label="Editar" size="small" @click="abrirEditarUsuario(slotProps.data)" />
+                    <Button v-if="hasPermission('users.change_user')" label="Editar" size="small" @click="abrirEditarUsuario(slotProps.data)" />
                   </template>
                 </Column>
               </template>
@@ -67,7 +67,7 @@
                 </Column>
                 <Column header="Ações" :style="{ width: '180px' }">
                   <template #body="slotProps">
-                    <Button label="Gerenciar usuários" size="small" @click="abrirGerenciarUsuarios(slotProps.data)" />
+                    <Button v-if="hasPermission('auth.change_group')" label="Gerenciar usuários" size="small" @click="abrirGerenciarUsuarios(slotProps.data)" />
                   </template>
                 </Column>
               </template>
@@ -77,7 +77,7 @@
         <TabPanel value="grupos">
           <div class="tab-content">
             <div class="table-toolbar">
-              <Button label="Novo grupo" size="small" icon="pi pi-plus" @click="abrirDialogGrupo" />
+              <Button v-if="hasPermission('auth.add_group')" label="Novo grupo" size="small" icon="pi pi-plus" @click="abrirDialogGrupo" />
             </div>
             <BaseDataTable
               :items="grupos"
@@ -98,8 +98,8 @@
                 <Column header="Ações" :style="{ width: '170px' }">
                   <template #body="slotProps">
                     <div class="col-acoes">
-                      <Button label="Editar" size="small" @click="editarGrupo(slotProps.data)" />
-                      <Button label="Excluir" severity="danger" size="small" @click="abrirConfirmacaoExcluir(slotProps.data)" />
+                      <Button v-if="hasPermission('auth.change_group')" label="Editar" size="small" @click="editarGrupo(slotProps.data)" />
+                      <Button v-if="hasPermission('auth.delete_group')" label="Excluir" severity="danger" size="small" @click="abrirConfirmacaoExcluir(slotProps.data)" />
                     </div>
                   </template>
                 </Column>
@@ -259,7 +259,11 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
+import { useStore } from 'vuex'
 import { useToast } from 'primevue/usetoast'
+
+const store = useStore()
+const hasPermission = (perm) => store.getters.hasPermission(perm)
 import Tabs from 'primevue/tabs'
 import TabList from 'primevue/tablist'
 import Tab from 'primevue/tab'
