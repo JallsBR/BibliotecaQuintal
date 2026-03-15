@@ -1,0 +1,13 @@
+---
+description: Usar documentação de contexto do projeto (backend e frontend) em docs/ai/
+alwaysApply: true
+---
+
+# Contexto de IA — Biblioteca Quintal
+
+Ao trabalhar neste repositório, use a documentação de contexto em **docs/ai/**:
+
+- **Backend (Django):** `docs/ai/backend-context.md` — estrutura da API, apps (users, livros, leitor), modelos, URLs, padrões DRF, convenções (pt-br, um arquivo por modelo em views).
+- **Frontend (Vue 3):** `docs/ai/frontend-context.md` — estrutura do front, rotas, store Vuex, serviços (APIService, livroService, leitorService), páginas, componentes, convenções.
+
+Índice dos contextos: `docs/ai/README.md`. Respeitar convenções (idioma pt-br, padrões de views/serializers no backend e de chamadas à API no frontend).
