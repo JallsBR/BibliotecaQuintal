@@ -15,6 +15,10 @@
         <i class="pi pi-book"></i>
         <span>Livros</span>
       </router-link>
+      <router-link to="/galeria" class="nav-link" active-class="nav-link--active">
+        <i class="pi pi-images"></i>
+        <span>Galeria</span>
+      </router-link>
       <router-link to="/recompensas" class="nav-link" active-class="nav-link--active">
         <i class="pi pi-gift"></i>
         <span>Recompensas</span>

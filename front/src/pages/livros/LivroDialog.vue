@@ -192,14 +192,39 @@
               <!-- Imagem -->
               <div class="dialog-field dialog-field--vertical">
                 <span class="dialog-label">Imagem</span>
-                <FileUpload
-                  mode="basic"
-                  accept="image/*"
-                  :maxFileSize="2000000"
-                  chooseLabel="Escolher imagem"
-                  @select="onImagemSelect"
-                />
-                <small v-if="form.imagemFile" class="dialog-file-name">{{ form.imagemFile.name }}</small>
+                <div class="dialog-row dialog-row--imagem">
+                  <div class="dialog-field dialog-field--imagem-url">
+                    <FloatLabel variant="on" class="dialog-input-wrap">
+                      <InputText
+                        id="livro-imagem-url"
+                        v-model="form.imagem_url"
+                        class="dialog-input"
+                        autocomplete="off"
+                        placeholder="https://exemplo.com/capa.jpg"
+                      />
+                      <label for="livro-imagem-url">URL da imagem (opcional)</label>
+                    </FloatLabel>
+                  </div>
+                  <div class="dialog-field dialog-field--imagem-atual-btn">
+                    <Button
+                      type="button"
+                      label="Imagem atual"
+                      :disabled="!imagemExistente"
+                      @click="abrirImagemAtual"
+                    />
+                  </div>
+                  <div class="dialog-field dialog-field--imagem-upload">
+                    <FileUpload
+                      mode="basic"
+                      accept="image/*"
+                      :maxFileSize="2000000"
+                      chooseLabel="Escolher imagem"
+                      style="margin-left: -12rem;"
+                      @select="onImagemSelect"
+                    />
+                    <small v-if="form.imagemFile" class="dialog-file-name">{{ form.imagemFile.name }}</small>
+                  </div>
+                </div>
               </div>
 
               <div class="dialog-actions dialog-actions--inside-tab">
@@ -497,6 +522,16 @@
       </Tabs>
     </div>
   </Dialog>
+  <Dialog
+    v-model:visible="imagemDialogVisible"
+    modal
+    header="Imagem atual do livro"
+    :style="{ width: '26rem' }"
+  >
+    <div class="dialog-imagem-atual-wrap" v-if="imagemExistente">
+      <img :src="imagemExistente" alt="Imagem atual do livro" class="dialog-imagem-atual" />
+    </div>
+  </Dialog>
 </template>
 
 <script setup>
@@ -605,6 +640,19 @@ const confirmDeleteCategoriaMessage = computed(() => {
 const toast = useToast()
 const loadingIsbn = ref(false)
 
+const imagemDialogVisible = ref(false)
+
+const imagemExistente = computed(() => {
+  const livro = props.livro
+  if (!livro) return null
+  return livro.imagem || livro.imagem_url || null
+})
+
+function abrirImagemAtual() {
+  if (!imagemExistente.value) return
+  imagemDialogVisible.value = true
+}
+
 function onAutorSelectAreaClick(e) {
   const t = e.target
   const isInput = t.tagName === 'INPUT'
@@ -656,7 +704,8 @@ function getFormDefault() {
     autores: [],
     editora: null,
     categorias: [],
-    imagemFile: null
+    imagemFile: null,
+    imagem_url: ''
   }
 }
 
@@ -681,7 +730,8 @@ function preencherFormComLivro(livro) {
     autores: Array.isArray(livro.autores) ? livro.autores : [],
     editora: livro.editora?.id ?? livro.editora ?? null,
     categorias: Array.isArray(livro.categorias) ? livro.categorias : [],
-    imagemFile: null
+    imagemFile: null,
+    imagem_url: livro.imagem_url ?? ''
   }
 }
 
@@ -1176,6 +1226,7 @@ function salvar() {
     autores: form.value.autores ?? [],
     editora: form.value.editora ?? null,
     categorias: form.value.categorias ?? [],
+    imagem_url: form.value.imagem_url || null
   }
   if (form.value.imagemFile) {
     payload.imagemFile = form.value.imagemFile
@@ -1258,6 +1309,36 @@ function salvar() {
 .dialog-row {
   display: flex;
   gap: 1rem;
+}
+
+.dialog-row--imagem {
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.dialog-field--imagem-url {
+  flex: 2;
+}
+
+.dialog-field--imagem-upload {
+  flex: 0 0 auto;
+}
+
+.dialog-field--imagem-atual-btn {
+  flex: 0 0 auto;
+}
+
+.dialog-imagem-atual-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dialog-imagem-atual {
+  max-width: 100%;
+  max-height: 360px;
+  border-radius: 8px;
+  object-fit: contain;
 }
 
 

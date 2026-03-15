@@ -285,7 +285,11 @@ function incluir() {
 async function onLivroSalvo(payload) {
   try {
     if (livroEditando.value && livroEditando.value.id) {
-      await livroService.livros.update(livroEditando.value.id, payload)
+      if (payload.imagemFile) {
+        await livroService.livros.updateWithFile(livroEditando.value.id, payload)
+      } else {
+        await livroService.livros.update(livroEditando.value.id, payload)
+      }
     } else {
       if (payload.imagemFile) {
         await livroService.livros.createWithFile(payload)

@@ -123,6 +123,31 @@ const livroService = {
       const response = await api.put(`${BASE}/livros/${id}/`, data)
       return response.data
     },
+    /** Atualiza livro enviando imagem via FormData (multipart/form-data). */
+    updateWithFile: async (id, payload) => {
+      const formData = new FormData()
+      const file = payload.imagemFile
+      if (file) {
+        formData.append('imagem', file)
+        delete payload.imagemFile
+      }
+      Object.entries(payload).forEach(([key, value]) => {
+        if (value === null || value === undefined || value === '') {
+          return
+        }
+        if (Array.isArray(value)) {
+          value.forEach((v) => {
+            formData.append(key, v)
+          })
+        } else {
+          formData.append(key, value)
+        }
+      })
+      const response = await api.put(`${BASE}/livros/${id}/`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      return response.data
+    },
     delete: async (id) => {
       await api.delete(`${BASE}/livros/${id}/`)
     }

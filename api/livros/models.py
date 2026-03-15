@@ -4,6 +4,10 @@ from users.models import User
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from decimal import Decimal
+from io import BytesIO
+from django.core.files.base import ContentFile
+from PIL import Image
+import os
 
 class Categoria(models.Model):
     nome = models.CharField(max_length=100, unique=True)
@@ -67,6 +71,7 @@ class Livro(models.Model):
     isbn = models.CharField(max_length=13, verbose_name='ISBN', blank=True, null=True)
     ativo = models.BooleanField(default=True, verbose_name='Ativo', blank=True, null=True)
     imagem = models.ImageField(upload_to='livros/', blank=True, null=True, verbose_name='Imagem')
+    imagem_url = models.URLField(blank=True, null=True, verbose_name='URL da Imagem')
     autores = models.ManyToManyField(Autor, verbose_name='Autores', blank=True)
     editora = models.ForeignKey(Editora, on_delete=models.CASCADE, verbose_name='Editora', blank=True, null=True)
     categorias = models.ManyToManyField(Categoria, verbose_name='Categorias', blank=True)
@@ -106,11 +111,14 @@ class Livro(models.Model):
     def save(self, *args, **kwargs):
         if self.qtd_total is not None and self.qtd_emprestados is not None:
             self.is_disponivel = (self.qtd_total - self.qtd_emprestados) > 0
-        try:
-            super().save(*args, **kwargs)
 
-            if self.photo:
-                img_path = self.photo.path
+        # Primeiro salva normalmente
+        super().save(*args, **kwargs)
+
+        # Otimiza a imagem se existir
+        if self.imagem:
+            try:
+                img_path = self.imagem.path
                 img = Image.open(img_path)
                 if img.mode in ("RGBA", "P"):
                     img = img.convert("RGB")
@@ -123,19 +131,18 @@ class Livro(models.Model):
                 bottom = (height + min_dim) / 2
                 img = img.crop((left, top, right, bottom))
 
-
                 img = img.resize((400, 400), Image.Resampling.LANCZOS)
 
                 buffer = BytesIO()
-                img.save(buffer, format='JPEG', quality=85, optimize=True)
+                img.save(buffer, format="JPEG", quality=85, optimize=True)
                 buffer.seek(0)
 
                 file_name = os.path.basename(img_path)
-                self.photo.save(file_name, ContentFile(buffer.read()), save=False)
+                self.imagem.save(file_name, ContentFile(buffer.read()), save=False)
 
-                super().save(update_fields=['photo'])
-        except Exception as e:
-            print(f"[ERRO] Falha ao otimizar imagem: {e}")
+                super().save(update_fields=["imagem"])
+            except Exception as e:
+                print(f"[ERRO] Falha ao otimizar imagem: {e}")
     
  
     class Meta:
