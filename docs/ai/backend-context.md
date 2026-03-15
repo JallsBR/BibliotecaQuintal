@@ -46,7 +46,7 @@ Base: `/api/v1/`
 
 | Prefixo        | Inclui (app) | Rotas |
 |----------------|--------------|--------|
-| `api/v1/auth/` | users        | signin, signup, token/refresh/, user, logout |
+| `api/v1/auth/` | users        | signin, signup, token/refresh/, user, logout, **groups/** (list-create), **groups/<pk>/** (retrieve-update-destroy), **groups/<pk>/users/** (GET/PUT usuários do grupo), **permissions/** (list, sem paginação), **users/** (list), **users/<pk>/** (retrieve, PATCH) — rotas de grupos/permissoes/usuários apenas **IsSuperuser** |
 | `api/v1/livros/` | livros     | categorias/, autores/, editoras/, livros/ (cada um com list-create e retrieve-update-destroy por `<int:pk>`) |
 | `api/v1/leitor/` | leitor     | recompensas/, leitores/, emprestimos/, reservas/ (mesmo padrão) |
 
@@ -59,8 +59,9 @@ Base: `/api/v1/`
 
 ### users
 
-- **User** (AbstractUser): `email` (unique), herda username, password, etc.  
+- **User** (AbstractUser): `email` (unique), herda username, password, groups (M2M Group), etc.  
   - `AUTH_USER_MODEL = 'users.User'`
+- **Auth (Django):** Group, Permission — usados para grupos e permissões (API de configuração para superuser).
 
 ### livros
 
@@ -87,7 +88,7 @@ Base: `/api/v1/`
 - Para cada recurso:
   - **ListCreate:** `{Modelo}ListCreateView` (generics.ListCreateAPIView)  
   - **Detalhe/edição/remoção:** `{Modelo}RetrieveUpdateDestroyView` (generics.RetrieveUpdateDestroyAPIView)  
-- **Permissão:** `IsAuthenticated` em todas as views de livros e leitor.  
+- **Permissão:** `IsAuthenticated` em todas as views de livros e leitor; **IsSuperuser** nas views de configuração (users: `group.py`, `group_users.py`, `permission.py`, `user_config.py`).  
 - **Filtros/ordenação:** `DjangoFilterBackend` + `OrderingFilter`; `filterset_fields` e `ordering_fields`/`ordering` por view.  
 - **Delete:** método `destroy()` sobrescrito retornando mensagem de sucesso em português (ex.: "Autor removido com sucesso.").  
 - **Queryset:** `get_queryset()` retornando `Modelo.objects.all()`; `get_object()` com `get_object_or_404(queryset, pk=self.kwargs["pk"])`.
@@ -98,6 +99,7 @@ Base: `/api/v1/`
 
 - Um serializer por modelo (ex.: `AutorSerializer`, `EmprestimoSerializer`).  
 - Uso típico: `fields = '__all__'`, `read_only_fields = ['created_at', 'updated_at']` quando fizer sentido.
+- **users:** `UserSerializer` — usado em signin/GetUser; inclui `permissions` (SerializerMethodField com `user.get_all_permissions()`). `UserAdminSerializer` — listagem/edição de usuários (grupos, is_staff, groups_detail). `GroupSerializer` (serializers_group) — name, permissions, permissions_detail, user_count. `PermissionSerializer` — id, name, codename, content_type_name.
 
 ---
 

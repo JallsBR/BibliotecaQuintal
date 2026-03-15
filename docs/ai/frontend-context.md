@@ -23,7 +23,7 @@ front/
 │   ├── components/       # BaseDataTable, BaseSelect, BaseConfirmDialog, NavBar, FooterApp, AuthUserCard
 │   ├── constants/       # pagination.js
 │   ├── layouts/         # AuthLayout.vue (app autenticada), PublicLayout.vue (signin/signup)
-│   ├── pages/           # Uma pasta por módulo: home, livros, leitores, emprestimos, reservas, recompensas, auth
+│   ├── pages/           # Uma pasta por módulo: home, livros, leitores, emprestimos, reservas, recompensas, configuracao, auth
 │   ├── router/          # index.js — rotas e beforeEach (requiresAuth)
 │   ├── services/        # APIService.js, livroService.js, leitorService.js
 │   ├── store/           # index.js — Vuex (user, token, login, logout)
@@ -42,14 +42,15 @@ front/
 - **Públicas (PublicLayout):** `/signin` (signin), `/signup` (signup).  
 - **Logout:** `/logout` — componente que despacha logout e redireciona.  
 - **Autenticadas (AuthLayout, meta requiresAuth):** `/` (home), `/livros`, `/leitores`, `/emprestimos`, `/reservas`, `/recompensas`.  
-- **Guard:** `beforeEach` — se `requiresAuth` e não autenticado → `{ name: 'signin' }`; se já autenticado e rota signin/signup → `{ name: 'home' }`.
+- **Configuração (superuser):** `/configuracao` — `meta.requiresSuperuser: true`; guard redireciona não-superuser para home.  
+- **Guard:** `beforeEach` — se `requiresAuth` e não autenticado → `{ name: 'signin' }`; se `requiresSuperuser` e usuário não superuser → `{ name: 'home' }`; se já autenticado e rota signin/signup → `{ name: 'home' }`.
 
 ---
 
 ## Store (Vuex)
 
-- **State:** `user`, `token`, `loading`. Persistência em `localStorage` (`user`, `access`, `refresh`).  
-- **Getters:** `isAuthenticated`, `getUser`, `isLoading`.  
+- **State:** `user`, `token`, `loading`. Persistência em `localStorage` (`user`, `access`, `refresh`). O objeto `user` inclui `permissions` (lista de strings `app_label.codename`) retornada pelo backend.  
+- **Getters:** `isAuthenticated`, `getUser`, `isLoading`, `isSuperuser`, `hasPermission(perm)` — retorna true se superuser ou se `perm` está em `user.permissions`.  
 - **Actions:** `login({ email, password })` (POST `/auth/signin`, commit SET_AUTH), `logout` (commit LOGOUT e `window.location.href = '/signin'`).  
 - **Mutations:** SET_LOADING, SET_AUTH (user + access + refresh no state e localStorage), LOGOUT (limpa state e localStorage).
 
@@ -59,6 +60,7 @@ front/
 
 - **APIService.js:** instância Axios com `baseURL` = `/api/v1` em dev ou `http://127.0.0.1:8000/api/v1`. Interceptor de request adiciona `Authorization: Bearer <access>`. Interceptor de response: em 401 tenta refresh com POST `/auth/token/refresh/`; se falhar chama `handleLogout` (commit LOGOUT + push signin).  
 - **livroService.js / leitorService.js:** funções que usam `api` (APIService) para CRUD de livros, categorias, autores, editoras, leitores, empréstimos, reservas, recompensas (conforme endpoints do backend).  
+- **configService.js:** `groups.getAll/getById/create/update/delete`, `groups.getUsers(groupId)` e `groups.setUsers(groupId, userIds)`, `permissions.getAll`, `users.getAll/getById/update` (PATCH). Base `/auth/`.  
 - **Paginação:** constante em `constants/pagination.js`; listagens usam parâmetros de query da API (page, page_size ou equivalente).
 
 ---
@@ -68,15 +70,17 @@ front/
 | Rota        | Página principal      | Observação |
 |------------|------------------------|------------|
 | `/`        | home/index.vue         | Dashboard / início |
-| `/livros`  | livros/index.vue       | Listagem + LivroDialog (criar/editar) |
-| `/leitores`| leitores/index.vue     | Listagem + LeitorDialog |
-| `/emprestimos` | emprestimos/index.vue | Listagem + EmprestimoDialog |
-| `/reservas`| reservas/index.vue     | Listagem + ReservaDialog |
-| `/recompensas` | recompensas/index.vue | Listagem (recompensas) |
+| `/livros`  | livros/index.vue       | Listagem + LivroDialog (criar/editar). Botões por permissão: view_livro, add_livro, change_livro, delete_livro. |
+| `/leitores`| leitores/index.vue     | Listagem + LeitorDialog. Permissões leitor.view_leitor, add_leitor, change_leitor, delete_leitor. |
+| `/emprestimos` | emprestimos/index.vue | Listagem + EmprestimoDialog. Permissões leitor.view_emprestimo, add_emprestimo, change_emprestimo. |
+| `/reservas`| reservas/index.vue     | Listagem + ReservaDialog. Permissões leitor.view_reserva, add_reserva, change_reserva. |
+| `/recompensas` | recompensas/index.vue | Listagem. Permissões leitor.view_recompensa, add_recompensa, change_recompensa, delete_recompensa. |
+| `/configuracao` | configuracao/index.vue | **Somente superuser.** Tabs: Usuários (editar grupos/staff), Grupos do usuário (gerenciar usuários por grupo), Grupos (CRUD grupo; Editar só nome; botão Permissões abre dialog com checkboxes em 3 colunas, termos em pt-br), Permissões (lista read-only). |
 | `/signin`  | auth/SiginPage.vue     | Login |
 | `/signup`  | auth/SigupPage.vue     | Cadastro de usuário |
 
-- Diálogos de criação/edição (ex.: LivroDialog, LeitorDialog) usam PrimeVue (Dialog, inputs, botões) e chamam os serviços correspondentes; mensagens e labels em pt-br.
+- Diálogos de criação/edição (ex.: LivroDialog, LeitorDialog) usam PrimeVue (Dialog, inputs, botões) e chamam os serviços correspondentes; mensagens e labels em pt-br.  
+- **Permissões na UI:** em todas as listagens e colunas de ação, botões (Buscar, Incluir, Editar, Excluir, etc.) usam `v-if="hasPermission('app.codename')"` (ex.: `livros.change_livro`, `leitor.delete_leitor`). Store getter `hasPermission(perm)`; superuser vê tudo.
 
 ---
 
@@ -85,7 +89,7 @@ front/
 - **BaseDataTable:** tabela PrimeVue (DataTable) reutilizável com paginação e ações.  
 - **BaseSelect:** select (dropdown) reutilizável.  
 - **BaseConfirmDialog:** diálogo de confirmação (ex.: exclusão).  
-- **NavBar:** menu da aplicação autenticada (links para home, livros, leitores, etc.; usuário e logout).  
+- **NavBar:** menu da aplicação autenticada (links para home, livros, leitores, etc.; link "Configuração" apenas se `isSuperuser`; usuário e logout).  
 - **FooterApp:** rodapé.  
 - **AuthUserCard:** exibição do usuário logado (ex.: no layout).
 

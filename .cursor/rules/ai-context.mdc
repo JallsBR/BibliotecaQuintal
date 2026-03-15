@@ -7,7 +7,7 @@ alwaysApply: true
 
 Ao trabalhar neste repositório, use a documentação de contexto em **docs/ai/**:
 
-- **Backend (Django):** `docs/ai/backend-context.md` — estrutura da API, apps (users, livros, leitor), modelos, URLs, padrões DRF, convenções (pt-br, um arquivo por modelo em views).
-- **Frontend (Vue 3):** `docs/ai/frontend-context.md` — estrutura do front, rotas, store Vuex, serviços (APIService, livroService, leitorService), páginas, componentes, convenções.
+- **Backend (Django):** `docs/ai/backend-context.md` — estrutura da API, apps (users, livros, leitor), modelos, URLs (incl. auth: grupos, permissões, usuários), padrões DRF, permissões (IsSuperuser), convenções (pt-br, um arquivo por modelo em views).
+- **Frontend (Vue 3):** `docs/ai/frontend-context.md` — estrutura do front, rotas (incl. /configuracao para superuser), store Vuex (hasPermission, isSuperuser), serviços (APIService, livroService, leitorService, configService), páginas (incl. Configuração com tabs Grupos/Permissões/Usuários/Grupos do usuário), botões por permissão Django, componentes, convenções.
 
 Índice dos contextos: `docs/ai/README.md`. Respeitar convenções (idioma pt-br, padrões de views/serializers no backend e de chamadas à API no frontend).

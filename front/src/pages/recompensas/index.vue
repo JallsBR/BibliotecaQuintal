@@ -80,7 +80,7 @@
             <span v-else class="p-tag p-tag-danger">Não</span>
           </template>
         </Column>
-        <Column v-if="hasPermission('leitor.view_recompensa')" header="Ações" :style="{ width: '160px', maxWidth: '160px' }">
+        <Column v-if="hasPermission('leitor.view_recompensa')" header="Ações" :style="{ width: '100px', maxWidth: '100px' }">
           <template #body="slotProps">
             <div class="col-acoes">
               <Button v-if="hasPermission('leitor.change_recompensa')" label="Editar" size="small" @click="editarRecompensa(slotProps.data)" />

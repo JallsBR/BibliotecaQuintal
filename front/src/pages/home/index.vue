@@ -20,6 +20,16 @@
         </div>
         <i class="pi pi-chevron-right home-card-arrow"></i>
       </RouterLink>
+      <div v-if="countEmprestimosEmAtraso > 0" class="home-card home-card--no-link">
+        <div class="home-card-icon home-card-icon--atraso">
+          <i class="pi pi-book"></i>
+        </div>
+        <div class="home-card-body">
+          <h3 class="home-card-title">Devoluções em atraso</h3>
+          <p class="home-card-descricao">Empréstimos com data de devolução já passada e ainda não devolvidos</p>
+          <p class="home-card-count">{{ countEmprestimosEmAtraso }} em atraso</p>
+        </div>
+      </div>
     </div>
 
     <div class="home-loading" v-else>
@@ -31,42 +41,28 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import leitorService from '@/services/leitorService'
-import livroService from '@/services/livroService'
+import { getStats } from '@/services/dashboardService'
 
 const loading = ref(true)
 const countLivros = ref(0)
 const countLeitores = ref(0)
 const countEmprestimosAbertos = ref(0)
+const countEmprestimosEmAtraso = ref(0)
 const countReservas = ref(0)
 const countRecompensas = ref(0)
-
-async function getCount(service, params = {}) {
-  try {
-    const data = await service.getAll({ ...params, page_size: 1 })
-    return data?.count ?? (Array.isArray(data) ? data.length : data?.results?.length ?? 0)
-  } catch {
-    return 0
-  }
-}
 
 async function carregarContagens() {
   loading.value = true
   try {
-    const [livros, leitores, emprestimos, reservas, recompensas] = await Promise.all([
-      getCount(livroService.livros),
-      getCount(leitorService.leitores),
-      getCount(leitorService.emprestimos, { devolvido: false }),
-      getCount(leitorService.reservas, { ativo: true }),
-      getCount(leitorService.recompensas)
-    ])
-    countLivros.value = livros
-    countLeitores.value = leitores
-    countEmprestimosAbertos.value = emprestimos
-    countReservas.value = reservas
-    countRecompensas.value = recompensas
+    const stats = await getStats()
+    countLivros.value = stats.livros
+    countLeitores.value = stats.leitores
+    countEmprestimosAbertos.value = stats.emprestimos_abertos
+    countEmprestimosEmAtraso.value = stats.emprestimos_em_atraso
+    countReservas.value = stats.reservas_ativas
+    countRecompensas.value = stats.recompensas
   } catch (e) {
-    console.error('Erro ao carregar contagens:', e)
+    console.error('Erro ao carregar contagens do dashboard:', e)
   } finally {
     loading.value = false
   }
@@ -206,6 +202,21 @@ onMounted(carregarContagens)
   color: var(--texto-secundario);
   font-size: 1rem;
   flex-shrink: 0;
+}
+
+.home-card--no-link {
+  cursor: default;
+  pointer-events: auto;
+}
+
+.home-card--no-link:hover {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.home-card-icon--atraso {
+  background: var(--p-red-500, #ef4444);
+  color: white;
 }
 
 .home-loading {

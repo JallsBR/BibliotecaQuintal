@@ -4,8 +4,8 @@ Sistema de gestão de biblioteca com **backend Django (REST)** e **frontend Vue 
 
 ## Estrutura do projeto
 
-- **`api/`** — Backend Django (API REST, JWT, MySQL). Ver `docs/ai/backend-context.md`.
-- **`front/`** — Frontend Vue 3 + Vite + PrimeVue. Ver `docs/ai/frontend-context.md`.
+- **`api/`** — Backend Django (API REST, JWT, MySQL). Inclui API de auth para superuser: grupos, permissões, usuários. Ver `docs/ai/backend-context.md`.
+- **`front/`** — Frontend Vue 3 + Vite + PrimeVue. Inclui página Configuração (superuser), controle de botões por permissão Django e serviços de configuração. Ver `docs/ai/frontend-context.md`.
 - **`docs/ai/`** — Documentos de contexto para assistentes de IA (backend e frontend).
 
 ## Desenvolvimento com Docker
@@ -71,6 +71,6 @@ cd api && python manage.py migrate && python manage.py runserver
 
 ## Documentação para IA
 
-- **Backend:** `docs/ai/backend-context.md` — modelos, URLs, padrões Django/DRF.  
-- **Frontend:** `docs/ai/frontend-context.md` — rotas, store, serviços, componentes Vue.  
+- **Backend:** `docs/ai/backend-context.md` — modelos, URLs (incl. auth: grupos, permissões, usuários), padrões Django/DRF, IsSuperuser.  
+- **Frontend:** `docs/ai/frontend-context.md` — rotas (incl. /configuracao), store (hasPermission, isSuperuser), serviços (configService), botões por permissão, componentes Vue.  
 - **Índice:** `docs/ai/README.md` — visão geral dos contextos.
