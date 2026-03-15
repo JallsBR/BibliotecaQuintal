@@ -112,10 +112,25 @@ class Livro(models.Model):
         if self.qtd_total is not None and self.qtd_emprestados is not None:
             self.is_disponivel = (self.qtd_total - self.qtd_emprestados) > 0
 
-        # Primeiro salva normalmente
+        # Guarda referência da imagem antiga para eventual limpeza
+        old_image = None
+        if self.pk:
+            try:
+                old_image = Livro.objects.get(pk=self.pk).imagem
+            except Livro.DoesNotExist:
+                old_image = None
+
+        # Salva normalmente (inclui possível nova imagem)
         super().save(*args, **kwargs)
 
-        # Otimiza a imagem se existir
+        # Se a imagem foi trocada, remove o arquivo antigo do storage
+        if old_image and old_image.name and old_image != self.imagem:
+            try:
+                old_image.storage.delete(old_image.name)
+            except Exception as e:
+                print(f"[ERRO] Falha ao remover imagem antiga: {e}")
+
+        # Otimiza a imagem atual (apenas sobrescreve o mesmo arquivo)
         if self.imagem:
             try:
                 img_path = self.imagem.path
@@ -133,14 +148,8 @@ class Livro(models.Model):
 
                 img = img.resize((400, 400), Image.Resampling.LANCZOS)
 
-                buffer = BytesIO()
-                img.save(buffer, format="JPEG", quality=85, optimize=True)
-                buffer.seek(0)
-
-                file_name = os.path.basename(img_path)
-                self.imagem.save(file_name, ContentFile(buffer.read()), save=False)
-
-                super().save(update_fields=["imagem"])
+                # Sobrescreve o arquivo existente, sem criar um novo nome
+                img.save(img_path, format="JPEG", quality=85, optimize=True)
             except Exception as e:
                 print(f"[ERRO] Falha ao otimizar imagem: {e}")
     
