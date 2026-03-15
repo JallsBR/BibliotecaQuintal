@@ -95,10 +95,11 @@
                     {{ (slotProps.data.permissions_detail?.length ?? 0) }} permissão(ões)
                   </template>
                 </Column>
-                <Column header="Ações" :style="{ width: '170px' }">
+                <Column header="Ações" :style="{ width: '280px' }">
                   <template #body="slotProps">
                     <div class="col-acoes">
                       <Button v-if="hasPermission('auth.change_group')" label="Editar" size="small" @click="editarGrupo(slotProps.data)" />
+                      <Button v-if="hasPermission('auth.change_group')" label="Permissões" size="small" @click="abrirDialogPermissoesGrupo(slotProps.data)" />
                       <Button v-if="hasPermission('auth.delete_group')" label="Excluir" severity="danger" size="small" @click="abrirConfirmacaoExcluir(slotProps.data)" />
                     </div>
                   </template>
@@ -148,23 +149,38 @@
             </FloatLabel>
           </div>
         </div>
-        <div class="dialog-row">
-          <div class="dialog-field dialog-field--full">
-            <label class="dialog-label">Permissões</label>
-            <MultiSelect
-              v-model="formGrupo.permissions"
-              :options="permissoes"
-              optionLabel="name"
-              optionValue="id"
-              placeholder="Selecione as permissões"
-              class="dialog-input w-full"
-              :filter="true"
-              filterPlaceholder="Buscar..."
+        <div class="dialog-row dialog-row--acoes">
+          <Button type="button" label="Salvar" size="small" :loading="salvando" @click="salvarGrupo" />
+        </div>
+      </div>
+    </Dialog>
+
+    <Dialog
+      v-model:visible="dialogPermissoesGrupoVisible"
+      :header="grupoPermissoesEditando ? `Permissões: ${grupoPermissoesEditando.name}` : 'Permissões'"
+      modal
+      :style="{ width: '70rem', }"
+      :contentStyle="{ overflow: 'visible', maxHeight: '80vh' }"
+      @hide="limparDialogPermissoesGrupo"
+    >
+      <div class="dialog-body dialog-permissoes-body">
+        <div class="dialog-permissoes-lista dialog-permissoes-grid">
+          <div
+            v-for="perm in permissoes"
+            :key="perm.id"
+            class="dialog-permissao-item"
+          >
+            <Checkbox
+              :modelValue="formPermissoesGrupo.includes(perm.id)"
+              :binary="true"
+              :inputId="`perm-${perm.id}`"
+              @update:modelValue="(v) => togglePermissaoGrupo(perm.id, v)"
             />
+            <label :for="`perm-${perm.id}`" class="dialog-permissao-label">{{ nomePermissaoPt(perm.name) }}</label>
           </div>
         </div>
         <div class="dialog-row dialog-row--acoes">
-          <Button type="button" label="Salvar" size="small" :loading="salvando" @click="salvarGrupo" />
+          <Button type="button" label="Salvar" size="small" :loading="salvandoPermissoesGrupo" @click="salvarPermissoesGrupo" />
         </div>
       </div>
     </Dialog>
@@ -304,6 +320,10 @@ const grupoUsuariosEditando = ref(null)
 const formGrupoUsuarios = ref({ user_ids: [] })
 const listaUsuariosParaGrupo = ref([])
 const salvandoGrupoUsuarios = ref(false)
+const dialogPermissoesGrupoVisible = ref(false)
+const grupoPermissoesEditando = ref(null)
+const formPermissoesGrupo = ref([])
+const salvandoPermissoesGrupo = ref(false)
 
 const permissoesAgrupadas = computed(() => permissoes.value)
 const gruposParaUsuario = computed(() => grupos.value)
@@ -346,10 +366,8 @@ function abrirDialogGrupo() {
 
 function editarGrupo(grupo) {
   grupoEditando.value = grupo
-  formGrupo.value = {
-    name: grupo.name ?? '',
-    permissions: (grupo.permissions ?? []).map((p) => (typeof p === 'object' ? p.id : p))
-  }
+  const permIds = (grupo.permissions_detail ?? grupo.permissions ?? []).map((p) => (typeof p === 'object' ? p.id : p))
+  formGrupo.value = { name: grupo.name ?? '', permissions: permIds }
   dialogGrupoVisible.value = true
 }
 
@@ -366,7 +384,7 @@ async function salvarGrupo() {
   }
   salvando.value = true
   try {
-    const payload = { name: nome, permissions: formGrupo.value.permissions ?? [] }
+    const payload = { name: nome, permissions: grupoEditando.value ? (formGrupo.value.permissions ?? []) : [] }
     if (grupoEditando.value?.id) {
       await configService.groups.update(grupoEditando.value.id, payload)
       toast.add({ severity: 'success', summary: 'Grupo atualizado', detail: 'O grupo foi atualizado com sucesso.', life: 3000 })
@@ -419,6 +437,79 @@ async function confirmarExclusao() {
 function cancelarExclusao() {
   confirmDeleteVisible.value = false
   grupoParaExcluir.value = null
+}
+
+function nomePermissaoPt(name) {
+  if (!name || typeof name !== 'string') return name
+  const modeloPt = {
+    livro: 'Livro',
+    autor: 'Autor',
+    editora: 'Editora',
+    categoria: 'Categoria',
+    leitor: 'Leitor',
+    emprestimo: 'Empréstimo',
+    reserva: 'Reserva',
+    recompensa: 'Recompensa',
+    user: 'Usuário',
+    group: 'Grupo',
+    permission: 'Permissão',
+    contenttype: 'Tipo de conteúdo',
+    logentry: 'Registro de log'
+  }
+  let s = name
+    .replace(/^Can add\s+/i, 'Pode adicionar ')
+    .replace(/^Can change\s+/i, 'Pode alterar ')
+    .replace(/^Can delete\s+/i, 'Pode excluir ')
+    .replace(/^Can view\s+/i, 'Pode visualizar ')
+  const modelo = s.split(/\s+/).pop()?.toLowerCase()
+  if (modelo && modeloPt[modelo]) s = s.replace(new RegExp(`\\b${modelo}\\b`, 'i'), modeloPt[modelo])
+  return s
+}
+
+function abrirDialogPermissoesGrupo(grupo) {
+  grupoPermissoesEditando.value = grupo
+  const permIds = (grupo.permissions_detail ?? grupo.permissions ?? []).map((p) => (typeof p === 'object' ? p.id : p))
+  formPermissoesGrupo.value = [...permIds]
+  dialogPermissoesGrupoVisible.value = true
+}
+
+function togglePermissaoGrupo(permId, checked) {
+  if (checked) {
+    if (!formPermissoesGrupo.value.includes(permId)) formPermissoesGrupo.value = [...formPermissoesGrupo.value, permId]
+  } else {
+    formPermissoesGrupo.value = formPermissoesGrupo.value.filter((id) => id !== permId)
+  }
+}
+
+function limparDialogPermissoesGrupo() {
+  grupoPermissoesEditando.value = null
+  formPermissoesGrupo.value = []
+}
+
+async function salvarPermissoesGrupo() {
+  if (!grupoPermissoesEditando.value?.id) return
+  salvandoPermissoesGrupo.value = true
+  try {
+    await configService.groups.update(grupoPermissoesEditando.value.id, {
+      name: grupoPermissoesEditando.value.name,
+      permissions: formPermissoesGrupo.value
+    })
+    toast.add({ severity: 'success', summary: 'Permissões atualizadas', detail: 'As permissões do grupo foram salvas.', life: 3000 })
+    dialogPermissoesGrupoVisible.value = false
+    await carregarGrupos()
+  } catch (e) {
+    console.error('Erro ao salvar permissões do grupo:', e)
+    const detail = e?.response?.data
+      ? typeof e.response.data === 'object'
+        ? Object.entries(e.response.data)
+            .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(' ') : v}`)
+            .join(' | ')
+        : e.response.data
+      : 'Não foi possível salvar as permissões.'
+    toast.add({ severity: 'error', summary: 'Erro ao salvar', detail, life: 5000 })
+  } finally {
+    salvandoPermissoesGrupo.value = false
+  }
 }
 
 async function carregarUsuarios() {
@@ -633,5 +724,37 @@ onMounted(() => {
 .dialog-readonly {
   font-size: 0.9375rem;
   color: var(--texto-secundario);
+}
+
+.dialog-permissoes-body {
+  max-height: 60vh;
+}
+
+.dialog-permissoes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: auto;
+  max-height: 50vh;
+  padding-right: 0.25rem;
+}
+
+.dialog-permissoes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem 1rem;
+}
+
+.dialog-permissao-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dialog-permissao-label {
+  font-size: 0.9375rem;
+  color: var(--texto-primario);
+  cursor: pointer;
+  user-select: none;
 }
 </style>
