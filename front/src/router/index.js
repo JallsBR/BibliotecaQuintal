@@ -8,6 +8,7 @@ import LeitoresPage from '../pages/leitores/index.vue'
 import EmprestimosPage from '../pages/emprestimos/index.vue'
 import ReservasPage from '../pages/reservas/index.vue'
 import RecompensasPage from '../pages/recompensas/index.vue'
+import ConfiguracaoPage from '../pages/configuracao/index.vue'
 import SiginPage from '../pages/auth/SiginPage.vue'
 import SigupPage from '../pages/auth/SigupPage.vue'
 import store from '../store'
@@ -78,6 +79,12 @@ const routes = [
         path: 'recompensas',
         name: 'recompensas',
         component: RecompensasPage
+      },
+      {
+        path: 'configuracao',
+        name: 'configuracao',
+        component: ConfiguracaoPage,
+        meta: { requiresAuth: true, requiresSuperuser: true }
       }
     ]
   }
@@ -90,10 +97,15 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const requiresSuperuser = to.matched.some((record) => record.meta.requiresSuperuser)
   const isAuthenticated = store.getters.isAuthenticated
+  const isSuperuser = store.getters.isSuperuser
 
   if (requiresAuth && !isAuthenticated) {
     return { name: 'signin' }
+  }
+  if (requiresSuperuser && !isSuperuser) {
+    return { name: 'home' }
   }
   if ((to.name === 'signin' || to.name === 'signup') && isAuthenticated) {
     return { name: 'home' }

@@ -433,8 +433,8 @@
                   <template #columns>
                     <Column field="recompensa_nome" header="Nome" sortable />
                     <Column field="recompensa_descricao" header="Descrição" sortable />
-                    <Column field="recompensa_pontuacao" header="Pontuação" sortable :style="{ width: '100px', maxWidth: '100px' }" />
-                    <Column field="data_resgate" header="Data resgate" sortable :style="{ width: '120px', maxWidth: '120px' }">
+                    <Column field="recompensa_pontuacao" header="Pontuação" sortable :style="{ width: '150px', maxWidth: '150px' }" />
+                    <Column field="data_resgate" header="Data resgate" sortable :style="{ width: '150px', maxWidth: '150px' }">
                       <template #body="slotProps">
                         {{ formatarApenasData(slotProps.data.data_resgate) }}
                       </template>

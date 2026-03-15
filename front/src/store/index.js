@@ -11,7 +11,8 @@ export default createStore({
   getters: {
     isAuthenticated: state => !!state.token,
     getUser: state => state.user,
-    isLoading: state => state.loading
+    isLoading: state => state.loading,
+    isSuperuser: state => !!state.user?.is_superuser
   },
 
   mutations: {

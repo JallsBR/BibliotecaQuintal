@@ -64,8 +64,8 @@
             {{ formatarTelefone(slotProps.data.telefone) }}
           </template>
         </Column>
-        <Column field="pontuacao_atual" header="Pontuação" sortable :style="{ width: '100px', maxWidth: '100px' }" />
-        <Column field="ativo" header="Ativo" sortable :style="{ width: '90px', maxWidth: '90px' }">
+        <Column field="pontuacao_atual" header="Pontuação" sortable :style="{ width: '150px', maxWidth: '150px' }" />
+        <Column field="ativo" header="Ativo" sortable :style="{ width: '150px', maxWidth: '150px' }">
           <template #body="slotProps">
             <span v-if="slotProps.data.ativo" class="p-tag p-tag-success">Sim</span>
             <span v-else class="p-tag p-tag-danger">Não</span>

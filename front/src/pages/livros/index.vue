@@ -118,10 +118,9 @@
           <template #body="slotProps">
             {{ slotProps.data.categoria_nome ?? slotProps.data.categoria?.nome ?? slotProps.data.categoria ?? '' }}
           </template>
-        </Column>
-        <Column field="qtd_paginas" header="Qtd Páginas" sortable :style="{ width: '115px', maxWidth: '115px' }" />
-        <Column field="qtd_disponivel" header="Qtd Disponível" sortable :style="{ width: '115px', maxWidth: '115px' }" />
-        <Column field="is_disponivel" header="Disponível" sortable :style="{ width: '115px', maxWidth: '115px' }">
+        </Column>       
+        <Column field="qtd_disponivel" header="Qtd Disponível" sortable :style="{ width: '130px', maxWidth: '130px' }" />
+        <Column field="is_disponivel" header="Disponível" sortable :style="{ width: '130px', maxWidth: '130px' }">
           <template #body="slotProps">
             <span v-if="slotProps.data.is_disponivel" class="p-tag p-tag-success">Sim</span>
             <span v-else class="p-tag p-tag-danger">Não</span>

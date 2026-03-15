@@ -31,6 +31,15 @@
         <i class="pi pi-clock"></i>
         <span>Reservas</span>
       </router-link>
+      <router-link
+        v-if="isSuperuser"
+        to="/configuracao"
+        class="nav-link"
+        active-class="nav-link--active"
+      >
+        <i class="pi pi-cog"></i>
+        <span>Configuração</span>
+      </router-link>
     </nav>
 
     <div class="navbar-separator" role="separator"></div>
@@ -86,7 +95,9 @@ export default {
       temaAtual.value = proximo
     }
 
-    return { userName, logout, temaAtual, toggleTema, logoNavBar }
+    const isSuperuser = computed(() => store.getters.isSuperuser)
+
+    return { userName, logout, temaAtual, toggleTema, logoNavBar, isSuperuser }
   }
 }
 </script>
