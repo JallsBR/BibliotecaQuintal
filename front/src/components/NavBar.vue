@@ -15,6 +15,10 @@
         <i class="pi pi-book"></i>
         <span>Livros</span>
       </router-link>
+      <router-link to="/recompensas" class="nav-link" active-class="nav-link--active">
+        <i class="pi pi-gift"></i>
+        <span>Recompensas</span>
+      </router-link>
       <router-link to="/leitores" class="nav-link" active-class="nav-link--active">
         <i class="pi pi-user"></i>
         <span>Leitores</span>
@@ -26,10 +30,6 @@
       <router-link to="/reservas" class="nav-link" active-class="nav-link--active">
         <i class="pi pi-clock"></i>
         <span>Reservas</span>
-      </router-link>
-      <router-link to="/recompensas" class="nav-link" active-class="nav-link--active">
-        <i class="pi pi-gift"></i>
-        <span>Recompensas</span>
       </router-link>
     </nav>
 
