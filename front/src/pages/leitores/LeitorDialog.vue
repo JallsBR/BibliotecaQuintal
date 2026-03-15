@@ -4,7 +4,7 @@
     modal
     header="Leitor"
     :style="{ width: '65rem' }"
-    :contentStyle="{ overflow: 'visible' }"
+    :contentStyle="{ overflowY: 'auto', maxHeight: '100vh' }"
     @hide="aoFechar"
     @show="aoAbrirDialog"
   >

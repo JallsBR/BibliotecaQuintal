@@ -4,7 +4,7 @@
     modal
     header="Incluir Informações do Livro"
     :style="{ width: '65rem' }"
-    :contentStyle="{ overflow: 'visible' }"
+    :contentStyle="{ overflowY: 'auto', maxHeight: '100vh' }"
     @hide="limparFormulario"
     @show="carregarOpcoes"
   >
@@ -531,6 +531,7 @@
     modal
     header="Imagem atual do livro"
     :style="{ width: '26rem' }"
+    :contentStyle="{ overflowY: 'auto', maxHeight: '100vh' }"
   >
     <div class="dialog-imagem-atual-wrap" v-if="imagemExistente">
       <img :src="imagemExistente" alt="Imagem atual do livro" class="dialog-imagem-atual" />
@@ -1223,6 +1224,9 @@ function salvar() {
 
 .dialog-tabs :deep(.p-tabs-panels) {
   padding-top: 0.5rem;
+  /* evita que tab com datatable gigante estoure a altura do Dialog */
+  max-height: 32rem;
+  overflow-y: auto;
 }
 
 .dialog-field {
