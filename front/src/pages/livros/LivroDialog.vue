@@ -41,7 +41,7 @@
                   </FloatLabel>
                 </div>
 
-                <div class="dialog-field">
+                <div class="dialog-field dialog-multiselect-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
                     <MultiSelect
                       id="livro-autores"
@@ -49,7 +49,7 @@
                       :options="autores"
                       optionLabel="nome"
                       optionValue="id"
-                      class="dialog-input"
+                      class="dialog-input dialog-input--multiselect"
                       display="chip"
                       showClear
                       filter
@@ -63,7 +63,12 @@
 
               <div class="dialog-field dialog-field--vertical">
                 <FloatLabel variant="on" class="dialog-input-wrap">
-                  <Textarea id="livro-descricao" v-model="form.descricao" class="dialog-input" rows="3" autoResize />
+                  <Textarea
+                    id="livro-descricao"
+                    v-model="form.descricao"
+                    class="dialog-input dialog-input--descricao"
+                    rows="3"
+                  />
                   <label for="livro-descricao">Descrição</label>
                 </FloatLabel>
               </div>
@@ -86,7 +91,7 @@
                     <label for="livro-editora">Editora</label>
                   </FloatLabel>
                 </div>                
-                <div class="dialog-field">
+                <div class="dialog-field dialog-multiselect-field">
                   <FloatLabel variant="on" class="dialog-input-wrap">
                     <MultiSelect
                       id="livro-categorias"
@@ -94,7 +99,7 @@
                       :options="opcoesCategorias"
                       optionLabel="nome"
                       optionValue="id"
-                      class="dialog-input"
+                      class="dialog-input dialog-input--multiselect"
                       display="chip"
                       showClear
                       filter
@@ -775,19 +780,12 @@ async function buscarLivroPorIsbn() {
 
   loadingIsbn.value = true
   try {
-    const url = `https://openlibrary.org/api/books?bibkeys=ISBN:${isbnLimpo}&format=json&jscmd=data`
-    const response = await fetch(url)
-    if (!response.ok) {
-      throw new Error('Falha ao consultar dados do livro.')
-    }
-    const data = await response.json()
-    const key = `ISBN:${isbnLimpo}`
-    const livroApi = data[key]
-    if (!livroApi) {
+    const data = await livroService.livros.consultarIsbn(isbnLimpo)
+    if (!data) {
       toast.add({
         severity: 'warn',
         summary: 'Livro não encontrado',
-        detail: 'Nenhum livro encontrado para este ISBN na Open Library.',
+        detail: 'Nenhum livro encontrado para este ISBN.',
         life: 4000
       })
       return
@@ -795,85 +793,56 @@ async function buscarLivroPorIsbn() {
 
     // Título
     if (!form.value.titulo) {
-      form.value.titulo = livroApi.title || form.value.titulo
+      form.value.titulo = data.titulo || form.value.titulo
     }
 
     // Número de páginas
-    if (!form.value.qtd_paginas && livroApi.number_of_pages) {
-      form.value.qtd_paginas = livroApi.number_of_pages
+    if (!form.value.qtd_paginas && data.qtd_paginas) {
+      form.value.qtd_paginas = data.qtd_paginas
     }
 
     // Ano de publicação
-    if (!form.value.ano_publicacao && livroApi.publish_date) {
-      const matchAno = String(livroApi.publish_date).match(/(19|20)\d{2}/)
-      if (matchAno) {
-        form.value.ano_publicacao = Number(matchAno[0])
-      }
+    if (!form.value.ano_publicacao && data.ano_publicacao) {
+      form.value.ano_publicacao = data.ano_publicacao
     }
 
-    // Editora (primeira)
-    if (!form.value.editora && Array.isArray(livroApi.publishers) && livroApi.publishers.length > 0) {
-      const nomeEditora = livroApi.publishers[0]?.name || livroApi.publishers[0]
-      if (nomeEditora) {
-        let editoraExistente = editoras.value.find((e) => (e.nome || '').toLowerCase() === nomeEditora.toLowerCase())
-        if (!editoraExistente) {
-          try {
-            const criada = await livroService.editoras.create({ nome: nomeEditora })
-            await carregarEditoras()
-            // garante que dropdown de editora conheça a nova opção
-            opcoesEditoras.value = editoras.value
-            editoraExistente =
-              editoras.value.find((e) => e.id === criada.id) ||
-              editoras.value.find((e) => (e.nome || '').toLowerCase() === nomeEditora.toLowerCase()) ||
-              criada
-          } catch (e) {
-            console.error('Erro ao criar editora a partir do ISBN:', e)
-          }
-        }
-        if (editoraExistente?.id) {
-          form.value.editora = editoraExistente.id
-        }
-      }
+    // Capa (URL da Open Library; por padrão o backend envia large)
+    if (data.imagem_url) {
+      form.value.imagem_url = data.imagem_url
     }
 
-    // Autores (todos)
-    if (Array.isArray(livroApi.authors) && livroApi.authors.length > 0) {
-      const autoresIds = [...(form.value.autores || [])]
-      for (const autorObj of livroApi.authors) {
-        const nomeAutor = autorObj?.name || autorObj
-        if (!nomeAutor) continue
+    // Editora (backend já garante existência e devolve id)
+    if (!form.value.editora && data.editora_id) {
+      form.value.editora = data.editora_id
+      await carregarEditoras()
+      // garante que o Select de editora conheça a nova opção
+      opcoesEditoras.value = editoras.value ?? []
+    }
 
-        let existente = autores.value.find((a) => (a.nome || '').toLowerCase() === nomeAutor.toLowerCase())
-        if (!existente) {
-          try {
-            const criado = await livroService.autores.create({ nome: nomeAutor })
-            await carregarAutores()
-            // garante que multiselect de autores conheça o novo autor
-            autores.value = autores.value ?? []
-            existente =
-              autores.value.find((a) => a.id === criado.id) ||
-              autores.value.find((a) => (a.nome || '').toLowerCase() === nomeAutor.toLowerCase()) ||
-              criado
-          } catch (e) {
-            console.error('Erro ao criar autor a partir do ISBN:', e)
-          }
-        }
-        if (existente?.id && !autoresIds.includes(existente.id)) {
-          autoresIds.push(existente.id)
-        }
-      }
-      form.value.autores = autoresIds
+    // Autores (backend já garante existência e devolve ids)
+    if (Array.isArray(data.autores_ids) && data.autores_ids.length > 0) {
+      form.value.autores = data.autores_ids
+      await carregarAutores()
+    }
+
+    // Descrição e idioma (quando vêm da Open Library)
+    if (!form.value.descricao && data.descricao) {
+      form.value.descricao = data.descricao
+    }
+    if (!form.value.idioma && data.idioma) {
+      form.value.idioma = data.idioma
     }
 
     toast.add({
       severity: 'success',
       summary: 'Dados carregados pelo ISBN',
-      detail: 'Informações do livro preenchidas a partir da Open Library.',
+      detail: 'Informações do livro preenchidas a partir do backend.',
       life: 3000
     })
   } catch (e) {
     console.error('Erro ao buscar livro por ISBN:', e)
-    const msg = e?.message || 'Erro ao consultar dados do livro pelo ISBN.'
+    const backendMsg = e?.response?.data?.detail
+    const msg = backendMsg || e?.message || 'Erro ao consultar dados do livro pelo ISBN.'
     toast.add({
       severity: 'error',
       summary: 'Erro ao buscar ISBN',
@@ -1391,6 +1360,31 @@ function salvar() {
 .dialog-input {
   flex: 1;
   width: 100%;
+}
+
+/* Descrição: altura fixa com rolagem interna */
+.dialog-input--descricao {
+  min-height: 5rem;
+  max-height: 8rem;
+  overflow-y: auto;
+}
+
+/* MultiSelect: altura fixa para não crescer ao adicionar muitos itens (chips) */
+.dialog-multiselect-field :deep(.p-multiselect) {
+  min-height: 2.5rem;
+  max-height: 7rem;
+  overflow: hidden;
+}
+
+.dialog-multiselect-field :deep(.p-multiselect-label-container) {
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.dialog-multiselect-field :deep(.p-multiselect-label) {
+  flex-wrap: wrap;
 }
 
 .dialog-file-name {

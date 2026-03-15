@@ -150,6 +150,10 @@ const livroService = {
     },
     delete: async (id) => {
       await api.delete(`${BASE}/livros/${id}/`)
+    },
+    consultarIsbn: async (isbn) => {
+      const response = await api.get(`${BASE}/livros/isbn/`, { params: { isbn } })
+      return response.data
     }
   }
 }

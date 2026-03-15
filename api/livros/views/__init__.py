@@ -2,3 +2,4 @@ from .categoria import CategoriaListCreateView, CategoriaRetrieveUpdateDestroyVi
 from .autor import AutorListCreateView, AutorRetrieveUpdateDestroyView
 from .editora import EditoraListCreateView, EditoraRetrieveUpdateDestroyView
 from .livro import LivroListCreateView, LivroRetrieveUpdateDestroyView
+from .isbn import IsbnConsultaView

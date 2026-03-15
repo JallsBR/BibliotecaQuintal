@@ -19,5 +19,8 @@ urlpatterns = [
     # Livros
     path("livros/", views.LivroListCreateView.as_view(), name="livro-list-create"),
     path("livros/<int:pk>/", views.LivroRetrieveUpdateDestroyView.as_view(), name="livro-retrieve-update-destroy"),
+
+     # ISBN (Open Library)
+    path("livros/isbn/", views.IsbnConsultaView.as_view(), name="livro-isbn-consulta"),
 ]
 
