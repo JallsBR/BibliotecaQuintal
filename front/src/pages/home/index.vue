@@ -41,7 +41,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useStore } from 'vuex'
 import { getStats } from '@/services/dashboardService'
+
+const store = useStore()
+const hasPermission = (perm) => store.getters.hasPermission(perm)
 
 const loading = ref(true)
 const countLivros = ref(0)
@@ -68,48 +72,67 @@ async function carregarContagens() {
   }
 }
 
-const cards = computed(() => [
-  {
-    rota: '/livros',
-    titulo: 'Livros',
-    descricao: 'Acervo de livros',
-    icone: 'pi pi-book',
-    count: countLivros.value,
-    countFormatted: `${countLivros.value} livro${countLivros.value !== 1 ? 's' : ''} cadastrado${countLivros.value !== 1 ? 's' : ''}`
-  },
-  {
-    rota: '/leitores',
-    titulo: 'Leitores',
-    descricao: 'Cadastro de leitores',
-    icone: 'pi pi-users',
-    count: countLeitores.value,
-    countFormatted: `${countLeitores.value} leitor${countLeitores.value !== 1 ? 'es' : ''} cadastrado${countLeitores.value !== 1 ? 's' : ''}`
-  },
-  {
-    rota: '/emprestimos',
-    titulo: 'Empréstimos',
-    descricao: 'Empréstimos em aberto',
-    icone: 'pi pi-send',
-    count: countEmprestimosAbertos.value,
-    countFormatted: `${countEmprestimosAbertos.value} empréstimo${countEmprestimosAbertos.value !== 1 ? 's' : ''} em aberto`
-  },
-  {
-    rota: '/reservas',
-    titulo: 'Reservas',
-    descricao: 'Reservas ativas',
-    icone: 'pi pi-clock',
-    count: countReservas.value,
-    countFormatted: `${countReservas.value} reserva${countReservas.value !== 1 ? 's' : ''} ativa${countReservas.value !== 1 ? 's' : ''}`
-  },
-  {
-    rota: '/recompensas',
-    titulo: 'Recompensas',
-    descricao: 'Recompensas disponíveis',
-    icone: 'pi pi-gift',
-    count: countRecompensas.value,
-    countFormatted: `${countRecompensas.value} recompensa${countRecompensas.value !== 1 ? 's' : ''} disponíveis`
+const cards = computed(() => {
+  const lista = []
+
+  // Livros (apenas para quem tem permissão de ver livros)
+  if (hasPermission('livros.view_livro')) {
+    lista.push({
+      rota: '/livros',
+      titulo: 'Livros',
+      descricao: 'Cadastro e gestão do acervo',
+      icone: 'pi pi-book',
+      count: countLivros.value,
+      countFormatted: `${countLivros.value} livro${countLivros.value !== 1 ? 's' : ''} cadastrado${countLivros.value !== 1 ? 's' : ''}`
+    })    
   }
-])
+
+  lista.push(
+    // Acervo (galeria de cartões do acervo)
+    {
+      rota: '/acervo',
+      titulo: 'Acervo',
+      descricao: 'Visualização do acervo em cartões',
+      icone: 'pi pi-images',
+      count: countLivros.value,
+      countFormatted: `${countLivros.value} livro${countLivros.value !== 1 ? 's' : ''} no acervo`
+    },
+    {
+      rota: '/leitores',
+      titulo: 'Leitores',
+      descricao: 'Cadastro de leitores',
+      icone: 'pi pi-users',
+      count: countLeitores.value,
+      countFormatted: `${countLeitores.value} leitor${countLeitores.value !== 1 ? 'es' : ''} cadastrado${countLeitores.value !== 1 ? 's' : ''}`
+    },
+    {
+      rota: '/emprestimos',
+      titulo: 'Empréstimos',
+      descricao: 'Empréstimos em aberto',
+      icone: 'pi pi-send',
+      count: countEmprestimosAbertos.value,
+      countFormatted: `${countEmprestimosAbertos.value} empréstimo${countEmprestimosAbertos.value !== 1 ? 's' : ''} em aberto`
+    },
+    {
+      rota: '/reservas',
+      titulo: 'Reservas',
+      descricao: 'Reservas ativas',
+      icone: 'pi pi-clock',
+      count: countReservas.value,
+      countFormatted: `${countReservas.value} reserva${countReservas.value !== 1 ? 's' : ''} ativa${countReservas.value !== 1 ? 's' : ''}`
+    },
+    {
+      rota: '/recompensas',
+      titulo: 'Recompensas',
+      descricao: 'Recompensas disponíveis',
+      icone: 'pi pi-gift',
+      count: countRecompensas.value,
+      countFormatted: `${countRecompensas.value} recompensa${countRecompensas.value !== 1 ? 's' : ''} disponível${countRecompensas.value !== 1 ? 's' : ''}`
+    }
+  )
+
+  return lista
+})
 
 onMounted(carregarContagens)
 </script>
@@ -153,7 +176,7 @@ onMounted(carregarContagens)
 
 .home-card:hover {
   border-color: var(--azulquintal);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--azulquintal) 18%, transparent);
 }
 
 .home-card-icon {
@@ -215,8 +238,8 @@ onMounted(carregarContagens)
 }
 
 .home-card-icon--atraso {
-  background: var(--p-red-500, #ef4444);
-  color: white;
+  background: var(--perigo);
+  color: var(--texto-sobre-azul);
 }
 
 .home-loading {

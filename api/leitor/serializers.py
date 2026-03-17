@@ -61,6 +61,7 @@ class EmprestimoSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['leitor_nome'] = instance.leitor.nome if instance.leitor_id else ''
+        data['leitor_telefone'] = instance.leitor.telefone if instance.leitor_id else ''
         data['livro_titulo'] = instance.livro.titulo if instance.livro_id else ''
         return data
 
@@ -80,6 +81,6 @@ class ReservaSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['leitor_nome'] = instance.leitor.nome if instance.leitor_id else ''
+        data['leitor_telefone'] = instance.leitor.telefone if instance.leitor_id else ''
         data['livro_titulo'] = instance.livro.titulo if instance.livro_id else ''
         return data
-            

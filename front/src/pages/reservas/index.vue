@@ -9,8 +9,10 @@
       :dataKey="dataKey"
       :totalRecords="totalRecords"
       :rows="rows"
+      :first="first"
       :lazy="lazy"
       :reorderableColumns="reorderableColumns"
+      @page="onPage"
     >
       <template #toolbar>
         <div class="table-toolbar" style="margin-top: 1rem;">
@@ -67,8 +69,9 @@
         </Popover>
       </template>
       <template #columns>
-        <Column v-if="hasPermission('leitor.view_reserva')" field="leitor_nome" header="Leitor" sortable />
         <Column field="livro_titulo" header="Livro" sortable />
+        <Column v-if="hasPermission('leitor.view_reserva')" field="leitor_nome" header="Leitor" sortable />
+        <Column v-if="hasPermission('leitor.view_reserva')" field="leitor_telefone" header="Telefone" :style="{ width: '130px', maxWidth: '130px' }" />
         <Column field="data_reserva" header="Data reserva" sortable>
           <template #body="slotProps">
             {{ formatarData(slotProps.data.data_reserva) }}
@@ -141,8 +144,9 @@ const reservas = ref([])
 const loading = ref(false)
 const dataKey = 'id'
 const totalRecords = ref(0)
+const first = ref(0)
 const rows = PAGE_SIZE
-const lazy = ref(false)
+const lazy = ref(true)
 const reorderableColumns = false
 
 const OPCOES_TIPO_BUSCA = [
@@ -223,7 +227,8 @@ async function confirmarCancelamento() {
       detail: 'A reserva foi cancelada.',
       life: 3000
     })
-    await carregarReservas(montarParametrosBusca())
+    first.value = 0
+    await carregarReservas({ ...montarParametrosBusca(), page: 1, page_size: rows })
     fecharConfirmacaoCancelar()
   } catch (e) {
     console.error('Erro ao cancelar reserva:', e)
@@ -245,11 +250,13 @@ function abrirDialogIncluir() {
 }
 
 async function onReservaSalva() {
-  await carregarReservas(montarParametrosBusca())
+  first.value = 0
+  await carregarReservas({ ...montarParametrosBusca(), page: 1, page_size: rows })
 }
 
 async function aplicarFiltros() {
-  await carregarReservas(montarParametrosBusca())
+  first.value = 0
+  await carregarReservas({ ...montarParametrosBusca(), page: 1, page_size: rows })
   popoverBuscaRef.value?.hide()
 }
 
@@ -257,7 +264,8 @@ async function limparFiltros() {
   filtroTipo.value = 'aberto'
   filtroLeitor.value = null
   filtroLivro.value = null
-  await carregarReservas(montarParametrosBusca())
+  first.value = 0
+  await carregarReservas({ ...montarParametrosBusca(), page: 1, page_size: rows })
   popoverBuscaRef.value?.hide()
 }
 
@@ -289,9 +297,14 @@ async function carregarReservas(params = {}) {
   }
 }
 
+function onPage(event) {
+  first.value = event.first
+  carregarReservas({ ...montarParametrosBusca(), page: event.page + 1, page_size: event.rows })
+}
+
 onMounted(() => {
   carregarOpcoesFiltro()
-  carregarReservas(montarParametrosBusca())
+  carregarReservas({ ...montarParametrosBusca(), page: 1, page_size: rows })
 })
 </script>
 

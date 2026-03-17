@@ -9,8 +9,10 @@
       :dataKey="dataKey"
       :totalRecords="totalRecords"
       :rows="rows"
+      :first="first"
       :lazy="lazy"
       :reorderableColumns="reorderableColumns"
+      @page="onPage"
     >
       <template #toolbar>
         <div class="table-toolbar" style="margin-top: 1rem;">
@@ -124,8 +126,9 @@ const dialogVisible = ref(false)
 const leitorEditando = ref(null)
 const dataKey = 'id'
 const totalRecords = ref(0)
+const first = ref(0)
 const rows = PAGE_SIZE
-const lazy = ref(false)
+const lazy = ref(true)
 const reorderableColumns = false
 
 const popoverBuscaRef = ref(null)
@@ -180,8 +183,8 @@ function montarParametrosBusca() {
 }
 
 async function aplicarFiltros() {
-  const params = montarParametrosBusca()
-  await carregarLeitores(params)
+  first.value = 0
+  await carregarLeitores({ ...montarParametrosBusca(), page: 1, page_size: rows })
   popoverBuscaRef.value?.hide()
 }
 
@@ -191,7 +194,8 @@ async function limparFiltros() {
   filtroCpf.value = ''
   filtroTelefone.value = ''
   filtroAtivo.value = false
-  await carregarLeitores()
+  first.value = 0
+  await carregarLeitores({ page: 1, page_size: rows })
   popoverBuscaRef.value?.hide()
 }
 
@@ -201,7 +205,8 @@ function incluir() {
 }
 
 async function aoFecharDialog() {
-  await carregarLeitores(montarParametrosBusca())
+  first.value = 0
+  await carregarLeitores({ ...montarParametrosBusca(), page: 1, page_size: rows })
 }
 
 async function onLeitorSalvo(payload) {
@@ -213,7 +218,8 @@ async function onLeitorSalvo(payload) {
       await leitorService.leitores.create(payload)
       toast.add({ severity: 'success', summary: 'Leitor cadastrado', detail: 'O leitor foi cadastrado com sucesso.', life: 3000 })
     }
-    await carregarLeitores()
+    first.value = 0
+    await carregarLeitores({ page: 1, page_size: rows })
   } catch (e) {
     console.error('Erro ao salvar leitor:', e)
     const detail = e?.response?.data ? (typeof e.response.data === 'object' ? Object.entries(e.response.data).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(' ') : v}`).join(' | ') : e.response.data) : 'Não foi possível salvar o leitor.'
@@ -274,8 +280,13 @@ function cancelarExclusao() {
   leitorParaExcluir.value = null
 }
 
+function onPage(event) {
+  first.value = event.first
+  carregarLeitores({ ...montarParametrosBusca(), page: event.page + 1, page_size: event.rows })
+}
+
 onMounted(() => {
-  carregarLeitores()
+  carregarLeitores({ page: 1, page_size: rows })
 })
 </script>
 

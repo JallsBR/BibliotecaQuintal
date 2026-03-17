@@ -9,8 +9,10 @@
       :dataKey="dataKey"
       :totalRecords="totalRecords"
       :rows="rows"
+      :first="first"
       :lazy="lazy"
       :reorderableColumns="reorderableColumns"
+      @page="onPage"
     >
       <template #toolbar>
         <div class="table-toolbar" style="margin-top: 1rem;">
@@ -181,8 +183,9 @@ const dialogVisible = ref(false)
 const livroEditando = ref(null)
 const dataKey = 'id'
 const totalRecords = ref(0)
+const first = ref(0)
 const rows = PAGE_SIZE
-const lazy = ref(false)
+const lazy = ref(true)
 const reorderableColumns = false
 
 const popoverBuscaRef = ref(null)
@@ -258,7 +261,8 @@ function montarParametrosBusca() {
 }
 
 async function aplicarFiltros() {
-  const params = montarParametrosBusca()
+  first.value = 0
+  const params = { ...montarParametrosBusca(), page: 1, page_size: rows }
   await carregarLivros(params)
   popoverBuscaRef.value?.hide()
 }
@@ -273,7 +277,8 @@ async function limparFiltros() {
   filtroCategoria.value = null
   filtroAtivo.value = false
   filtroDisponivel.value = false
-  await carregarLivros()
+  first.value = 0
+  await carregarLivros({ page: 1, page_size: rows })
   popoverBuscaRef.value?.hide()
 }
 
@@ -297,7 +302,8 @@ async function onLivroSalvo(payload) {
         await livroService.livros.create(payload)
       }
     }
-    await carregarLivros()
+    first.value = 0
+    await carregarLivros({ page: 1, page_size: rows })
     toast.add({
       severity: 'success',
       summary: 'Livro salvo',
@@ -360,8 +366,13 @@ function cancelarExclusaoLivro() {
   livroParaExcluir.value = null
 }
 
+function onPage(event) {
+  first.value = event.first
+  carregarLivros({ ...montarParametrosBusca(), page: event.page + 1, page_size: event.rows })
+}
+
 onMounted(async () => {
-  await Promise.all([carregarLivros(), carregarFiltros()])
+  await Promise.all([carregarLivros({ page: 1, page_size: rows }), carregarFiltros()])
 })
 </script>
 

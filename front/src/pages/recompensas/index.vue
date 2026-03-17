@@ -9,8 +9,10 @@
       :dataKey="dataKey"
       :totalRecords="totalRecords"
       :rows="rows"
+      :first="first"
       :lazy="lazy"
       :reorderableColumns="reorderableColumns"
+      @page="onPage"
     >
       <template #toolbar>
         <div class="table-toolbar" style="margin-top: 1rem;">
@@ -137,8 +139,9 @@ const recompensas = ref([])
 const loading = ref(false)
 const dataKey = 'id'
 const totalRecords = ref(0)
+const first = ref(0)
 const rows = PAGE_SIZE
-const lazy = ref(false)
+const lazy = ref(true)
 const reorderableColumns = false
 
 const OPCOES_ATIVO = [
@@ -183,7 +186,8 @@ function montarParametrosBusca() {
 }
 
 async function aplicarFiltros() {
-  await carregarRecompensas(montarParametrosBusca())
+  first.value = 0
+  await carregarRecompensas({ ...montarParametrosBusca(), page: 1, page_size: rows })
   popoverBuscaRef.value?.hide()
 }
 
@@ -193,7 +197,8 @@ function abrirDialogIncluir() {
 }
 
 async function onRecompensaSalvo() {
-  await carregarRecompensas(montarParametrosBusca())
+  first.value = 0
+  await carregarRecompensas({ ...montarParametrosBusca(), page: 1, page_size: rows })
 }
 
 async function limparFiltros() {
@@ -201,7 +206,8 @@ async function limparFiltros() {
   filtroPontuacaoMin.value = null
   filtroPontuacaoMax.value = null
   filtroAtivo.value = null
-  await carregarRecompensas()
+  first.value = 0
+  await carregarRecompensas({ page: 1, page_size: rows })
   popoverBuscaRef.value?.hide()
 }
 
@@ -261,8 +267,13 @@ async function carregarRecompensas(params = {}) {
   }
 }
 
+function onPage(event) {
+  first.value = event.first
+  carregarRecompensas({ ...montarParametrosBusca(), page: event.page + 1, page_size: event.rows })
+}
+
 onMounted(() => {
-  carregarRecompensas()
+  carregarRecompensas({ page: 1, page_size: rows })
 })
 </script>
 

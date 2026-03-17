@@ -11,13 +11,13 @@
         <i class="pi pi-home"></i>
         <span>Início</span>
       </router-link>
-      <router-link to="/livros" class="nav-link" active-class="nav-link--active">
+      <router-link v-if="hasPermission('livros.view_livro')" to="/livros" class="nav-link" active-class="nav-link--active">
         <i class="pi pi-book"></i>
         <span>Livros</span>
       </router-link>
-      <router-link to="/galeria" class="nav-link" active-class="nav-link--active">
+      <router-link to="/acervo" class="nav-link" active-class="nav-link--active">
         <i class="pi pi-images"></i>
-        <span>Galeria</span>
+        <span>Acervo</span>
       </router-link>
       <router-link to="/recompensas" class="nav-link" active-class="nav-link--active">
         <i class="pi pi-gift"></i>
@@ -100,21 +100,25 @@ export default {
     }
 
     const isSuperuser = computed(() => store.getters.isSuperuser)
+    const hasPermission = (perm) => store.getters.hasPermission(perm)
 
-    return { userName, logout, temaAtual, toggleTema, logoNavBar, isSuperuser }
+    return { userName, logout, temaAtual, toggleTema, logoNavBar, isSuperuser, hasPermission }
   }
 }
 </script>
 
 <style scoped>
 .navbar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
   width: 260px;
   min-width: 260px;
-  height: 100vh;
   background: var(--azulquintal);
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
+  z-index: 100;
 }
 
 .navbar-header {

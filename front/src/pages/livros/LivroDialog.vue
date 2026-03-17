@@ -279,11 +279,13 @@
                 :items="autoresFiltrados"
                 :loading="loadingAutores"
                 dataKey="id"
-                :totalRecords="autoresFiltrados.length"
+                :totalRecords="autoresTotal"
                 :rows="autoresRows"
-                :lazy="false"
+                :first="firstAutores"
+                :lazy="true"
                 :reorderableColumns="false"
                 class="dialog-autor-table"
+                @page="onPageAutores"
               >
                 <template #columns>
                   <Column field="nome" header="Autor" sortable />
@@ -376,11 +378,13 @@
                 :items="editorasFiltradas"
                 :loading="loadingEditoras"
                 dataKey="id"
-                :totalRecords="editorasFiltradas.length"
+                :totalRecords="editorasTotal"
                 :rows="editorasRows"
-                :lazy="false"
+                :first="firstEditoras"
+                :lazy="true"
                 :reorderableColumns="false"
                 class="dialog-autor-table"
+                @page="onPageEditoras"
               >
                 <template #columns>
                   <Column field="nome" header="Editora" sortable />
@@ -473,11 +477,13 @@
                 :items="categoriasFiltradas"
                 :loading="loadingCategorias"
                 dataKey="id"
-                :totalRecords="categoriasFiltradas.length"
+                :totalRecords="categoriasTotal"
                 :rows="categoriasRows"
-                :lazy="false"
+                :first="firstCategorias"
+                :lazy="true"
                 :reorderableColumns="false"
                 class="dialog-autor-table"
+                @page="onPageCategorias"
               >
                 <template #columns>
                   <Column field="nome" header="Categoria" sortable />
@@ -590,6 +596,7 @@ const form = ref(getFormDefault())
 const autores = ref([])
 const loadingAutores = ref(false)
 const autoresTotal = ref(0)
+const firstAutores = ref(0)
 const autoresRows = 10
 const autorEditandoId = ref(null)
 const autorForm = ref({ nome: '' })
@@ -610,6 +617,8 @@ const confirmDeleteAutorMessage = computed(() => {
 
 const editoras = ref([])
 const loadingEditoras = ref(false)
+const editorasTotal = ref(0)
+const firstEditoras = ref(0)
 const editorasRows = 10
 const editoraEditandoId = ref(null)
 const editoraForm = ref({ nome: '' })
@@ -627,6 +636,8 @@ const confirmDeleteEditoraMessage = computed(() => {
 
 const categorias = ref([])
 const loadingCategorias = ref(false)
+const categoriasTotal = ref(0)
+const firstCategorias = ref(0)
 const categoriasRows = 10
 const categoriaEditandoId = ref(null)
 const categoriaForm = ref({ nome: '' })
@@ -742,10 +753,13 @@ function preencherFormComLivro(livro) {
 
 async function carregarOpcoes() {
   try {
+    firstAutores.value = 0
+    firstEditoras.value = 0
+    firstCategorias.value = 0
     const [resAutores, resEditoras, resCategorias] = await Promise.all([
-      livroService.autores.getAll(),
-      livroService.editoras.getAll(),
-      livroService.categorias.getAll()
+      livroService.autores.getAll({ page: 1, page_size: autoresRows }),
+      livroService.editoras.getAll({ page: 1, page_size: editorasRows }),
+      livroService.categorias.getAll({ page: 1, page_size: categoriasRows })
     ])
     const listaAutores = Array.isArray(resAutores) ? resAutores : resAutores?.results ?? []
     opcoesAutores.value = listaAutores
@@ -755,10 +769,12 @@ async function carregarOpcoes() {
     const listaEditoras = Array.isArray(resEditoras) ? resEditoras : resEditoras?.results ?? []
     opcoesEditoras.value = listaEditoras
     editoras.value = listaEditoras
+    editorasTotal.value = resEditoras?.count ?? listaEditoras.length
 
     const listaCategorias = Array.isArray(resCategorias) ? resCategorias : resCategorias?.results ?? []
     opcoesCategorias.value = listaCategorias
     categorias.value = listaCategorias
+    categoriasTotal.value = resCategorias?.count ?? listaCategorias.length
   } catch (e) {
     console.error('Erro ao carregar opções:', e)
     toast.add({
@@ -815,7 +831,8 @@ async function buscarLivroPorIsbn() {
     // Editora (backend já garante existência e devolve id)
     if (!form.value.editora && data.editora_id) {
       form.value.editora = data.editora_id
-      await carregarEditoras()
+      firstEditoras.value = 0
+      await carregarEditoras({ page: 1, page_size: editorasRows })
       // garante que o Select de editora conheça a nova opção
       opcoesEditoras.value = editoras.value ?? []
     }
@@ -823,7 +840,8 @@ async function buscarLivroPorIsbn() {
     // Autores (backend já garante existência e devolve ids)
     if (Array.isArray(data.autores_ids) && data.autores_ids.length > 0) {
       form.value.autores = data.autores_ids
-      await carregarAutores()
+      firstAutores.value = 0
+      await carregarAutores({ page: 1, page_size: autoresRows })
     }
 
     // Descrição e idioma (quando vêm da Open Library)
@@ -895,7 +913,8 @@ async function salvarAutor() {
     }
     autorForm.value = { nome: '' }
     autorEditandoId.value = null
-    await carregarAutores()
+    firstAutores.value = 0
+    await carregarAutores({ page: 1, page_size: autoresRows })
     await carregarOpcoes()
     toast.add({
       severity: 'success',
@@ -929,7 +948,8 @@ async function confirmarExclusaoAutor() {
   confirmDeleteAutorLoading.value = true
   try {
     await livroService.autores.delete(autorParaExcluir.value.id)
-    await carregarAutores()
+    firstAutores.value = 0
+    await carregarAutores({ page: 1, page_size: autoresRows })
     await carregarOpcoes()
     toast.add({
       severity: 'success',
@@ -957,12 +977,18 @@ function cancelarExclusaoAutor() {
   autorParaExcluir.value = null
 }
 
-async function carregarEditoras() {
+function onPageAutores(event) {
+  firstAutores.value = event.first
+  carregarAutores({ page: event.page + 1, page_size: event.rows })
+}
+
+async function carregarEditoras(params = {}) {
   loadingEditoras.value = true
   try {
-    const data = await livroService.editoras.getAll()
+    const data = await livroService.editoras.getAll(params)
     const list = Array.isArray(data) ? data : data?.results ?? []
     editoras.value = list
+    editorasTotal.value = data?.count ?? list.length
   } catch (e) {
     console.error('Erro ao carregar editoras:', e)
     editoras.value = []
@@ -981,6 +1007,11 @@ function limparPesquisaEditora() {
   filtroPesquisaEditora.value = ''
 }
 
+function onPageEditoras(event) {
+  firstEditoras.value = event.first
+  carregarEditoras({ page: event.page + 1, page_size: event.rows })
+}
+
 async function salvarEditora() {
   if (!editoraForm.value.nome) return
   try {
@@ -991,7 +1022,8 @@ async function salvarEditora() {
     }
     editoraForm.value = { nome: '' }
     editoraEditandoId.value = null
-    await carregarEditoras()
+    firstEditoras.value = 0
+    await carregarEditoras({ page: 1, page_size: editorasRows })
     await carregarOpcoes()
     toast.add({
       severity: 'success',
@@ -1025,7 +1057,8 @@ async function confirmarExclusaoEditora() {
   confirmDeleteEditoraLoading.value = true
   try {
     await livroService.editoras.delete(editoraParaExcluir.value.id)
-    await carregarEditoras()
+    firstEditoras.value = 0
+    await carregarEditoras({ page: 1, page_size: editorasRows })
     await carregarOpcoes()
     toast.add({
       severity: 'success',
@@ -1053,12 +1086,13 @@ function cancelarExclusaoEditora() {
   editoraParaExcluir.value = null
 }
 
-async function carregarCategorias() {
+async function carregarCategorias(params = {}) {
   loadingCategorias.value = true
   try {
-    const data = await livroService.categorias.getAll()
+    const data = await livroService.categorias.getAll(params)
     const list = Array.isArray(data) ? data : data?.results ?? []
     categorias.value = list
+    categoriasTotal.value = data?.count ?? list.length
   } catch (e) {
     console.error('Erro ao carregar categorias:', e)
     categorias.value = []
@@ -1077,6 +1111,11 @@ function limparPesquisaCategoria() {
   filtroPesquisaCategoria.value = ''
 }
 
+function onPageCategorias(event) {
+  firstCategorias.value = event.first
+  carregarCategorias({ page: event.page + 1, page_size: event.rows })
+}
+
 async function salvarCategoria() {
   if (!categoriaForm.value.nome) return
   try {
@@ -1087,7 +1126,8 @@ async function salvarCategoria() {
     }
     categoriaForm.value = { nome: '' }
     categoriaEditandoId.value = null
-    await carregarCategorias()
+    firstCategorias.value = 0
+    await carregarCategorias({ page: 1, page_size: categoriasRows })
     await carregarOpcoes()
     toast.add({
       severity: 'success',
@@ -1121,7 +1161,8 @@ async function confirmarExclusaoCategoria() {
   confirmDeleteCategoriaLoading.value = true
   try {
     await livroService.categorias.delete(categoriaParaExcluir.value.id)
-    await carregarCategorias()
+    firstCategorias.value = 0
+    await carregarCategorias({ page: 1, page_size: categoriasRows })
     await carregarOpcoes()
     toast.add({
       severity: 'success',
@@ -1150,9 +1191,18 @@ function cancelarExclusaoCategoria() {
 }
 
 watch(tabAtiva, (valor) => {
-  if (valor === 'autor') carregarAutores()
-  if (valor === 'editora') carregarEditoras()
-  if (valor === 'categoria') carregarCategorias()
+  if (valor === 'autor') {
+    firstAutores.value = 0
+    carregarAutores({ page: 1, page_size: autoresRows })
+  }
+  if (valor === 'editora') {
+    firstEditoras.value = 0
+    carregarEditoras({ page: 1, page_size: editorasRows })
+  }
+  if (valor === 'categoria') {
+    firstCategorias.value = 0
+    carregarCategorias({ page: 1, page_size: categoriasRows })
+  }
 })
 
 watch(

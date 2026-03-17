@@ -9,8 +9,10 @@
       :dataKey="dataKey"
       :totalRecords="totalRecords"
       :rows="rows"
+      :first="first"
       :lazy="lazy"
       :reorderableColumns="reorderableColumns"
+      @page="onPage"
     >
       <template #toolbar>
         <div class="table-toolbar" style="margin-top: 1rem;">
@@ -67,8 +69,9 @@
         </Popover>
       </template>
       <template #columns>
-        <Column v-if="hasPermission('leitor.view_emprestimo')" field="leitor_nome" header="Leitor" sortable />
         <Column field="livro_titulo" header="Livro" sortable />
+        <Column v-if="hasPermission('leitor.view_emprestimo')" field="leitor_nome" header="Leitor" sortable />
+        <Column v-if="hasPermission('leitor.view_emprestimo')" field="leitor_telefone" header="Telefone" :style="{ width: '130px', maxWidth: '130px' }" />
         <Column field="data_emprestimo" header="Data empréstimo" sortable>
           <template #body="slotProps">
             {{ formatarData(slotProps.data.data_emprestimo) }}
@@ -130,8 +133,9 @@ const emprestimos = ref([])
 const loading = ref(false)
 const dataKey = 'id'
 const totalRecords = ref(0)
+const first = ref(0)
 const rows = PAGE_SIZE
-const lazy = ref(false)
+const lazy = ref(true)
 const reorderableColumns = false
 
 const OPCOES_TIPO_BUSCA = [
@@ -198,7 +202,8 @@ async function devolver(emp) {
       detail: 'Empréstimo marcado como devolvido.',
       life: 3000
     })
-    await carregarEmprestimos(montarParametrosBusca())
+    first.value = 0
+    await carregarEmprestimos({ ...montarParametrosBusca(), page: 1, page_size: rows })
   } catch (e) {
     console.error('Erro ao devolver:', e)
     const detail = e?.response?.data
@@ -215,7 +220,8 @@ async function devolver(emp) {
 }
 
 async function aplicarFiltros() {
-  await carregarEmprestimos(montarParametrosBusca())
+  first.value = 0
+  await carregarEmprestimos({ ...montarParametrosBusca(), page: 1, page_size: rows })
   popoverBuscaRef.value?.hide()
 }
 
@@ -224,14 +230,16 @@ function abrirDialogIncluir() {
 }
 
 async function onEmprestimoSalvo() {
-  await carregarEmprestimos(montarParametrosBusca())
+  first.value = 0
+  await carregarEmprestimos({ ...montarParametrosBusca(), page: 1, page_size: rows })
 }
 
 async function limparFiltros() {
   filtroTipo.value = 'aberto'
   filtroLeitor.value = null
   filtroLivro.value = null
-  await carregarEmprestimos(montarParametrosBusca())
+  first.value = 0
+  await carregarEmprestimos({ ...montarParametrosBusca(), page: 1, page_size: rows })
   popoverBuscaRef.value?.hide()
 }
 
@@ -263,9 +271,14 @@ async function carregarEmprestimos(params = {}) {
   }
 }
 
+function onPage(event) {
+  first.value = event.first
+  carregarEmprestimos({ ...montarParametrosBusca(), page: event.page + 1, page_size: event.rows })
+}
+
 onMounted(() => {
   carregarOpcoesFiltro()
-  carregarEmprestimos(montarParametrosBusca())
+  carregarEmprestimos({ ...montarParametrosBusca(), page: 1, page_size: rows })
 })
 </script>
 

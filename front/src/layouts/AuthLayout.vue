@@ -31,15 +31,16 @@ export default {
 <style scoped>
 .auth-layout {
   min-height: 100vh;
-  display: flex;
 }
 
 .auth-main {
-  flex: 1;
+  margin-left: 260px;
+  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: 100vh;
+  overflow: hidden;
 }
 
 .auth-header {
@@ -53,5 +54,7 @@ export default {
 .auth-content {
   padding-bottom: 1rem;
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 </style>

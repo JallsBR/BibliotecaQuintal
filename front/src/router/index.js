@@ -4,7 +4,7 @@ import PublicLayout from '../layouts/PublicLayout.vue'
 import LogoutPage from '../pages/auth/LogoutPage.vue'
 import HomePage from '../pages/home/index.vue'
 import LivrosPage from '../pages/livros/index.vue'
-import GaleriaPage from '../pages/galeria/index.vue'
+import AcervoPage from '../pages/acervo/index.vue'
 import LeitoresPage from '../pages/leitores/index.vue'
 import EmprestimosPage from '../pages/emprestimos/index.vue'
 import ReservasPage from '../pages/reservas/index.vue'
@@ -62,9 +62,9 @@ const routes = [
         component: LivrosPage
       },
       {
-        path: 'galeria',
-        name: 'galeria',
-        component: GaleriaPage
+        path: 'acervo',
+        name: 'acervo',
+        component: AcervoPage
       },
       {
         path: 'leitores',

@@ -214,11 +214,13 @@
                   :items="emprestimosLista"
                   :loading="loadingEmprestimos"
                   dataKey="id"
-                  :totalRecords="emprestimosLista.length"
-                  :rows="10"
-                  :lazy="false"
+                  :totalRecords="totalRecordsEmprestimos"
+                  :rows="emprestimosRows"
+                  :first="firstEmprestimos"
+                  :lazy="true"
                   :reorderableColumns="false"
                   class="dialog-autor-table"
+                  @page="onPageEmprestimos"
                 >
                   <template #columns>
                     <Column field="livro" header="Livro" sortable>
@@ -323,11 +325,13 @@
                   :items="reservasLista"
                   :loading="loadingReservas"
                   dataKey="id"
-                  :totalRecords="reservasLista.length"
-                  :rows="10"
-                  :lazy="false"
+                  :totalRecords="totalRecordsReservas"
+                  :rows="reservasRows"
+                  :first="firstReservas"
+                  :lazy="true"
                   :reorderableColumns="false"
                   class="dialog-autor-table"
+                  @page="onPageReservas"
                 >
                   <template #columns>
                     <Column field="livro" header="Livro" sortable>
@@ -424,11 +428,13 @@
                   :items="recompensasResgatadasLista"
                   :loading="loadingRecompensasResgatadas"
                   dataKey="id"
-                  :totalRecords="recompensasResgatadasLista.length"
+                  :totalRecords="totalRecordsRecompensas"
                   :rows="recompensasRows"
-                  :lazy="false"
+                  :first="firstRecompensas"
+                  :lazy="true"
                   :reorderableColumns="false"
                   class="dialog-autor-table"
+                  @page="onPageRecompensas"
                 >
                   <template #columns>
                     <Column field="recompensa_nome" header="Nome" sortable />
@@ -530,6 +536,9 @@ const leitorId = computed(() => props.leitor?.id ?? form.value.id ?? null)
 // Empréstimos
 const emprestimosLista = ref([])
 const loadingEmprestimos = ref(false)
+const firstEmprestimos = ref(0)
+const totalRecordsEmprestimos = ref(0)
+const emprestimosRows = 10
 const emprestimoForm = ref(getEmprestimoFormDefault())
 const emprestimoEditandoId = ref(null)
 
@@ -544,6 +553,9 @@ const confirmDeleteEmprestimoMessage = computed(() => {
 // Reservas
 const reservasLista = ref([])
 const loadingReservas = ref(false)
+const firstReservas = ref(0)
+const totalRecordsReservas = ref(0)
+const reservasRows = 10
 const reservaForm = ref(getReservaFormDefault())
 const reservaEditandoId = ref(null)
 
@@ -560,6 +572,8 @@ const opcoesRecompensas = ref([])
 const recompensasResgatadasLista = ref([])
 const loadingRecompensasResgatadas = ref(false)
 const loadingCatalogoRecompensas = ref(false)
+const firstRecompensas = ref(0)
+const totalRecordsRecompensas = ref(0)
 const recompensasRows = 10
 const resgateEditandoId = ref(null)
 const recompensaResgateForm = ref(getRecompensaResgateFormDefault())
@@ -733,7 +747,14 @@ async function carregarOpcoes() {
     opcoesLivros.value = listaLivros
     opcoesRecompensas.value = Array.isArray(recompensasCatalog) ? recompensasCatalog : recompensasCatalog?.results ?? []
     if (leitorId.value) {
-      await Promise.all([carregarEmprestimos(), carregarReservas(), carregarRecompensasResgatadas()])
+      firstEmprestimos.value = 0
+      firstReservas.value = 0
+      firstRecompensas.value = 0
+      await Promise.all([
+        carregarEmprestimos({ page: 1, page_size: emprestimosRows }),
+        carregarReservas({ page: 1, page_size: reservasRows }),
+        carregarRecompensasResgatadas({ page: 1, page_size: recompensasRows })
+      ])
     }
   } catch (e) {
     console.error('Erro ao carregar opções:', e)
@@ -741,12 +762,15 @@ async function carregarOpcoes() {
   }
 }
 
-async function carregarEmprestimos() {
+async function carregarEmprestimos(params = {}) {
   if (!leitorId.value) return
   loadingEmprestimos.value = true
   try {
-    const data = await leitorService.emprestimos.getAll({ leitor: leitorId.value })
-    emprestimosLista.value = Array.isArray(data) ? data : data?.results ?? []
+    const query = { leitor: leitorId.value, ...params }
+    const data = await leitorService.emprestimos.getAll(query)
+    const list = Array.isArray(data) ? data : data?.results ?? []
+    emprestimosLista.value = list
+    totalRecordsEmprestimos.value = data?.count ?? list.length
   } catch (e) {
     console.error('Erro ao carregar empréstimos:', e)
     emprestimosLista.value = []
@@ -755,12 +779,20 @@ async function carregarEmprestimos() {
   }
 }
 
-async function carregarReservas() {
+function onPageEmprestimos(event) {
+  firstEmprestimos.value = event.first
+  carregarEmprestimos({ page: event.page + 1, page_size: event.rows })
+}
+
+async function carregarReservas(params = {}) {
   if (!leitorId.value) return
   loadingReservas.value = true
   try {
-    const data = await leitorService.reservas.getAll({ leitor: leitorId.value })
-    reservasLista.value = Array.isArray(data) ? data : data?.results ?? []
+    const query = { leitor: leitorId.value, ...params }
+    const data = await leitorService.reservas.getAll(query)
+    const list = Array.isArray(data) ? data : data?.results ?? []
+    reservasLista.value = list
+    totalRecordsReservas.value = data?.count ?? list.length
   } catch (e) {
     console.error('Erro ao carregar reservas:', e)
     reservasLista.value = []
@@ -769,18 +801,31 @@ async function carregarReservas() {
   }
 }
 
-async function carregarRecompensasResgatadas() {
+function onPageReservas(event) {
+  firstReservas.value = event.first
+  carregarReservas({ page: event.page + 1, page_size: event.rows })
+}
+
+async function carregarRecompensasResgatadas(params = {}) {
   if (!leitorId.value) return
   loadingRecompensasResgatadas.value = true
   try {
-    const data = await leitorService.leitorRecompensas.getAll({ leitor: leitorId.value })
-    recompensasResgatadasLista.value = Array.isArray(data) ? data : data?.results ?? []
+    const query = { leitor: leitorId.value, ...params }
+    const data = await leitorService.leitorRecompensas.getAll(query)
+    const list = Array.isArray(data) ? data : data?.results ?? []
+    recompensasResgatadasLista.value = list
+    totalRecordsRecompensas.value = data?.count ?? list.length
   } catch (e) {
     console.error('Erro ao carregar resgates:', e)
     recompensasResgatadasLista.value = []
   } finally {
     loadingRecompensasResgatadas.value = false
   }
+}
+
+function onPageRecompensas(event) {
+  firstRecompensas.value = event.first
+  carregarRecompensasResgatadas({ page: event.page + 1, page_size: event.rows })
 }
 
 function aoFechar() {
@@ -868,7 +913,8 @@ async function salvarEmprestimo() {
     }
     emprestimoForm.value = getEmprestimoFormDefault()
     emprestimoEditandoId.value = null
-    await carregarEmprestimos()
+    firstEmprestimos.value = 0
+    await carregarEmprestimos({ page: 1, page_size: emprestimosRows })
   } catch (e) {
     console.error('Erro ao salvar empréstimo:', e)
     const data = e?.response?.data
@@ -909,7 +955,8 @@ async function confirmarExclusaoEmprestimo() {
   confirmDeleteEmprestimoLoading.value = true
   try {
     await leitorService.emprestimos.delete(emprestimoParaExcluir.value.id)
-    await carregarEmprestimos()
+    firstEmprestimos.value = 0
+    await carregarEmprestimos({ page: 1, page_size: emprestimosRows })
     toast.add({ severity: 'success', summary: 'Empréstimo excluído', life: 3000 })
   } catch (e) {
     toast.add({ severity: 'error', summary: 'Erro ao excluir empréstimo', life: 5000 })
@@ -947,7 +994,8 @@ async function salvarReserva() {
     }
     reservaForm.value = getReservaFormDefault()
     reservaEditandoId.value = null
-    await carregarReservas()
+    firstReservas.value = 0
+    await carregarReservas({ page: 1, page_size: reservasRows })
   } catch (e) {
     console.error('Erro ao salvar reserva:', e)
     toast.add({ severity: 'error', summary: 'Erro ao salvar reserva', detail: e?.response?.data?.detail || 'Não foi possível salvar.', life: 5000 })
@@ -973,7 +1021,8 @@ async function confirmarExclusaoReserva() {
   confirmDeleteReservaLoading.value = true
   try {
     await leitorService.reservas.delete(reservaParaExcluir.value.id)
-    await carregarReservas()
+    firstReservas.value = 0
+    await carregarReservas({ page: 1, page_size: reservasRows })
     toast.add({ severity: 'success', summary: 'Reserva excluída', life: 3000 })
   } catch (e) {
     toast.add({ severity: 'error', summary: 'Erro ao excluir reserva', life: 5000 })
@@ -1012,7 +1061,8 @@ async function salvarRecompensaResgate() {
     }
     recompensaResgateForm.value = getRecompensaResgateFormDefault()
     resgateEditandoId.value = null
-    await carregarRecompensasResgatadas()
+    firstRecompensas.value = 0
+    await carregarRecompensasResgatadas({ page: 1, page_size: recompensasRows })
   } catch (e) {
     const detail = e?.response?.data?.recompensa?.[0] ?? e?.response?.data?.detail ?? 'Não foi possível salvar.'
     toast.add({ severity: 'error', summary: 'Erro ao salvar resgate', detail, life: 5000 })
@@ -1046,7 +1096,8 @@ async function confirmarExclusaoResgate() {
   confirmDeleteResgateLoading.value = true
   try {
     await leitorService.leitorRecompensas.delete(resgateParaExcluir.value.id)
-    await carregarRecompensasResgatadas()
+    firstRecompensas.value = 0
+    await carregarRecompensasResgatadas({ page: 1, page_size: recompensasRows })
     toast.add({ severity: 'success', summary: 'Resgate excluído', life: 3000 })
   } catch (e) {
     toast.add({ severity: 'error', summary: 'Erro ao excluir resgate', life: 5000 })
@@ -1081,9 +1132,18 @@ watch(
 )
 
 watch(tabAtiva, (valor) => {
-  if (valor === 'emprestimo' && leitorId.value) carregarEmprestimos()
-  if (valor === 'reservas' && leitorId.value) carregarReservas()
-  if (valor === 'recompensas' && leitorId.value) carregarRecompensasResgatadas()
+  if (valor === 'emprestimo' && leitorId.value) {
+    firstEmprestimos.value = 0
+    carregarEmprestimos({ page: 1, page_size: emprestimosRows })
+  }
+  if (valor === 'reservas' && leitorId.value) {
+    firstReservas.value = 0
+    carregarReservas({ page: 1, page_size: reservasRows })
+  }
+  if (valor === 'recompensas' && leitorId.value) {
+    firstRecompensas.value = 0
+    carregarRecompensasResgatadas({ page: 1, page_size: recompensasRows })
+  }
 })
 </script>
 
