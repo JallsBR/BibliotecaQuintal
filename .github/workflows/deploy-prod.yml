@@ -16,38 +16,52 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Trigger deploy hook
+      - name: Deploy via SSH
         env:
-          DEPLOY_TOKEN: ${{ secrets.DEPLOY_HOOK_TOKEN }}
           SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_HOOK_TOKEN }}
         run: |
           set -euo pipefail
-          # 1) Preferir webhook (secret curto)
+
           if [ -n "${DEPLOY_TOKEN:-}" ]; then
             code=$(curl -sS -o /tmp/out -w '%{http_code}' -X POST \
               'https://bibliotecaquintaldasartes.o5o.tech/__deploy__/deploy' \
-              -H "X-Deploy-Token: $DEPLOY_TOKEN")
-            echo "hook_http=$code"
+              -H "X-Deploy-Token: ${DEPLOY_TOKEN}")
+            echo "hook_http=${code}"
             cat /tmp/out; echo
-            [ "$code" = "202" ] && exit 0
+            if [ "${code}" = "202" ]; then exit 0; fi
             echo "hook falhou; tentando SSH..."
           fi
-          # 2) Fallback SSH
+
           if [ -z "${SSH_KEY:-}" ]; then
-            echo "Nem DEPLOY_HOOK_TOKEN nem VPS_SSH_KEY configurados"; exit 1
+            echo "Configure o secret VPS_SSH_KEY (ou DEPLOY_HOOK_TOKEN)."
+            exit 1
           fi
+
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           KEY=~/.ssh/deploy_key
-          # aceita chave PEM/OpenSSH multilinha, com \n literais, ou base64
-          if echo "$SSH_KEY" | grep -q 'BEGIN .*PRIVATE KEY'; then
-            printf '%s\n' "$SSH_KEY" | sed 's/\r$//' > "$KEY"
-          elif echo "$SSH_KEY" | grep -q '\\n'; then
+
+          # Remove CR; grava chave
+          printf '%s\n' "$SSH_KEY" | sed 's/\r$//' > "$KEY"
+
+          # Se veio com \n literais numa linha só
+          if ! grep -q 'BEGIN' "$KEY"; then
             printf '%s' "$SSH_KEY" | sed 's/\\n/\n/g' > "$KEY"
-          else
-            echo "$SSH_KEY" | tr -d '\n\r ' | base64 -d > "$KEY"
           fi
+
+          # Se ainda não é PEM/OpenSSH, assume base64
+          if ! grep -q 'BEGIN' "$KEY"; then
+            echo "$SSH_KEY" | tr -d '\n\r\t ' | base64 -d > "$KEY"
+          fi
+
+          # Garante newline final
+          [ -n "$(tail -c1 "$KEY")" ] && echo >> "$KEY"
           chmod 600 "$KEY"
+
+          echo "key_header=$(head -1 "$KEY")"
           ssh-keyscan -H 76.13.231.242 >> ~/.ssh/known_hosts 2>/dev/null
-          ssh -i "$KEY" -o IdentitiesOnly=yes -o BatchMode=yes root@76.13.231.242 \
-            '/opt/o5o/apps/bibliotecaquintal/deploy-sync.sh --force'
+
+          ssh -vvv -i "$KEY" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o ConnectTimeout=15 root@76.13.231.242 \
+            '/opt/o5o/apps/bibliotecaquintal/deploy-sync.sh --force' 2>&1 | tail -40
