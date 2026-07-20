@@ -20,8 +20,6 @@ services:
       timeout: 5s
       retries: 20
       start_period: 30s
-    networks:
-      - internal
 
   api:
     build:
@@ -42,20 +40,11 @@ services:
       DB_PORT: "3306"
     volumes:
       - media_data:/app/api/media
+    ports:
+      - "127.0.0.1:8082:8000"
     depends_on:
       db:
         condition: service_healthy
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=proxy
-      - traefik.http.routers.bq-api.rule=Host(`${DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/admin`) || PathPrefix(`/media`) || PathPrefix(`/static`))
-      - traefik.http.routers.bq-api.entrypoints=websecure
-      - traefik.http.routers.bq-api.tls.certresolver=le
-      - traefik.http.routers.bq-api.priority=100
-      - traefik.http.services.bq-api.loadbalancer.server.port=8000
-    networks:
-      - internal
-      - proxy
 
   front:
     build:
@@ -66,22 +55,9 @@ services:
     restart: unless-stopped
     depends_on:
       - api
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=proxy
-      - traefik.http.routers.bq-front.rule=Host(`${DOMAIN}`)
-      - traefik.http.routers.bq-front.entrypoints=websecure
-      - traefik.http.routers.bq-front.tls.certresolver=le
-      - traefik.http.routers.bq-front.priority=1
-      - traefik.http.services.bq-front.loadbalancer.server.port=80
-    networks:
-      - proxy
+    ports:
+      - "127.0.0.1:8081:80"
 
 volumes:
   mysql_data:
   media_data:
-
-networks:
-  internal:
-  proxy:
-    external: true
