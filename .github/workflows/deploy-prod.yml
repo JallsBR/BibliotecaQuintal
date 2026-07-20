@@ -15,22 +15,39 @@ jobs:
     name: Deploy VPS
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: 76.13.231.242
-          username: root
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
-          script_stop: true
-          command_timeout: 25m
-          script: |
-            set -euo pipefail
-            cd /opt/o5o/apps/bibliotecaquintal
-            git fetch origin master
-            git checkout master
-            git reset --hard origin/master
-            docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
-            docker compose -f docker-compose.prod.yml --env-file .env.prod ps
+      - name: Trigger deploy hook
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_HOOK_TOKEN }}
+          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          # 1) Preferir webhook (secret curto)
+          if [ -n "${DEPLOY_TOKEN:-}" ]; then
+            code=$(curl -sS -o /tmp/out -w '%{http_code}' -X POST \
+              'https://bibliotecaquintaldasartes.o5o.tech/__deploy__/deploy' \
+              -H "X-Deploy-Token: $DEPLOY_TOKEN")
+            echo "hook_http=$code"
+            cat /tmp/out; echo
+            [ "$code" = "202" ] && exit 0
+            echo "hook falhou; tentando SSH..."
+          fi
+          # 2) Fallback SSH
+          if [ -z "${SSH_KEY:-}" ]; then
+            echo "Nem DEPLOY_HOOK_TOKEN nem VPS_SSH_KEY configurados"; exit 1
+          fi
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          KEY=~/.ssh/deploy_key
+          # aceita chave PEM/OpenSSH multilinha, com \n literais, ou base64
+          if echo "$SSH_KEY" | grep -q 'BEGIN .*PRIVATE KEY'; then
+            printf '%s\n' "$SSH_KEY" | sed 's/\r$//' > "$KEY"
+          elif echo "$SSH_KEY" | grep -q '\\n'; then
+            printf '%s' "$SSH_KEY" | sed 's/\\n/\n/g' > "$KEY"
+          else
+            echo "$SSH_KEY" | tr -d '\n\r ' | base64 -d > "$KEY"
+          fi
+          chmod 600 "$KEY"
+          ssh-keyscan -H 76.13.231.242 >> ~/.ssh/known_hosts 2>/dev/null
+          ssh -i "$KEY" -o IdentitiesOnly=yes -o BatchMode=yes root@76.13.231.242 \
+            '/opt/o5o/apps/bibliotecaquintal/deploy-sync.sh --force'
