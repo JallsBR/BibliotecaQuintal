@@ -10,6 +10,9 @@ services:
       MYSQL_ROOT_HOST: "%"
     volumes:
       - mysql_data:/var/lib/mysql
+    # Só localhost no VPS — acesso externo via túnel SSH (DBeaver)
+    ports:
+      - "127.0.0.1:3309:3306"
     healthcheck:
       test:
         [
