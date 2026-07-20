@@ -135,7 +135,7 @@ export default {
 
 .navbar-logo {
   max-width: 100%;
-  max-height: 76px;
+  max-height: 152px;
   object-fit: contain;
 }
 

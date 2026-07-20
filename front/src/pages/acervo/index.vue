@@ -20,8 +20,8 @@
             <label for="filtro-titulo">Título</label>
           </FloatLabel>
 
-          <FloatLabel class="filtro-campo">
-            <BaseSelect
+          <FloatLabel class="filtro-campo filtro-campo--multiselect">
+            <BaseMultiSelect
               id="filtro-autor"
               v-model="filtroAutor"
               :options="opcoesAutores"
@@ -30,7 +30,7 @@
               showClear
               class="w-full"
             />
-            <label for="filtro-autor">Autor</label>
+            <label for="filtro-autor">Autores</label>
           </FloatLabel>
         </div>
 
@@ -51,8 +51,8 @@
             />
             <label for="filtro-editora">Editora</label>
           </FloatLabel>
-          <FloatLabel class="filtro-campo">
-            <BaseSelect
+          <FloatLabel class="filtro-campo filtro-campo--multiselect">
+            <BaseMultiSelect
               id="filtro-categoria"
               v-model="filtroCategoria"
               :options="opcoesCategorias"
@@ -61,7 +61,7 @@
               showClear
               class="w-full"
             />
-            <label for="filtro-categoria">Categoria</label>
+            <label for="filtro-categoria">Categorias</label>
           </FloatLabel>
         </div>
 
@@ -178,6 +178,7 @@ import FloatLabel from 'primevue/floatlabel'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import BaseSelect from '@/components/BaseSelect.vue'
+import BaseMultiSelect from '@/components/BaseMultiSelect.vue'
 import Checkbox from 'primevue/checkbox'
 import Dialog from 'primevue/dialog'
 import Paginator from 'primevue/paginator'
@@ -198,9 +199,9 @@ const filtroTitulo = ref('')
 const filtroIdioma = ref('')
 const filtroAnoDe = ref(null)
 const filtroAnoAte = ref(null)
-const filtroAutor = ref(null)
+const filtroAutor = ref([])
 const filtroEditora = ref(null)
-const filtroCategoria = ref(null)
+const filtroCategoria = ref([])
 const filtroAtivo = ref(false)
 const filtroDisponivel = ref(false)
 
@@ -289,9 +290,9 @@ function montarParametrosBusca() {
   if (filtroIdioma.value?.trim()) params['idioma__icontains'] = filtroIdioma.value.trim()
   if (filtroAnoDe.value != null) params['ano_publicacao__gte'] = filtroAnoDe.value
   if (filtroAnoAte.value != null) params['ano_publicacao__lte'] = filtroAnoAte.value
-  if (filtroAutor.value) params['autores'] = filtroAutor.value
+  if (filtroAutor.value?.length) params['autores__in'] = filtroAutor.value.join(',')
   if (filtroEditora.value) params['editora'] = filtroEditora.value
-  if (filtroCategoria.value) params['categorias'] = filtroCategoria.value
+  if (filtroCategoria.value?.length) params['categorias__in'] = filtroCategoria.value.join(',')
   if (filtroAtivo.value) params['ativo'] = true
   if (filtroDisponivel.value) params['is_disponivel'] = true
   return params
@@ -310,9 +311,9 @@ async function limparFiltros() {
   filtroIdioma.value = ''
   filtroAnoDe.value = null
   filtroAnoAte.value = null
-  filtroAutor.value = null
+  filtroAutor.value = []
   filtroEditora.value = null
-  filtroCategoria.value = null
+  filtroCategoria.value = []
   filtroAtivo.value = false
   filtroDisponivel.value = false
   first.value = 0
@@ -442,6 +443,15 @@ onMounted(async () => {
 
 .filtro-campo {
   width: 100%;
+}
+
+.filtro-campo--multiselect :deep(.p-multiselect) {
+  width: 100%;
+}
+
+.filtro-campo--multiselect :deep(.p-multiselect-label-container) {
+  max-height: 4.5rem;
+  overflow-y: auto;
 }
 
 .filtro-switches {
