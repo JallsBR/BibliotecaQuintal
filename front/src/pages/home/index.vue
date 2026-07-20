@@ -1,6 +1,6 @@
 <template>
   <div class="home-page">
-    <h1 class="home-title">Biblioteca Quintal</h1>
+    <h1 class="home-title">Biblioteca Quintal das artes</h1>
     <p class="home-subtitle">Bem-vindo ao sistema. Acesse rapidamente os módulos abaixo.</p>
 
     <div class="home-cards" v-if="!loading">

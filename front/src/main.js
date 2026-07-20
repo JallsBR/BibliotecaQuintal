@@ -7,6 +7,7 @@ import ToastService from 'primevue/toastservice'
 import Aura from '@primevue/themes/aura'
 import 'primeicons/primeicons.css'
 import './assets/theme-global.css'
+import { atualizarFavicon } from './utils/logo'
 
 const app = createApp(App)
 app.use(PrimeVue, {
@@ -25,5 +26,6 @@ app.use(store)
 // Aplica tema salvo antes do mount para evitar flash
 const temaSalvo = localStorage.getItem('tema') || 'claro'
 document.documentElement.setAttribute('data-tema', temaSalvo)
+atualizarFavicon(temaSalvo)
 
 app.mount('#app')

@@ -182,6 +182,7 @@ import Checkbox from 'primevue/checkbox'
 import Dialog from 'primevue/dialog'
 import Paginator from 'primevue/paginator'
 import livroService from '@/services/livroService'
+import { getLogoAtual } from '@/utils/logo'
 
 const store = useStore()
 const hasPermission = (perm) => store.getters.hasPermission(perm)
@@ -213,7 +214,7 @@ const livroSelecionado = ref(null)
 const toast = useToast()
 const anoAtual = new Date().getFullYear()
 
-const logoFallback = '/logo.png'
+const logoFallback = getLogoAtual()
 
 function getImagemLivro(livro) {
   if (livro.imagem) {

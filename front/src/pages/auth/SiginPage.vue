@@ -4,7 +4,7 @@
       <template #content>
         <form @submit.prevent="handleLogin">
           <div class="auth-header">
-            <img src="/logoHAzul.png" alt="Logo" class="auth-logo" />
+            <img :src="logoSrc" alt="Biblioteca Quintal" class="auth-logo" />
           </div>
 
           <Message v-if="error" severity="error" :closable="false" class="auth-error">
@@ -62,6 +62,8 @@ import Password from 'primevue/password'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
 import { RouterLink } from 'vue-router'
+import { LOGO_PRETO } from '@/utils/logo'
+
 export default {
   name: 'SignInPage',
   components: {
@@ -83,6 +85,9 @@ export default {
   computed: {
     loading() {
       return this.$store.getters.isLoading
+    },
+    logoSrc() {
+      return LOGO_PRETO
     }
   },
 
@@ -136,7 +141,7 @@ export default {
 
 .auth-logo {
   width: 100%;
-  max-width: 200px;
+  max-width: 400px;
   display: block;
   margin: 0 auto;
   object-fit: contain;

@@ -4,7 +4,7 @@
       <template #content>
         <form @submit.prevent="handleSignup">
           <div class="auth-header">
-            <img src="/logoHAzul.png" alt="Logo" class="auth-logo" />
+            <img :src="logoSrc" alt="Biblioteca Quintal" class="auth-logo" />
           </div>
 
           <Message v-if="error" severity="error" :closable="false" class="auth-error">
@@ -94,6 +94,7 @@ import Message from 'primevue/message'
 import Dialog from 'primevue/dialog'
 import ProgressBar from 'primevue/progressbar'
 import { RouterLink } from 'vue-router'
+import { LOGO_PRETO } from '@/utils/logo'
 
 const PROGRESSO_MAX_ANTES = 85
 const PROGRESSO_INTERVALO_MS = 150
@@ -120,6 +121,11 @@ export default {
       loading: false,
       progresso: 0,
       progressoTimer: null
+    }
+  },
+  computed: {
+    logoSrc() {
+      return LOGO_PRETO
     }
   },
   methods: {
@@ -214,7 +220,7 @@ export default {
 
 .auth-logo {
   width: 100%;
-  max-width: 200px;
+  max-width: 400px;
   display: block;
   margin: 0 auto;
   object-fit: contain;

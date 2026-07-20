@@ -63,6 +63,7 @@
 import { computed, ref, onMounted } from 'vue'
 import store from '../store'
 import Button from 'primevue/button'
+import { atualizarFavicon, getLogoPorTema } from '@/utils/logo'
 
 const TEMA_KEY = 'tema'
 
@@ -76,9 +77,7 @@ export default {
       temaAtual.value = document.documentElement.getAttribute('data-tema') || 'claro'
     })
 
-    const logoNavBar = computed(() =>
-      temaAtual.value === 'escuro' ? '/logoHAmarelo.png' : '/logoHAzul.png'
-    )
+    const logoNavBar = computed(() => getLogoPorTema(temaAtual.value))
 
     const userName = computed(() => {
       const user = store.state?.user
@@ -97,6 +96,7 @@ export default {
       document.documentElement.setAttribute('data-tema', proximo)
       localStorage.setItem(TEMA_KEY, proximo)
       temaAtual.value = proximo
+      atualizarFavicon(proximo)
     }
 
     const isSuperuser = computed(() => store.getters.isSuperuser)
