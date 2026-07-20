@@ -7,6 +7,9 @@ atalhos.txt
 __pycache__/
 OIG4.webp
 *.sqlite3
+.env.prod
+.env
+api/staticfiles/
 
 
 # Logs

@@ -1,0 +1,87 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_HOST: "%"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD || exit 1",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    networks:
+      - internal
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+      DEBUG: ${DEBUG:-False}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS}
+      CORS_ALLOW_ALL_ORIGINS: ${CORS_ALLOW_ALL_ORIGINS:-False}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: db
+      DB_PORT: "3306"
+    volumes:
+      - media_data:/app/api/media
+    depends_on:
+      db:
+        condition: service_healthy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.bq-api.rule=Host(`${DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/admin`) || PathPrefix(`/media`) || PathPrefix(`/static`))
+      - traefik.http.routers.bq-api.entrypoints=websecure
+      - traefik.http.routers.bq-api.tls.certresolver=le
+      - traefik.http.routers.bq-api.priority=100
+      - traefik.http.services.bq-api.loadbalancer.server.port=8000
+    networks:
+      - internal
+      - proxy
+
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE: /api/v1
+    restart: unless-stopped
+    depends_on:
+      - api
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.bq-front.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.bq-front.entrypoints=websecure
+      - traefik.http.routers.bq-front.tls.certresolver=le
+      - traefik.http.routers.bq-front.priority=1
+      - traefik.http.services.bq-front.loadbalancer.server.port=80
+    networks:
+      - proxy
+
+volumes:
+  mysql_data:
+  media_data:
+
+networks:
+  internal:
+  proxy:
+    external: true

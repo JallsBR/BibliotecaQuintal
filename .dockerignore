@@ -15,6 +15,11 @@ __pycache__
 .eggs
 dist
 build
+api/staticfiles
+
+# Segredos
+.env
+.env.prod
 
 # Banco local (opcional: remover se quiser persistir db no host)
 *.sqlite3
@@ -36,6 +41,7 @@ atalhos.txt
 
 # Node (se não usar front no mesmo build)
 node_modules
+front/node_modules
 npm-debug.log*
 
 # Arquivos de contexto do Cursor

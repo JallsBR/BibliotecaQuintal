@@ -11,3 +11,5 @@ sqlparse==0.5.5
 tzdata==2025.3
 django-jazzmin==3.0.3
 mysqlclient==2.2.6
+gunicorn==23.0.0
+whitenoise==6.9.0
