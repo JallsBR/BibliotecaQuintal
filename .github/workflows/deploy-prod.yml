@@ -42,26 +42,19 @@ jobs:
           chmod 700 ~/.ssh
           KEY=~/.ssh/deploy_key
 
-          # Remove CR; grava chave
           printf '%s\n' "$SSH_KEY" | sed 's/\r$//' > "$KEY"
-
-          # Se veio com \n literais numa linha só
           if ! grep -q 'BEGIN' "$KEY"; then
             printf '%s' "$SSH_KEY" | sed 's/\\n/\n/g' > "$KEY"
           fi
-
-          # Se ainda não é PEM/OpenSSH, assume base64
           if ! grep -q 'BEGIN' "$KEY"; then
             echo "$SSH_KEY" | tr -d '\n\r\t ' | base64 -d > "$KEY"
           fi
-
-          # Garante newline final
           [ -n "$(tail -c1 "$KEY")" ] && echo >> "$KEY"
           chmod 600 "$KEY"
 
           echo "key_header=$(head -1 "$KEY")"
           ssh-keyscan -H 76.13.231.242 >> ~/.ssh/known_hosts 2>/dev/null
 
-          ssh -vvv -i "$KEY" -o IdentitiesOnly=yes -o BatchMode=yes \
+          ssh -i "$KEY" -o IdentitiesOnly=yes -o BatchMode=yes \
             -o ConnectTimeout=15 root@76.13.231.242 \
-            '/opt/o5o/apps/bibliotecaquintal/deploy-sync.sh --force' 2>&1 | tail -40
+            '/opt/o5o/apps/bibliotecaquintal/deploy-sync.sh --force'
