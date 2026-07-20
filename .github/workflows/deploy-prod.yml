@@ -1,0 +1,36 @@
+name: Deploy produção
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-bibliotecaquintal-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy VPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script_stop: true
+          command_timeout: 25m
+          script: |
+            set -euo pipefail
+            cd /opt/o5o/apps/bibliotecaquintal
+            git fetch origin master
+            git checkout master
+            git reset --hard origin/master
+            docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+            docker compose -f docker-compose.prod.yml --env-file .env.prod ps
