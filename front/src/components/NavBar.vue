@@ -1,83 +1,134 @@
 <template>
-  <aside class="navbar">
-    <div class="navbar-header">
-      <router-link to="/" class="navbar-logo-link">
-        <img :src="logoNavBar" alt="Biblioteca Quintal" class="navbar-logo" />
-      </router-link>
-    </div>
+  <div class="navbar-shell">
+    <div v-if="menuAberto" class="navbar-overlay" @click="fecharMenu"></div>
 
-    <nav class="navbar-links">
-      <router-link to="/" class="nav-link" exact-active-class="nav-link--active">
-        <i class="pi pi-home"></i>
-        <span>Início</span>
-      </router-link>
-      <router-link v-if="hasPermission('livros.view_livro')" to="/livros" class="nav-link" active-class="nav-link--active">
-        <i class="pi pi-book"></i>
-        <span>Livros</span>
-      </router-link>
-      <router-link to="/acervo" class="nav-link" active-class="nav-link--active">
-        <i class="pi pi-images"></i>
-        <span>Acervo</span>
-      </router-link>
-      <router-link to="/recompensas" class="nav-link" active-class="nav-link--active">
-        <i class="pi pi-gift"></i>
-        <span>Recompensas</span>
-      </router-link>
-      <router-link to="/leitores" class="nav-link" active-class="nav-link--active">
-        <i class="pi pi-user"></i>
-        <span>Leitores</span>
-      </router-link>
-      <router-link to="/emprestimos" class="nav-link" active-class="nav-link--active">
-        <i class="pi pi-arrow-right"></i>
-        <span>Empréstimos</span>
-      </router-link>
-      <router-link to="/reservas" class="nav-link" active-class="nav-link--active">
-        <i class="pi pi-clock"></i>
-        <span>Reservas</span>
-      </router-link>
-      <router-link
-        v-if="isSuperuser"
-        to="/configuracao"
-        class="nav-link"
-        active-class="nav-link--active"
-      >
-        <i class="pi pi-cog"></i>
-        <span>Configuração</span>
-      </router-link>
-    </nav>
-
-    <div class="navbar-separator" role="separator"></div>
-
-    <div class="navbar-user">
-      <div class="navbar-user-actions">
-        <Button label="Logout" severity="danger" size="small" class="navbar-logout-btn" @click="logout" />
-        <button type="button" class="navbar-theme-btn" :aria-label="temaAtual === 'escuro' ? 'Tema claro' : 'Tema escuro'" @click="toggleTema">
-          <i class="pi" :class="temaAtual === 'escuro' ? 'pi-sun' : 'pi-moon'"></i>
-        </button>
+    <aside id="navbar-menu" class="navbar" :class="{ 'navbar--aberto': menuAberto }">
+      <div class="navbar-header">
+        <router-link to="/" class="navbar-logo-link">
+          <img :src="logoNavBar" alt="Biblioteca Quintal" class="navbar-logo" />
+        </router-link>
       </div>
-    </div>
-  </aside>
+
+      <nav class="navbar-links">
+        <router-link to="/" class="nav-link" exact-active-class="nav-link--active">
+          <i class="pi pi-home"></i>
+          <span>Início</span>
+        </router-link>
+        <router-link v-if="hasPermission('livros.view_livro')" to="/livros" class="nav-link" active-class="nav-link--active">
+          <i class="pi pi-book"></i>
+          <span>Livros</span>
+        </router-link>
+        <router-link to="/acervo" class="nav-link" active-class="nav-link--active">
+          <i class="pi pi-images"></i>
+          <span>Acervo</span>
+        </router-link>
+        <router-link to="/recompensas" class="nav-link" active-class="nav-link--active">
+          <i class="pi pi-gift"></i>
+          <span>Recompensas</span>
+        </router-link>
+        <router-link to="/leitores" class="nav-link" active-class="nav-link--active">
+          <i class="pi pi-user"></i>
+          <span>Leitores</span>
+        </router-link>
+        <router-link to="/emprestimos" class="nav-link" active-class="nav-link--active">
+          <i class="pi pi-arrow-right"></i>
+          <span>Empréstimos</span>
+        </router-link>
+        <router-link to="/reservas" class="nav-link" active-class="nav-link--active">
+          <i class="pi pi-clock"></i>
+          <span>Reservas</span>
+        </router-link>
+        <router-link
+          v-if="isSuperuser"
+          to="/configuracao"
+          class="nav-link"
+          active-class="nav-link--active"
+        >
+          <i class="pi pi-cog"></i>
+          <span>Configuração</span>
+        </router-link>
+      </nav>
+
+      <div class="navbar-separator" role="separator"></div>
+
+      <div class="navbar-user">
+        <div class="navbar-user-actions">
+          <Button label="Logout" severity="danger" size="small" class="navbar-logout-btn" @click="logout" />
+          <button type="button" class="navbar-theme-btn" :aria-label="temaAtual === 'escuro' ? 'Tema claro' : 'Tema escuro'" @click="alternarTema">
+            <i class="pi" :class="temaAtual === 'escuro' ? 'pi-sun' : 'pi-moon'"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <button
+      type="button"
+      class="navbar-fab"
+      :aria-label="menuAberto ? 'Fechar menu' : 'Abrir menu'"
+      :aria-expanded="menuAberto"
+      aria-controls="navbar-menu"
+      @click="alternarMenu"
+    >
+      <i v-if="menuAberto" class="pi pi-times"></i>
+      <img v-else :src="logoNavBar" alt="" class="navbar-fab-logo" />
+    </button>
+  </div>
 </template>
 
 <script>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute } from 'vue-router'
 import store from '../store'
 import Button from 'primevue/button'
-import { atualizarFavicon, getLogoPorTema } from '@/utils/logo'
+import { useTema } from '@/composables/useTema'
 
-const TEMA_KEY = 'tema'
+// Precisa acompanhar o breakpoint do CSS deste componente e do AuthLayout
+const MOBILE_QUERY = '(max-width: 900px)'
 
 export default {
   name: 'NavBar',
   components: { Button },
   setup() {
-    const temaAtual = ref('claro')
+    const { tema: temaAtual, logo: logoNavBar, alternarTema } = useTema()
+    const menuAberto = ref(false)
+    const route = useRoute()
+
+    let mediaQuery = null
+
+    function aoMudarViewport(evento) {
+      if (!evento.matches) {
+        menuAberto.value = false
+      }
+    }
+
+    function aoPressionarTecla(evento) {
+      if (evento.key === 'Escape') {
+        menuAberto.value = false
+      }
+    }
 
     onMounted(() => {
-      temaAtual.value = document.documentElement.getAttribute('data-tema') || 'claro'
+      mediaQuery = window.matchMedia(MOBILE_QUERY)
+      mediaQuery.addEventListener('change', aoMudarViewport)
+      window.addEventListener('keydown', aoPressionarTecla)
     })
 
-    const logoNavBar = computed(() => getLogoPorTema(temaAtual.value))
+    onBeforeUnmount(() => {
+      mediaQuery?.removeEventListener('change', aoMudarViewport)
+      window.removeEventListener('keydown', aoPressionarTecla)
+    })
+
+    watch(() => route.fullPath, () => {
+      menuAberto.value = false
+    })
+
+    function alternarMenu() {
+      menuAberto.value = !menuAberto.value
+    }
+
+    function fecharMenu() {
+      menuAberto.value = false
+    }
 
     const userName = computed(() => {
       const user = store.state?.user
@@ -91,18 +142,21 @@ export default {
       store.dispatch('logout')
     }
 
-    function toggleTema() {
-      const proximo = temaAtual.value === 'escuro' ? 'claro' : 'escuro'
-      document.documentElement.setAttribute('data-tema', proximo)
-      localStorage.setItem(TEMA_KEY, proximo)
-      temaAtual.value = proximo
-      atualizarFavicon(proximo)
-    }
-
     const isSuperuser = computed(() => store.getters.isSuperuser)
     const hasPermission = (perm) => store.getters.hasPermission(perm)
 
-    return { userName, logout, temaAtual, toggleTema, logoNavBar, isSuperuser, hasPermission }
+    return {
+      userName,
+      logout,
+      temaAtual,
+      alternarTema,
+      logoNavBar,
+      isSuperuser,
+      hasPermission,
+      menuAberto,
+      alternarMenu,
+      fecharMenu
+    }
   }
 }
 </script>
@@ -243,5 +297,87 @@ export default {
 
 .navbar-theme-btn .pi {
   font-size: 1.1rem;
+}
+
+.navbar-overlay {
+  display: none;
+}
+
+.navbar-fab {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .navbar {
+    width: 80vw;
+    max-width: 300px;
+    min-width: 0;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+
+  .navbar--aberto {
+    transform: translateX(0);
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.35);
+  }
+
+  .navbar-logo {
+    max-height: 104px;
+  }
+
+  .navbar-links {
+    overflow-y: auto;
+  }
+
+  .navbar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 90;
+    /* evita arrastar o conteúdo por trás do drawer */
+    touch-action: none;
+  }
+
+  .navbar-fab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    right: 1rem;
+    bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
+    width: 3.5rem;
+    height: 3.5rem;
+    padding: 0.4rem;
+    border: none;
+    border-radius: 50%;
+    background: var(--azulquintal);
+    color: var(--texto-sobre-azul);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    z-index: 110;
+    transition: transform 0.2s;
+  }
+
+  .navbar-fab:active {
+    transform: scale(0.94);
+  }
+
+  .navbar-fab-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .navbar-fab .pi {
+    font-size: 1.4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar,
+  .navbar-fab {
+    transition: none;
+  }
 }
 </style>
