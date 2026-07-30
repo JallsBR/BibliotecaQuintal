@@ -102,11 +102,15 @@
         class="livro-card"
         @click="abrirDetalhes(livro)"
       >
-        <div class="livro-card-image-wrap">
+        <div
+          class="livro-card-image-wrap"
+          :class="{ 'livro-card-image-wrap--fallback': !temImagemLivro(livro) }"
+        >
           <img
             :src="getImagemLivro(livro)"
             alt="Capa do livro"
             class="livro-card-image"
+            :class="{ 'livro-card-image--fallback': !temImagemLivro(livro) }"
           />
         </div>
         <div class="livro-card-content">
@@ -136,6 +140,7 @@
             :src="getImagemLivro(livroSelecionado)"
             alt="Capa do livro"
             class="dialog-detalhes-image"
+            :class="{ 'dialog-detalhes-image--fallback': !temImagemLivro(livroSelecionado) }"
           />
           <div class="dialog-detalhes-main">
             <h2>{{ livroSelecionado.titulo }}</h2>
@@ -183,7 +188,7 @@ import Checkbox from 'primevue/checkbox'
 import Dialog from 'primevue/dialog'
 import Paginator from 'primevue/paginator'
 import livroService from '@/services/livroService'
-import { getLogoAtual } from '@/utils/logo'
+import { useTema } from '@/composables/useTema'
 
 const store = useStore()
 const hasPermission = (perm) => store.getters.hasPermission(perm)
@@ -215,16 +220,17 @@ const livroSelecionado = ref(null)
 const toast = useToast()
 const anoAtual = new Date().getFullYear()
 
-const logoFallback = getLogoAtual()
+const { logo: logoFallback } = useTema()
+
+function temImagemLivro(livro) {
+  return Boolean(livro?.imagem || livro?.imagem_url)
+}
 
 function getImagemLivro(livro) {
-  if (livro.imagem) {
-    return livro.imagem
+  if (temImagemLivro(livro)) {
+    return livro.imagem || livro.imagem_url
   }
-  if (livro.imagem_url) {
-    return livro.imagem_url
-  }
-  return logoFallback
+  return logoFallback.value
 }
 
 function formatarAutores(autoresNomes) {
@@ -406,6 +412,17 @@ onMounted(async () => {
   object-fit: cover;
 }
 
+.livro-card-image-wrap--fallback {
+  background: var(--azulquintal);
+}
+
+.livro-card-image--fallback {
+  object-fit: contain;
+  object-position: center;
+  padding: 18%;
+  box-sizing: border-box;
+}
+
 .livro-card-content {
   padding: 0.75rem 0.8rem 0.9rem;
 }
@@ -492,6 +509,14 @@ onMounted(async () => {
   border-radius: 8px;
   object-fit: cover;
   flex-shrink: 0;
+}
+
+.dialog-detalhes-image--fallback {
+  object-fit: contain;
+  object-position: center;
+  background: var(--azulquintal);
+  padding: 0.75rem;
+  box-sizing: border-box;
 }
 
 .dialog-detalhes-main h2 {
