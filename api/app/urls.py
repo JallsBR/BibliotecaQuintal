@@ -1,7 +1,7 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
-from django.conf.urls.static import static
+from django.views.static import serve
 
 from app.views import DashboardStatsView
 
@@ -11,4 +11,10 @@ urlpatterns = [
     path('api/v1/livros/', include('livros.urls')),
     path('api/v1/leitor/', include('leitor.urls')),
     path('api/v1/dashboard/stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Produção: o host Nginx proxia /media/ → API (8082). static() só ativa com DEBUG.
+    re_path(
+        r'^media/(?P<path>.*)$',
+        serve,
+        {'document_root': settings.MEDIA_ROOT},
+    ),
+]

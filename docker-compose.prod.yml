@@ -58,6 +58,9 @@ services:
     restart: unless-stopped
     depends_on:
       - api
+    volumes:
+      # Mesmo volume da API — Nginx do front serve /media/ (somente leitura).
+      - media_data:/var/www/media:ro
     ports:
       - "127.0.0.1:8081:80"
 
