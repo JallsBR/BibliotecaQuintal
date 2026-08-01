@@ -1,24 +1,34 @@
-from rest_framework.views import APIView
-from users.auth import Authentication
-from users.serializers import UserSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.status import HTTP_400_BAD_REQUEST
+from rest_framework.throttling import AnonRateThrottle
+from rest_framework.views import APIView
+
+from users.services import autenticar_signin
+
+
+class SigninThrottle(AnonRateThrottle):
+    scope = "auth_signin"
+
 
 class Signin(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [SigninThrottle]
+
     def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
+        def _strip(v):
+            if v is None:
+                return ""
+            return str(v).strip()
 
-        user = Authentication.signin(self, email=email, password=password)
-        
-        token = RefreshToken.for_user(user)
+        email = _strip(request.data.get("email"))
+        password = request.data.get("password")
 
-        serializer = UserSerializer(user)
+        if not email or not password:
+            return Response(
+                {"detail": "Informe o e-mail e a senha."},
+                status=HTTP_400_BAD_REQUEST,
+            )
 
-        return Response({
-            "user": serializer.data,
-            "refresh": str(token),
-            "access": str(token.access_token)
-        })
+        payload = autenticar_signin(email=email, password=password)
+        return Response(payload)

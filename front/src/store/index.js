@@ -54,7 +54,16 @@ export default createStore({
           password
         })
 
-        const { user, access, refresh } = response.data
+        const data = response.data || {}
+
+        if (data.requires_2fa && data.challenge_id) {
+          return {
+            requires_2fa: true,
+            challenge_id: data.challenge_id
+          }
+        }
+
+        const { user, access, refresh } = data
 
         if (!access || !refresh) {
           throw new Error('Tokens inválidos')
@@ -66,9 +75,39 @@ export default createStore({
           refresh
         })
 
-        return true
+        return { ok: true }
       } catch (error) {
         console.error('Erro no login:', error)
+        return { ok: false }
+      } finally {
+        commit('SET_LOADING', false)
+      }
+    },
+
+    async verifyTwoFactor({ commit }, { challenge_id, code, link_token }) {
+      try {
+        commit('SET_LOADING', true)
+        const body = { challenge_id }
+        if (code != null && String(code).trim() !== '') {
+          body.code = String(code).trim()
+        } else if (link_token != null && String(link_token).trim() !== '') {
+          body.link_token = String(link_token).trim()
+        }
+        const { data } = await api.post('/auth/2fa/verify', body)
+        const { user, access, refresh } = data || {}
+
+        if (!access || !refresh) {
+          throw new Error('Tokens inválidos')
+        }
+
+        commit('SET_AUTH', {
+          user: user || {},
+          access,
+          refresh
+        })
+        return true
+      } catch (error) {
+        console.error('Erro na verificação 2FA:', error)
         return false
       } finally {
         commit('SET_LOADING', false)

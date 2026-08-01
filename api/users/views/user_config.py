@@ -12,7 +12,7 @@ class UserListView(generics.ListAPIView):
 
 
 class UserRetrieveUpdateView(generics.RetrieveUpdateAPIView):
-    """Consulta e atualiza um usuário (grupos, is_staff) — somente superuser."""
+    """Consulta e atualiza um usuário (grupos, is_staff, two_factor_enabled) — somente superuser."""
     serializer_class = UserAdminSerializer
     permission_classes = [IsSuperuser]
     queryset = User.objects.all()

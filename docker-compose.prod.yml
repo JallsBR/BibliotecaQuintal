@@ -41,6 +41,15 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_HOST: db
       DB_PORT: "3306"
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+      EMAIL_HOST: ${EMAIL_HOST:-mail.o5o.tech}
+      EMAIL_PORT: ${EMAIL_PORT:-465}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-bibliotecaquintaldasartes@o5o.tech}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-False}
+      EMAIL_USE_SSL: ${EMAIL_USE_SSL:-True}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-bibliotecaquintaldasartes@o5o.tech}
+      FRONTEND_URL: ${FRONTEND_URL:-https://bibliotecaquintaldasartes.o5o.tech}
     volumes:
       - media_data:/app/api/media
     ports:

@@ -14,6 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'email',
             'is_superuser',
+            'two_factor_enabled',
             'permissions',
         )
 
@@ -36,6 +37,7 @@ class UserAdminSerializer(serializers.ModelSerializer):
             'email',
             'is_staff',
             'is_superuser',
+            'two_factor_enabled',
             'groups',
             'groups_detail',
         )

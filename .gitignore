@@ -10,6 +10,7 @@ OIG4.webp
 .env.prod
 .env
 api/staticfiles/
+.cursor
 
 
 # Logs

@@ -13,7 +13,7 @@
       <TabPanels>
         <TabPanel value="usuarios">
           <div class="tab-content">
-            <p class="tab-desc">Usuários do sistema. Edite para alterar grupos e perfil de staff.</p>
+            <p class="tab-desc">Usuários do sistema. Edite para alterar grupos, staff e autenticação em dois fatores.</p>
             <BaseDataTable
               :items="usuarios"
               :loading="loadingUsuarios"
@@ -29,6 +29,12 @@
                 <Column header="Staff" :style="{ width: '80px' }">
                   <template #body="slotProps">
                     <span v-if="slotProps.data.is_staff">Sim</span>
+                    <span v-else>—</span>
+                  </template>
+                </Column>
+                <Column header="2FA" :style="{ width: '80px' }">
+                  <template #body="slotProps">
+                    <span v-if="slotProps.data.two_factor_enabled">Sim</span>
                     <span v-else>—</span>
                   </template>
                 </Column>
@@ -215,10 +221,20 @@
           </div>
         </div>
         <div class="dialog-row">
-          <div class="dialog-field">
-            <div class="flex align-items-center gap-2">
-              <Checkbox v-model="formUsuario.is_staff" inputId="usuario-is-staff" :binary="true" />
-              <label for="usuario-is-staff">Staff (acesso ao painel)</label>
+          <div class="dialog-field dialog-field--full">
+            <div class="flex align-items-center gap-4 flex-wrap">
+              <div class="flex align-items-center gap-2">
+                <Checkbox v-model="formUsuario.is_staff" inputId="usuario-is-staff" :binary="true" />
+                <label for="usuario-is-staff">Staff (acesso ao painel)</label>
+              </div>
+              <div class="flex align-items-center gap-2">
+                <Checkbox
+                  v-model="formUsuario.two_factor_enabled"
+                  inputId="usuario-two-factor"
+                  :binary="true"
+                />
+                <label for="usuario-two-factor">Autenticação em dois fatores (e-mail)</label>
+              </div>
             </div>
           </div>
         </div>
@@ -313,7 +329,7 @@ const confirmDeleteLoading = ref(false)
 const grupoParaExcluir = ref(null)
 const dialogUsuarioVisible = ref(false)
 const usuarioEditando = ref(null)
-const formUsuario = ref({ groups: [], is_staff: false })
+const formUsuario = ref({ groups: [], is_staff: false, two_factor_enabled: false })
 const salvandoUsuario = ref(false)
 const dialogGrupoUsuariosVisible = ref(false)
 const grupoUsuariosEditando = ref(null)
@@ -529,13 +545,14 @@ function abrirEditarUsuario(usuario) {
   usuarioEditando.value = usuario
   formUsuario.value = {
     groups: (usuario.groups ?? []).map((g) => (typeof g === 'object' ? g.id : g)),
-    is_staff: !!usuario.is_staff
+    is_staff: !!usuario.is_staff,
+    two_factor_enabled: !!usuario.two_factor_enabled
   }
   dialogUsuarioVisible.value = true
 }
 
 function limparFormUsuario() {
-  formUsuario.value = { groups: [], is_staff: false }
+  formUsuario.value = { groups: [], is_staff: false, two_factor_enabled: false }
   usuarioEditando.value = null
 }
 
@@ -545,7 +562,8 @@ async function salvarUsuario() {
   try {
     await configService.users.update(usuarioEditando.value.id, {
       groups: formUsuario.value.groups ?? [],
-      is_staff: formUsuario.value.is_staff
+      is_staff: formUsuario.value.is_staff,
+      two_factor_enabled: formUsuario.value.two_factor_enabled
     })
     toast.add({ severity: 'success', summary: 'Usuário atualizado', detail: 'Alterações salvas com sucesso.', life: 3000 })
     dialogUsuarioVisible.value = false

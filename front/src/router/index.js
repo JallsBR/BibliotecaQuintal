@@ -12,6 +12,8 @@ import RecompensasPage from '../pages/recompensas/index.vue'
 import ConfiguracaoPage from '../pages/configuracao/index.vue'
 import SiginPage from '../pages/auth/SiginPage.vue'
 import SigupPage from '../pages/auth/SigupPage.vue'
+import TwoFactorLinkPage from '../pages/auth/TwoFactorLinkPage.vue'
+import ResetPasswordPage from '../pages/auth/ResetPasswordPage.vue'
 import store from '../store'
 
 const routes = [
@@ -38,6 +40,28 @@ const routes = [
         path: '',
         name: 'signup',
         component: SigupPage
+      }
+    ]
+  },
+  {
+    path: '/auth/2fa-link',
+    component: PublicLayout,
+    children: [
+      {
+        path: '',
+        name: 'two-factor-link',
+        component: TwoFactorLinkPage
+      }
+    ]
+  },
+  {
+    path: '/auth/redefinir-senha',
+    component: PublicLayout,
+    children: [
+      {
+        path: '',
+        name: 'reset-password',
+        component: ResetPasswordPage
       }
     ]
   },
