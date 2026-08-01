@@ -54,6 +54,9 @@ services:
       - media_data:/app/api/media
     ports:
       - "127.0.0.1:8082:8000"
+    networks:
+      - default
+      - mail
     depends_on:
       db:
         condition: service_healthy
@@ -72,7 +75,15 @@ services:
       - media_data:/var/www/media:ro
     ports:
       - "127.0.0.1:8081:80"
+    networks:
+      - default
 
 volumes:
   mysql_data:
   media_data:
+
+networks:
+  default:
+  mail:
+    external: true
+    name: mail-o5o_default
