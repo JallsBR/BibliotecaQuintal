@@ -71,10 +71,12 @@ jobs:
           fi
 
           echo "key_header=$(head -1 "$KEY")"
-          ssh-keyscan -H 76.13.231.242 >> ~/.ssh/known_hosts 2>/dev/null
+          # ssh-keyscan pode falhar intermitente; não derrubar o job (set -e)
+          ssh-keyscan -H 76.13.231.242 >> ~/.ssh/known_hosts 2>/dev/null || true
 
           set +e
           out=$(ssh -i "$KEY" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=accept-new \
             -o ConnectTimeout=20 root@76.13.231.242 \
             '/opt/o5o/apps/bibliotecaquintal/deploy-sync.sh --force' 2>&1)
           rc=$?
